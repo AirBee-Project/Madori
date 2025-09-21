@@ -13,6 +13,7 @@
     "@deck.gl/core": "^9.1.11",
     "@deck.gl/geo-layers": "^9.1.11",
     "@deck.gl/layers": "^9.1.11",
+    "@deck.gl/mesh-layers": "^9.1.14",
     "@deck.gl/react": "^9.1.11",
     "@tabler/icons-react": "^3.31.0",
     "@tailwindcss/vite": "^4.1.4",
