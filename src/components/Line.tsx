@@ -3,8 +3,9 @@ type Props = {
   id: number;
   item: Item[];
   setItem: React.Dispatch<React.SetStateAction<Item[]>>;
+  onFocus?: (item: Item) => void;
 };
-export default function Line({ id, item, setItem }: Props) {
+export default function Line({ id, item, setItem, onFocus }: Props) {
   let myItem = item.find(
     (e): e is Item<"line"> => e.id === id && e.type === "line"
   )!;
@@ -66,6 +67,12 @@ export default function Line({ id, item, setItem }: Props) {
           }}
           className="w-[20%] border-gray-500 border-1 mx-[2%] bg-[#FFFFFF]"
         />
+        <button
+          className="bg-blue-500 text-white px-2 py-1 rounded ml-2 hover:bg-blue-600"
+          onClick={() => onFocus && onFocus(myItem)}
+        >
+          📍
+        </button>
         <p>ID:{myItem.id}</p>
       </div>
       <div>

@@ -1,5 +1,5 @@
 import { Color, LayersList } from "deck.gl";
-import { TileLayer } from "@deck.gl/geo-layers";
+import { TileLayer, Tile3DLayer } from "@deck.gl/geo-layers";
 import { BitmapLayer, GeoJsonLayer, PolygonLayer } from "@deck.gl/layers";
 import { Item } from "../types/Item";
 import { GeoJSON } from "geojson";
@@ -23,6 +23,11 @@ export default function generateLayer(item: Item[]): LayersList {
   let voxelItem: Item<"voxel">[] = item.filter(
     (e): e is Item<"voxel"> =>
       !e.isDeleted && !e.isVisible && e.type === "voxel"
+  );
+
+  let tiles3dItem: Item<"tiles3d">[] = item.filter(
+    (e): e is Item<"tiles3d"> =>
+      !e.isDeleted && !e.isVisible && e.type === "tiles3d"
   );
 
   //PointはまとめてGeoJsonLayerとして表示
@@ -70,6 +75,21 @@ export default function generateLayer(item: Item[]): LayersList {
     pickable: true,
   });
 
+  // 3D Tiles layers
+  const tiles3dLayers = tiles3dItem.map((tileItem, index) => 
+    new Tile3DLayer({
+      id: `3d-tiles-${tileItem.id}`,
+      data: tileItem.data.url,
+      pickable: true,
+      _subLayerProps: {
+        scenegraph: {
+          _lighting: 'pbr'
+        }
+      },
+      getColor: colorHexToRgba(tileItem.data.color, tileItem.data.opacity)
+    })
+  );
+
   //国土地理院から取得したTileMapを表示
   const tileMapLayer = new TileLayer({
     id: "TileMapLayer",
@@ -97,6 +117,7 @@ export default function generateLayer(item: Item[]): LayersList {
     pointGeoJsonLayer,
     lineGeoJsonLayer,
     voxelPolygonLayer,
+    ...tiles3dLayers,
   ];
   return reuslt;
 }

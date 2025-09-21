@@ -5,8 +5,9 @@ type Props = {
   id: number;
   item: Item[];
   setItem: React.Dispatch<React.SetStateAction<Item[]>>;
+  onFocus?: (item: Item) => void;
 };
-export default function Voxel({ id, item, setItem }: Props) {
+export default function Voxel({ id, item, setItem, onFocus }: Props) {
   const [inputVoxel, setInputVoxel] = useState<string>("");
   let myItem = item.find(
     (e): e is Item<"voxel"> => e.id === id && e.type === "voxel"
@@ -55,6 +56,12 @@ export default function Voxel({ id, item, setItem }: Props) {
           className="w-[20%] border-gray-500 border-1 mx-[2%] bg-[#FFFFFF]"
         />
 
+        <button
+          className="bg-blue-500 text-white px-2 py-1 rounded ml-2 hover:bg-blue-600"
+          onClick={() => onFocus && onFocus(myItem)}
+        >
+          📍
+        </button>
         <p>ID:{id}</p>
       </div>
       <div>
