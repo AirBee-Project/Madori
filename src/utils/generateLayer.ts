@@ -3,11 +3,10 @@ import { TileLayer } from "@deck.gl/geo-layers";
 import { BitmapLayer, GeoJsonLayer, PolygonLayer } from "@deck.gl/layers";
 import { Item } from "../types/Item";
 import { GeoJSON } from "geojson";
-import colorHexToRgba from "../utils/colorHexToRgba";
 import { COORDINATE_SYSTEM } from "@deck.gl/core";
-import hyperVoxelToPureVoxel from "./hyperVoxelToPureVoxel";
-import pvoxelToPolygon from "./pureVoxelToPolygon";
-
+import colorHexToRgba from "./ColorHexToRgba";
+import hyperVoxelToPureVoxel from "./HyperVoxelToPureVoxel";
+import pvoxelToPolygon from "./PureVoxelToPolygon";
 /**
  * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数
  */

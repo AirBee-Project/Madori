@@ -9,7 +9,7 @@ type Polygon = {
   color: Color;
 };
 import { Color } from "deck.gl";
-import type { PureVoxel } from "../types/PureVoxel";
+import { PureVoxel } from "../types/PureVoxel";
 
 type PvoxelCoordinates = {
   maxLon: number;
