@@ -10,7 +10,7 @@ import pvoxelToPolygon from "./PureVoxelToPolygon";
 /**
  * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数a
  */
-export default function generateLayer(item: Item[]): LayersList {
+export default function generateLayer(item: Item[], isMapVisible: boolean = true): LayersList {
   let pointItem: Item<"point">[] = item.filter(
     (e): e is Item<"point"> =>
       !e.isDeleted && !e.isVisible && e.type === "point"
@@ -93,7 +93,7 @@ export default function generateLayer(item: Item[]): LayersList {
   });
 
   let reuslt: LayersList = [
-    tileMapLayer,
+    ...(isMapVisible ? [tileMapLayer] : []),
     pointGeoJsonLayer,
     lineGeoJsonLayer,
     voxelPolygonLayer,
