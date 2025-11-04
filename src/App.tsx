@@ -42,6 +42,7 @@ export default function App() {
             color: color,
             opacity: 30,
             voxel: hyperVoxelParse(voxelData),
+            voxelString: voxelData,
           },
         };
         setItem([newVoxel]);
