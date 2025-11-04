@@ -16,6 +16,7 @@ const INITIAL_VIEW_STATE = {
 
 export default function App() {
   const [item, setItem] = useState<Item[]>([]);
+  const [isMapVisible, setIsMapVisible] = useState(true);
 
   function addObject(type: "point" | "line" | "voxel") {
     let newObject: Item = {
@@ -101,11 +102,17 @@ export default function App() {
           </div>
         </div>
         <div className="w-[75%] h-[100vh] relative">
+          <button
+            className="absolute top-4 right-4 z-10 bg-white border-2 border-gray-300 rounded-[4px] px-4 py-2 hover:bg-gray-100 transition duration-300 shadow-md"
+            onClick={() => setIsMapVisible(!isMapVisible)}
+          >
+            {isMapVisible ? "地図を非表示" : "地図を表示"}
+          </button>
           <DeckGL
             initialViewState={INITIAL_VIEW_STATE}
             controller
             width="75vw"
-            layers={generateLayer(item)}
+            layers={generateLayer(item, isMapVisible)}
             getTooltip={({ object }) =>
               object && {
                 text: `${object.voxelID}`,
