@@ -23,17 +23,23 @@ export default function App() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const voxelData = urlParams.get('voxel');
-    const color = urlParams.get('color');
+    const colorParam = urlParams.get('color');
     
     if (voxelData) {
       try {
+        // Normalize color parameter - add # if not present
+        let color = colorParam || "#0000FF";
+        if (colorParam && !colorParam.startsWith('#')) {
+          color = `#${colorParam}`;
+        }
+        
         const newVoxel: Item = {
           id: 1,
           type: "voxel",
           isDeleted: false,
           isVisible: true,
           data: {
-            color: color || "#0000FF",
+            color: color,
             opacity: 30,
             voxel: hyperVoxelParse(voxelData),
           },
