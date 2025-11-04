@@ -4,4 +4,5 @@ export type Voxel = {
   color: string;
   opacity: number;
   voxel: VoxelDefinition[];
+  voxelString?: string;
 };

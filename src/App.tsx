@@ -1,10 +1,11 @@
 import DeckGL from "@deck.gl/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Item } from "./types/Item";
 import Point from "./components/Point";
 import Line from "./components/Line";
 import Voxel from "./components/Voxel";
 import generateLayer from "./utils/GenerateLayer";
+import hyperVoxelParse from "./utils/HyperVoxelParse";
 
 const INITIAL_VIEW_STATE = {
   longitude: 0,
@@ -17,6 +18,39 @@ const INITIAL_VIEW_STATE = {
 export default function App() {
   const [item, setItem] = useState<Item[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(true);
+
+  // Load voxel from URL parameters on initial mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const voxelData = urlParams.get("voxel");
+    const colorParam = urlParams.get("color");
+
+    if (voxelData) {
+      try {
+        // Normalize color parameter - add # if not present
+        let color = colorParam || "#0000FF";
+        if (colorParam && !colorParam.startsWith("#")) {
+          color = `#${colorParam}`;
+        }
+
+        const newVoxel: Item = {
+          id: 1,
+          type: "voxel",
+          isDeleted: false,
+          isVisible: false,
+          data: {
+            color: color,
+            opacity: 30,
+            voxel: hyperVoxelParse(voxelData),
+            voxelString: voxelData,
+          },
+        };
+        setItem([newVoxel]);
+      } catch (error) {
+        console.error("Failed to parse voxel data from URL parameters:", error);
+      }
+    }
+  }, []);
 
   function addObject(type: "point" | "line" | "voxel") {
     let newObject: Item = {
