@@ -202,8 +202,8 @@ export default function App() {
           <DeckGL
             ref={deckRef}
             viewState={viewState}
-            onViewStateChange={({ viewState }) => setViewState(viewState)}
-            controller
+            onViewStateChange={({ viewState: newViewState }) => setViewState(newViewState as ViewState)}
+            controller={true}
             width="75vw"
             layers={generateLayer(item, isMapVisible)}
             getTooltip={({ object }) =>
