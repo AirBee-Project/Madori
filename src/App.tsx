@@ -7,7 +7,17 @@ import Voxel from "./components/Voxel";
 import generateLayer from "./utils/GenerateLayer";
 import hyperVoxelParse from "./utils/HyperVoxelParse";
 
-const INITIAL_VIEW_STATE = {
+type ViewState = {
+  longitude: number;
+  latitude: number;
+  zoom: number;
+  pitch: number;
+  bearing: number;
+  transitionDuration?: number;
+  transitionInterpolator?: any;
+};
+
+const INITIAL_VIEW_STATE: ViewState = {
   longitude: 139.6917,
   latitude: 35.6895,
   zoom: 15,
@@ -18,8 +28,8 @@ const INITIAL_VIEW_STATE = {
 export default function App() {
   const [item, setItem] = useState<Item[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(true);
-  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
-  const deckRef = useRef<any>(null);
+  const [viewState, setViewState] = useState<ViewState>(INITIAL_VIEW_STATE);
+  const deckRef = useRef<DeckGL>(null);
 
   // Load voxel from URL parameters on initial mount
   useEffect(() => {
@@ -130,8 +140,7 @@ export default function App() {
       pitch: 60,
       bearing: 0,
       transitionDuration: 1000,
-      transitionInterpolator: undefined,
-    } as any);
+    });
   }
 
   return (
