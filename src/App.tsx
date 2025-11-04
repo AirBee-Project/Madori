@@ -26,18 +26,22 @@ export default function App() {
     const color = urlParams.get('color');
     
     if (voxelData) {
-      const newVoxel: Item = {
-        id: 1,
-        type: "voxel",
-        isDeleted: false,
-        isVisible: true,
-        data: {
-          color: color || "#0000FF",
-          opacity: 30,
-          voxel: hyperVoxelParse(voxelData),
-        },
-      };
-      setItem([newVoxel]);
+      try {
+        const newVoxel: Item = {
+          id: 1,
+          type: "voxel",
+          isDeleted: false,
+          isVisible: true,
+          data: {
+            color: color || "#0000FF",
+            opacity: 30,
+            voxel: hyperVoxelParse(voxelData),
+          },
+        };
+        setItem([newVoxel]);
+      } catch (error) {
+        console.error("Failed to parse voxel data from URL parameters:", error);
+      }
     }
   }, []);
 

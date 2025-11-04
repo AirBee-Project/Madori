@@ -46,20 +46,24 @@ export default function Voxel({ id, item, setItem }: Props) {
       const text = await response.text();
       
       // Parse the voxel data from the fetched content
-      const parsedVoxels = hyperVoxelParse(text);
-      
-      // Update the voxel data
-      updateItem({
-        ...myItem,
-        data: {
-          ...myItem.data,
-          voxel: parsedVoxels,
-        },
-      });
-      
-      // Update the input field with the loaded data
-      setInputVoxel(text);
-      setIsLoading(false);
+      try {
+        const parsedVoxels = hyperVoxelParse(text);
+        
+        // Update the voxel data
+        updateItem({
+          ...myItem,
+          data: {
+            ...myItem.data,
+            voxel: parsedVoxels,
+          },
+        });
+        
+        // Update the input field with the loaded data
+        setInputVoxel(text);
+        setIsLoading(false);
+      } catch (parseError) {
+        throw new Error(`データの解析に失敗しました: ${parseError instanceof Error ? parseError.message : '不明なエラー'}`);
+      }
     } catch (error) {
       console.error("Failed to load voxel from URL:", error);
       setLoadError(`読み込みエラー: ${error instanceof Error ? error.message : '不明なエラー'}`);
