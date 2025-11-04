@@ -17,9 +17,13 @@ export default function Line({ id, item, setItem }: Props) {
     });
     setItem(result);
   }
+  function deleteItem(): void {
+    setItem(item.filter((e) => e.id !== id));
+  }
   return (
     <div className="m-[1.5vh] p-[3%] border-0 border-blue-400 rounded-[4px] bg-[#ececec]">
-      <div className="flex items-center">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
         <p className="bg-blue-200 p-[1%]">Line</p>
         <input
           type="text"
@@ -67,6 +71,13 @@ export default function Line({ id, item, setItem }: Props) {
           className="w-[20%] border-gray-500 border-1 mx-[2%] bg-[#FFFFFF]"
         />
         <p>ID:{myItem.id}</p>
+        </div>
+        <button
+          onClick={deleteItem}
+          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-300"
+        >
+          削除
+        </button>
       </div>
       <div>
         <div className="flex mt-[2%]">
