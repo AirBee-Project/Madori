@@ -3,11 +3,10 @@ import { TileLayer } from "@deck.gl/geo-layers";
 import { BitmapLayer, GeoJsonLayer, PolygonLayer } from "@deck.gl/layers";
 import { Item } from "../types/Item";
 import { GeoJSON } from "geojson";
-import colorHexToRgba from "../utils/colorHexToRgba";
 import { COORDINATE_SYSTEM } from "@deck.gl/core";
-import hyperVoxelToPureVoxel from "./hyperVoxelToPureVoxel";
-import pvoxelToPolygon from "./pureVoxelToPolygon";
-
+import colorHexToRgba from "./ColorHexToRgba";
+import hyperVoxelToPureVoxel from "./HyperVoxelToPureVoxel";
+import pvoxelToPolygon from "./PureVoxelToPolygon";
 /**
  * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数
  */
@@ -76,6 +75,7 @@ export default function generateLayer(item: Item[]): LayersList {
     data: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
     maxZoom: 18,
     minZoom: 0,
+    opacity: 0.4,
     renderSubLayers: (props) => {
       const { boundingBox } = props.tile;
       return new BitmapLayer(props, {
