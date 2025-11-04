@@ -1,5 +1,5 @@
 import { Item } from "../types/Item";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import hyperVoxelParse from "../utils/HyperVoxelParse";
 type Props = {
   id: number;
@@ -11,6 +11,13 @@ export default function Voxel({ id, item, setItem }: Props) {
   let myItem = item.find(
     (e): e is Item<"voxel"> => e.id === id && e.type === "voxel"
   )!;
+  
+  // Initialize inputVoxel from voxelString if available
+  useEffect(() => {
+    if (myItem.data.voxelString && !inputVoxel) {
+      setInputVoxel(myItem.data.voxelString);
+    }
+  }, [myItem.data.voxelString]);
   function updateItem(newItem: Item<"voxel">): void {
     const result = item.map((e) => {
       if (e.id === newItem.id) {
@@ -81,6 +88,7 @@ export default function Voxel({ id, item, setItem }: Props) {
                 data: {
                   ...myItem.data,
                   voxel: hyperVoxelParse(e.target.value),
+                  voxelString: e.target.value,
                 },
               });
             }}
