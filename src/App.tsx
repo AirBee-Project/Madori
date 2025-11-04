@@ -4,7 +4,7 @@ import { Item } from "./types/Item";
 import Point from "./components/Point";
 import Line from "./components/Line";
 import Voxel from "./components/Voxel";
-import generateLayer from "./util/GenerateLayer";
+import generateLayer from "./utils/GenerateLayer";
 
 const INITIAL_VIEW_STATE = {
   longitude: 139.6917,
