@@ -22,22 +22,22 @@ export default function App() {
   // Load voxel from URL parameters on initial mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const voxelData = urlParams.get('voxel');
-    const colorParam = urlParams.get('color');
-    
+    const voxelData = urlParams.get("voxel");
+    const colorParam = urlParams.get("color");
+
     if (voxelData) {
       try {
         // Normalize color parameter - add # if not present
         let color = colorParam || "#0000FF";
-        if (colorParam && !colorParam.startsWith('#')) {
+        if (colorParam && !colorParam.startsWith("#")) {
           color = `#${colorParam}`;
         }
-        
+
         const newVoxel: Item = {
           id: 1,
           type: "voxel",
           isDeleted: false,
-          isVisible: true,
+          isVisible: false,
           data: {
             color: color,
             opacity: 30,
