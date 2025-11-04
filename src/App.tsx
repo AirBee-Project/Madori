@@ -7,11 +7,11 @@ import Voxel from "./components/Voxel";
 import generateLayer from "./utils/GenerateLayer";
 
 const INITIAL_VIEW_STATE = {
-  longitude: 139.6917,
-  latitude: 35.6895,
-  zoom: 15,
+  longitude: 0,
+  latitude: 0,
+  zoom: 1,
   pitch: 60,
-  bearing: 0,
+  bearing: 30,
 };
 
 export default function App() {
