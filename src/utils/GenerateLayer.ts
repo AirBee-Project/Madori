@@ -30,11 +30,15 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
     data: generatePointGeoJson(pointItem),
     pickable: true,
     filled: true,
+    stroked: true,
     pointRadiusUnits: "pixels",
     pointRadiusMinPixels: 1,
     pointRadiusScale: 1,
     getFillColor: (d) => d.properties.color, // 個別カラー
     getRadius: (d) => d.properties.radius, // 個別サイズ
+    getLineColor: (d) => d.properties.isFocused ? [0, 0, 255, 255] : [255, 255, 255, 125],
+    getLineWidth: (d) => d.properties.isFocused ? 3 : 1,
+    lineWidthUnits: "pixels",
   });
 
   //LineはまとめてGeoJsonLayerとして表示
@@ -46,7 +50,7 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
     filled: false,
     lineWidthUnits: "pixels",
     getLineColor: (d) => d.properties.color as Color, // ← 色を個別設定
-    getLineWidth: (d) => d.properties.width, // ← 太さを個別設定
+    getLineWidth: (d) => d.properties.isFocused ? d.properties.width * 3 : d.properties.width, // ← 太さを個別設定、フォーカス時は3倍
   });
 
   //VoxelはPolygonLayerとしてまとめて出力
@@ -62,8 +66,8 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
     getElevation: (d) => d.elevation,
     getFillColor: (d) => d.color,
 
-    getLineColor: [255, 255, 255, 125], // 輪郭線の色
-    getLineWidth: 100, // 輪郭線の幅（下の設定もセットで）
+    getLineColor: (d) => d.isFocused ? [0, 0, 255, 255] : [255, 255, 255, 125], // 輪郭線の色、フォーカス時は青
+    getLineWidth: (d) => d.isFocused ? 300 : 100, // 輪郭線の幅、フォーカス時は3倍
     lineWidthUnits: "pixels",
     lineWidthScale: 1,
     pickable: true,
@@ -113,6 +117,7 @@ function generatePointGeoJson(point: Item<"point">[]): GeoJSON {
       properties: {
         color: colorHexToRgba(point[i].data.color, point[i].data.opacity),
         radius: point[i].data.size,
+        isFocused: point[i].isFocused,
       },
       geometry: {
         type: "Point",
@@ -142,6 +147,7 @@ function generateLineGeoJson(line: Item<"line">[]): GeoJSON {
       properties: {
         color: colorHexToRgba(line[i].data.color, line[i].data.opacity), // 赤
         width: line[i].data.size,
+        isFocused: line[i].isFocused,
       },
     });
   }
@@ -153,6 +159,7 @@ type Polygon = {
   elevation: number; // 高さ情報（階層に応じて）
   voxelID: string; // 一意のID
   color: Color;
+  isFocused: boolean;
 };
 function generatePolygonLayer(voxel: Item<"voxel">[]): Polygon[] {
   let result: Polygon[] = [];
@@ -162,7 +169,12 @@ function generatePolygonLayer(voxel: Item<"voxel">[]): Polygon[] {
       pureVoxel,
       colorHexToRgba(voxel[i].data.color, voxel[i].data.opacity)
     );
-    result.push(...polygon);
+    // Add isFocused flag to each polygon
+    const polygonsWithFocus = polygon.map(p => ({
+      ...p,
+      isFocused: voxel[i].isFocused,
+    }));
+    result.push(...polygonsWithFocus);
   }
   return result;
 }

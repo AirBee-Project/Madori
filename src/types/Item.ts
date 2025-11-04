@@ -15,5 +15,6 @@ export type Item<T extends ItemType = ItemType> = {
   type: "point" | "line" | "voxel";
   isDeleted: boolean;
   isVisible: boolean;
+  isFocused: boolean;
   data: ItemDataMap[T];
 };

@@ -1,5 +1,5 @@
 import DeckGL from "@deck.gl/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Item } from "./types/Item";
 import Point from "./components/Point";
 import Line from "./components/Line";
@@ -18,6 +18,8 @@ const INITIAL_VIEW_STATE = {
 export default function App() {
   const [item, setItem] = useState<Item[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(true);
+  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const deckRef = useRef<any>(null);
 
   // Load voxel from URL parameters on initial mount
   useEffect(() => {
@@ -38,6 +40,7 @@ export default function App() {
           type: "voxel",
           isDeleted: false,
           isVisible: false,
+          isFocused: false,
           data: {
             color: color,
             opacity: 30,
@@ -58,6 +61,7 @@ export default function App() {
       type: type,
       isDeleted: false,
       isVisible: false,
+      isFocused: false,
       data:
         type === "point"
           ? {
@@ -86,6 +90,50 @@ export default function App() {
     setItem([...item, newObject]);
   }
 
+  function handleFocus(id: number) {
+    const focusedItem = item.find((e) => e.id === id);
+    if (!focusedItem) return;
+
+    // Unfocus all other items and focus the clicked one
+    const updatedItems = item.map((e) => ({
+      ...e,
+      isFocused: e.id === id,
+    }));
+    setItem(updatedItems);
+
+    // Calculate target position based on item type
+    let targetLongitude = INITIAL_VIEW_STATE.longitude;
+    let targetLatitude = INITIAL_VIEW_STATE.latitude;
+    let targetZoom = 18;
+
+    if (focusedItem.type === "point") {
+      targetLongitude = focusedItem.data.lon;
+      targetLatitude = focusedItem.data.lat;
+    } else if (focusedItem.type === "line") {
+      // Focus on the midpoint of the line
+      targetLongitude = (focusedItem.data.lon1 + focusedItem.data.lon2) / 2;
+      targetLatitude = (focusedItem.data.lat1 + focusedItem.data.lat2) / 2;
+    } else if (focusedItem.type === "voxel" && focusedItem.data.voxel.length > 0) {
+      // Focus on the first voxel's center
+      const firstVoxel = focusedItem.data.voxel[0];
+      if (firstVoxel && firstVoxel.lon !== undefined && firstVoxel.lat !== undefined) {
+        targetLongitude = firstVoxel.lon;
+        targetLatitude = firstVoxel.lat;
+      }
+    }
+
+    // Animate camera to the focused object
+    setViewState({
+      longitude: targetLongitude,
+      latitude: targetLatitude,
+      zoom: targetZoom,
+      pitch: 60,
+      bearing: 0,
+      transitionDuration: 1000,
+      transitionInterpolator: undefined,
+    } as any);
+  }
+
   return (
     <div>
       <div className="w-[100%] flex">
@@ -100,11 +148,11 @@ export default function App() {
             {item.map((e) => {
               switch (e.type) {
                 case "point":
-                  return <Point id={e.id} item={item} setItem={setItem} />;
+                  return <Point key={e.id} id={e.id} item={item} setItem={setItem} onFocus={handleFocus} />;
                 case "line":
-                  return <Line id={e.id} item={item} setItem={setItem} />;
+                  return <Line key={e.id} id={e.id} item={item} setItem={setItem} onFocus={handleFocus} />;
                 case "voxel":
-                  return <Voxel id={e.id} item={item} setItem={setItem} />;
+                  return <Voxel key={e.id} id={e.id} item={item} setItem={setItem} onFocus={handleFocus} />;
               }
             })}
           </div>
@@ -143,7 +191,9 @@ export default function App() {
             {isMapVisible ? "地図を非表示" : "地図を表示"}
           </button>
           <DeckGL
-            initialViewState={INITIAL_VIEW_STATE}
+            ref={deckRef}
+            viewState={viewState}
+            onViewStateChange={({ viewState }) => setViewState(viewState)}
             controller
             width="75vw"
             layers={generateLayer(item, isMapVisible)}

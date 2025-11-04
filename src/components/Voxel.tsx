@@ -5,8 +5,9 @@ type Props = {
   id: number;
   item: Item[];
   setItem: React.Dispatch<React.SetStateAction<Item[]>>;
+  onFocus: (id: number) => void;
 };
-export default function Voxel({ id, item, setItem }: Props) {
+export default function Voxel({ id, item, setItem, onFocus }: Props) {
   const [inputVoxel, setInputVoxel] = useState<string>("");
   let myItem = item.find(
     (e): e is Item<"voxel"> => e.id === id && e.type === "voxel"
@@ -31,7 +32,7 @@ export default function Voxel({ id, item, setItem }: Props) {
     setItem(item.filter((e) => e.id !== id));
   }
   return (
-    <div className="m-[1.5vh] p-[3%] border-0 border-blue-400 rounded-[4px] bg-[#ececec]">
+    <div className={`m-[1.5vh] p-[3%] border-0 rounded-[4px] ${myItem.isFocused ? 'border-4 border-blue-500 bg-blue-50' : 'bg-[#ececec]'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center">
         <p className="bg-green-200 p-[1%]">Voxel</p>
@@ -68,12 +69,24 @@ export default function Voxel({ id, item, setItem }: Props) {
 
         <p>ID:{id}</p>
         </div>
-        <button
-          onClick={deleteItem}
-          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-300"
-        >
-          削除
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => onFocus(id)}
+            className={`px-3 py-1 rounded transition duration-300 ${
+              myItem.isFocused
+                ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                : 'bg-blue-200 hover:bg-blue-300 text-black'
+            }`}
+          >
+            フォーカス
+          </button>
+          <button
+            onClick={deleteItem}
+            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-300"
+          >
+            削除
+          </button>
+        </div>
       </div>
       <div>
         <div className="flex mt-[2%]">
