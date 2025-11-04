@@ -131,15 +131,25 @@ export default function App() {
         const n = 2 ** firstVoxel.Z;
         const lonPerTile = 360 / n;
         
+        // Get X value (handle both single number and range)
+        const xValue = Array.isArray(firstVoxel.X) 
+          ? (firstVoxel.X[0] + firstVoxel.X[1]) / 2 
+          : firstVoxel.X;
+        
         // Calculate longitude (center of the tile)
-        const minLon = -180 + lonPerTile * firstVoxel.X;
-        const maxLon = -180 + lonPerTile * (firstVoxel.X + 1);
+        const minLon = -180 + lonPerTile * xValue;
+        const maxLon = -180 + lonPerTile * (xValue + 1);
         targetLongitude = (minLon + maxLon) / 2;
+        
+        // Get Y value (handle both single number and range)
+        const yValue = Array.isArray(firstVoxel.Y)
+          ? (firstVoxel.Y[0] + firstVoxel.Y[1]) / 2
+          : firstVoxel.Y;
         
         // Calculate latitude (center of the tile using Mercator projection)
         const mercatorYToLat = (y: number) => (90 - 180 * y) * 2;
-        const maxLat = mercatorYToLat((1 / n) * firstVoxel.Y);
-        const minLat = mercatorYToLat((1 / n) * (firstVoxel.Y + 1));
+        const maxLat = mercatorYToLat((1 / n) * yValue);
+        const minLat = mercatorYToLat((1 / n) * (yValue + 1));
         targetLatitude = (minLat + maxLat) / 2;
       }
     }
