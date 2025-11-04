@@ -1,10 +1,11 @@
 import DeckGL from "@deck.gl/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Item } from "./types/Item";
 import Point from "./components/Point";
 import Line from "./components/Line";
 import Voxel from "./components/Voxel";
 import generateLayer from "./utils/GenerateLayer";
+import hyperVoxelParse from "./utils/HyperVoxelParse";
 
 const INITIAL_VIEW_STATE = {
   longitude: 139.6917,
@@ -17,6 +18,28 @@ const INITIAL_VIEW_STATE = {
 export default function App() {
   const [item, setItem] = useState<Item[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(true);
+
+  // Load voxel from URL parameters on initial mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const voxelData = urlParams.get('voxel');
+    const color = urlParams.get('color');
+    
+    if (voxelData) {
+      const newVoxel: Item = {
+        id: 1,
+        type: "voxel",
+        isDeleted: false,
+        isVisible: true,
+        data: {
+          color: color || "#0000FF",
+          opacity: 30,
+          voxel: hyperVoxelParse(voxelData),
+        },
+      };
+      setItem([newVoxel]);
+    }
+  }, []);
 
   function addObject(type: "point" | "line" | "voxel") {
     let newObject: Item = {

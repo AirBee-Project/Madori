@@ -8,6 +8,9 @@ type Props = {
 };
 export default function Voxel({ id, item, setItem }: Props) {
   const [inputVoxel, setInputVoxel] = useState<string>("");
+  const [inputUrl, setInputUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadError, setLoadError] = useState<string>("");
   let myItem = item.find(
     (e): e is Item<"voxel"> => e.id === id && e.type === "voxel"
   )!;
@@ -22,6 +25,46 @@ export default function Voxel({ id, item, setItem }: Props) {
   }
   function deleteItem(): void {
     setItem(item.filter((e) => e.id !== id));
+  }
+
+  async function loadFromUrl(): Promise<void> {
+    if (!inputUrl.trim()) {
+      setLoadError("URLを入力してください");
+      return;
+    }
+    
+    setIsLoading(true);
+    setLoadError("");
+    
+    try {
+      const response = await fetch(inputUrl);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const text = await response.text();
+      
+      // Parse the voxel data from the fetched content
+      const parsedVoxels = hyperVoxelParse(text);
+      
+      // Update the voxel data
+      updateItem({
+        ...myItem,
+        data: {
+          ...myItem.data,
+          voxel: parsedVoxels,
+        },
+      });
+      
+      // Update the input field with the loaded data
+      setInputVoxel(text);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Failed to load voxel from URL:", error);
+      setLoadError(`読み込みエラー: ${error instanceof Error ? error.message : '不明なエラー'}`);
+      setIsLoading(false);
+    }
   }
   return (
     <div className="m-[1.5vh] p-[3%] border-0 border-blue-400 rounded-[4px] bg-[#ececec]">
@@ -69,7 +112,27 @@ export default function Voxel({ id, item, setItem }: Props) {
         </button>
       </div>
       <div>
-        <div className="flex mt-[2%]">
+        <div className="flex mt-[2%] mb-[2%] gap-2">
+          <input
+            type="text"
+            placeholder="URL (例: https://example.com/voxels.txt)"
+            value={inputUrl}
+            onChange={(e) => setInputUrl(e.target.value)}
+            className="border-gray-500 border-1 bg-[#FFFFFF] flex-1"
+            disabled={isLoading}
+          />
+          <button
+            onClick={loadFromUrl}
+            disabled={isLoading}
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-1 rounded transition duration-300"
+          >
+            {isLoading ? "読み込み中..." : "URLから読み込み"}
+          </button>
+        </div>
+        {loadError && (
+          <div className="text-red-500 text-sm mb-[2%]">{loadError}</div>
+        )}
+        <div className="flex">
           <input
             type="text"
             placeholder="{z}/{f}/{x}/{y}"
