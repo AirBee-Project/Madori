@@ -75,7 +75,7 @@ export default function generateLayer(item: Item[]): LayersList {
     data: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
     maxZoom: 18,
     minZoom: 0,
-    opacity: 0.4,
+    opacity: 0.5,
     renderSubLayers: (props) => {
       const { boundingBox } = props.tile;
       return new BitmapLayer(props, {
