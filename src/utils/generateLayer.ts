@@ -8,7 +8,7 @@ import colorHexToRgba from "./ColorHexToRgba";
 import hyperVoxelToPureVoxel from "./HyperVoxelToPureVoxel";
 import pvoxelToPolygon from "./PureVoxelToPolygon";
 /**
- * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数
+ * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数a
  */
 export default function generateLayer(item: Item[]): LayersList {
   let pointItem: Item<"point">[] = item.filter(
