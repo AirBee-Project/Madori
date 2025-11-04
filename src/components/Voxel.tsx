@@ -1,6 +1,6 @@
 import { Item } from "../types/Item";
 import { useState } from "react";
-import hyperVoxelParse from "../utils/HyperVoxelParse";
+import hyperVoxelParse from "../util/HyperVoxelParse";
 type Props = {
   id: number;
   item: Item[];
