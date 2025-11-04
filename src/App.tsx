@@ -124,11 +124,23 @@ export default function App() {
       targetLongitude = (focusedItem.data.lon1 + focusedItem.data.lon2) / 2;
       targetLatitude = (focusedItem.data.lat1 + focusedItem.data.lat2) / 2;
     } else if (focusedItem.type === "voxel" && focusedItem.data.voxel.length > 0) {
-      // Focus on the first voxel's center
+      // Focus on the center of the first voxel
       const firstVoxel = focusedItem.data.voxel[0];
-      if (firstVoxel && firstVoxel.lon !== undefined && firstVoxel.lat !== undefined) {
-        targetLongitude = firstVoxel.lon;
-        targetLatitude = firstVoxel.lat;
+      if (firstVoxel) {
+        // Calculate voxel center using Z/X/Y coordinates
+        const n = 2 ** firstVoxel.Z;
+        const lonPerTile = 360 / n;
+        
+        // Calculate longitude (center of the tile)
+        const minLon = -180 + lonPerTile * firstVoxel.X;
+        const maxLon = -180 + lonPerTile * (firstVoxel.X + 1);
+        targetLongitude = (minLon + maxLon) / 2;
+        
+        // Calculate latitude (center of the tile using Mercator projection)
+        const mercatorYToLat = (y: number) => (90 - 180 * y) * 2;
+        const maxLat = mercatorYToLat((1 / n) * firstVoxel.Y);
+        const minLat = mercatorYToLat((1 / n) * (firstVoxel.Y + 1));
+        targetLatitude = (minLat + maxLat) / 2;
       }
     }
 
