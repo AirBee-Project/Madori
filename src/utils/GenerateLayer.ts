@@ -52,7 +52,7 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
   //VoxelはPolygonLayerとしてまとめて出力
 
   const voxelPolygonLayer = new PolygonLayer({
-    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+    // coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
     id: "PolygonLayer",
     data: generatePolygonLayer(voxelItem),
     extruded: true,

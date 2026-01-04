@@ -1,4 +1,5 @@
 import DeckGL from "@deck.gl/react";
+import { _GlobeView as GlobeView } from "deck.gl";
 import { useState, useEffect } from "react";
 import { Item } from "./types/Item";
 import Point from "./components/Point";
@@ -61,14 +62,14 @@ export default function App() {
       data:
         type === "point"
           ? {
-              color: "#FF0000",
-              opacity: 80,
-              size: 10,
-              lat: 0,
-              lon: 0,
-            }
+            color: "#FF0000",
+            opacity: 80,
+            size: 10,
+            lat: 0,
+            lon: 0,
+          }
           : type === "line"
-          ? {
+            ? {
               color: "#00FF00",
               opacity: 80,
               size: 10,
@@ -77,7 +78,7 @@ export default function App() {
               lat2: 45,
               lon2: 45,
             }
-          : {
+            : {
               color: "#0000FF",
               opacity: 30,
               voxel: [],
@@ -144,6 +145,7 @@ export default function App() {
           </button>
           <DeckGL
             initialViewState={INITIAL_VIEW_STATE}
+            views={new GlobeView()}
             controller
             width="75vw"
             layers={generateLayer(item, isMapVisible)}

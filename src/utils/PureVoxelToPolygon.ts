@@ -47,6 +47,7 @@ export default function pvoxelToPolygon(
 
 /**
  * 各ボクセルの経緯度範囲を計算
+ * https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
  */
 function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
   const n = 2 ** voxel.Z;
@@ -55,17 +56,15 @@ function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
   const minLon = -180 + lonPerTile * voxel.X;
   const maxLon = -180 + lonPerTile * (voxel.X + 1);
 
-  const maxLat = mercatorYToLat((1 / n) * voxel.Y);
-  const minLat = mercatorYToLat((1 / n) * (voxel.Y + 1));
-
+  const maxLat =
+    (Math.atan(Math.sinh(Math.PI - (voxel.Y / n) * 2 * Math.PI)) * 180) /
+    Math.PI;
+  const minLat =
+    (Math.atan(Math.sinh(Math.PI - ((voxel.Y + 1) / n) * 2 * Math.PI)) * 180) /
+    Math.PI;
+  console.log(maxLon, minLon, maxLat, minLat);
   return { maxLon, minLon, maxLat, minLat };
-}
 
-/**
- * メルカトルY座標（0〜1）を緯度に変換
- */
-function mercatorYToLat(y: number): number {
-  return (90 - 180 * y) * 2;
 }
 
 /**
