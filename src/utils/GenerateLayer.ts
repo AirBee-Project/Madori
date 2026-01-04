@@ -162,7 +162,11 @@ function generatePolygonLayer(voxel: Item<"voxel">[]): Polygon[] {
       pureVoxel,
       colorHexToRgba(voxel[i].data.color, voxel[i].data.opacity)
     );
-    result.push(...polygon);
+    // Use for loop instead of spread syntax to avoid "Maximum call stack size exceeded"
+    for (const p of polygon) {
+      result.push(p);
+    }
+
   }
   return result;
 }
