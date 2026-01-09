@@ -22,8 +22,9 @@ export default function hyperVoxelToPureVoxel(
       }
     }
   }
-  //重複排除
-  result = [...new Set(result)];
+  //重複排除は行わない（Setの最大サイズ制限回避のため）
+  //また、生成ロジック上重複がない場合は不要であり、ある場合でも一旦パフォーマンス優先で削除
+  //result = [...new Set(result)];
 
   console.log(result);
   return result;

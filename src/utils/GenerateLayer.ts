@@ -155,6 +155,7 @@ type Polygon = {
   color: Color;
 };
 function generatePolygonLayer(voxel: Item<"voxel">[]): Polygon[] {
+  console.time("Voxel Conversion Time");
   let result: Polygon[] = [];
   for (let i = 0; i < voxel.length; i++) {
     let pureVoxel = hyperVoxelToPureVoxel(voxel[i].data.voxel);
@@ -168,5 +169,7 @@ function generatePolygonLayer(voxel: Item<"voxel">[]): Polygon[] {
     }
 
   }
+  console.timeEnd("Voxel Conversion Time");
+  console.log(`Converted ${result.length} polygons.`);
   return result;
 }

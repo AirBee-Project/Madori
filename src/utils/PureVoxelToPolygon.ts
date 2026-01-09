@@ -49,7 +49,7 @@ export default function pvoxelToPolygon(
  * 各ボクセルの経緯度範囲を計算
  * https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
  */
-function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
+export function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
   const n = 2 ** voxel.Z;
   const lonPerTile = 360 / n;
 
@@ -62,7 +62,7 @@ function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
   const minLat =
     (Math.atan(Math.sinh(Math.PI - ((voxel.Y + 1) / n) * 2 * Math.PI)) * 180) /
     Math.PI;
-  console.log(maxLon, minLon, maxLat, minLat);
+
   return { maxLon, minLon, maxLat, minLat };
 
 }

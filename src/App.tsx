@@ -1,12 +1,14 @@
 import DeckGL from "@deck.gl/react";
-import { _GlobeView as GlobeView } from "deck.gl";
-import { useState, useEffect } from "react";
+import { _GlobeView as GlobeView, FlyToInterpolator } from "deck.gl";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Item } from "./types/Item";
 import Point from "./components/Point";
 import Line from "./components/Line";
 import Voxel from "./components/Voxel";
 import generateLayer from "./utils/GenerateLayer";
 import hyperVoxelParse from "./utils/HyperVoxelParse";
+import hyperVoxelToPureVoxel from "./utils/HyperVoxelToPureVoxel";
+import { pvoxelToCoordinates } from "./utils/PureVoxelToPolygon";
 
 const INITIAL_VIEW_STATE = {
   longitude: 0,
@@ -16,9 +18,21 @@ const INITIAL_VIEW_STATE = {
   bearing: 30,
 };
 
+// Define ViewState type allowing transitions
+type CustomViewState = {
+  longitude: number;
+  latitude: number;
+  zoom: number;
+  pitch: number;
+  bearing: number;
+  transitionDuration?: number;
+  transitionInterpolator?: any;
+};
+
 export default function App() {
   const [item, setItem] = useState<Item[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(true);
+  const [viewState, setViewState] = useState<CustomViewState>(INITIAL_VIEW_STATE);
 
   // Load voxel from URL parameters on initial mount
   useEffect(() => {
@@ -34,6 +48,31 @@ export default function App() {
           color = `#${colorParam}`;
         }
 
+        const parsedVoxel = hyperVoxelParse(voxelData);
+        // カメラ移動の計算: 最初のボクセルの中心に移動
+        if (parsedVoxel.length > 0) {
+          const pureVoxels = hyperVoxelToPureVoxel([parsedVoxel[0]]); // 代表点として1つだけ計算
+          if (pureVoxels.length > 0) {
+            const coords = pvoxelToCoordinates(pureVoxels[0]);
+            const centerLon = (coords.maxLon + coords.minLon) / 2;
+            const centerLat = (coords.maxLat + coords.minLat) / 2;
+
+            // ズームレベルはボクセルのZレベルに応じて調整
+            // Zが大きいほど寄る (ただしZ=22あたりで止める)
+            const targetZoom = Math.min(22, Math.max(5, pureVoxels[0].Z));
+
+            setViewState({
+              ...INITIAL_VIEW_STATE,
+              longitude: centerLon,
+              latitude: centerLat,
+              zoom: targetZoom,
+              transitionDuration: 3000,
+              transitionInterpolator: new FlyToInterpolator(),
+            });
+            console.log(`Flying to: ${centerLat}, ${centerLon} (Zoom: ${targetZoom})`);
+          }
+        }
+
         const newVoxel: Item = {
           id: 1,
           type: "voxel",
@@ -42,7 +81,7 @@ export default function App() {
           data: {
             color: color,
             opacity: 30,
-            voxel: hyperVoxelParse(voxelData),
+            voxel: parsedVoxel,
             voxelString: voxelData,
           },
         };
@@ -53,12 +92,12 @@ export default function App() {
     }
   }, []);
 
-  function addObject(type: "point" | "line" | "voxel") {
+  const addObject = useCallback((type: "point" | "line" | "voxel") => {
     let newObject: Item = {
-      id: item.length + 1,
+      id: item.length > 0 ? Math.max(...item.map(i => i.id)) + 1 : 1,
       type: type,
       isDeleted: false,
-      isVisible: false,
+      isVisible: true,
       data:
         type === "point"
           ? {
@@ -82,10 +121,17 @@ export default function App() {
               color: "#0000FF",
               opacity: 30,
               voxel: [],
+              voxelString: "", // Added to satisfy Voxel data potentially
             },
     };
-    setItem([...item, newObject]);
+    setItem((prevItems) => [...prevItems, newObject]);
+  }, [item]);
+
+  function onViewStateChange({ viewState }: { viewState: any }) {
+    setViewState(viewState);
   }
+
+  const layers = useMemo(() => generateLayer(item, isMapVisible), [item, isMapVisible]);
 
   return (
     <div>
@@ -99,13 +145,17 @@ export default function App() {
           </div>
           <div>
             {item.map((e) => {
+              if (e.isDeleted) return null;
+
               switch (e.type) {
                 case "point":
-                  return <Point id={e.id} item={item} setItem={setItem} />;
+                  return <Point key={e.id} id={e.id} item={item} setItem={setItem} />;
                 case "line":
-                  return <Line id={e.id} item={item} setItem={setItem} />;
+                  return <Line key={e.id} id={e.id} item={item} setItem={setItem} />;
                 case "voxel":
-                  return <Voxel id={e.id} item={item} setItem={setItem} />;
+                  return <Voxel key={e.id} id={e.id} item={item} setItem={setItem} />;
+                default:
+                  return null;
               }
             })}
           </div>
@@ -144,17 +194,25 @@ export default function App() {
             {isMapVisible ? "地図を非表示" : "地図を表示"}
           </button>
           <DeckGL
-            initialViewState={INITIAL_VIEW_STATE}
+            viewState={viewState}
+            onViewStateChange={onViewStateChange}
             views={new GlobeView()}
             controller
             width="75vw"
-            layers={generateLayer(item, isMapVisible)}
+            layers={layers}
+            onAfterRender={() => {
+              // 簡易的な描画完了計測（毎フレーム呼ばれるので注意）
+              // 実際にデータ更新時のみを測るにはuseRefなどで制御が必要だが、
+              // 重い処理処理直後に出るログを目安にする
+              console.log("DeckGL Rendered");
+            }}
             getTooltip={({ object }) =>
               object && {
                 text: `${object.voxelID}`,
               }
             }
-          />
+          >
+          </DeckGL>
         </div>
       </div>
     </div>
