@@ -68,10 +68,15 @@ export function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
 }
 
 /**
- * 標高の計算（Z, F を元に算出）
+ * IPA空間ID仕様に基づく底面標高の計算
+ * 底面標高 = f × 2^(25-Z) メートル
+ * H = 2^25 = 33,554,432m（鉛直方向の全体範囲）
+ * 各ボクセルの高さ = H / 2^Z = 2^(25-Z) メートル
  */
 function getAltitude(voxel: PureVoxel): number {
-  return ((33554432 * 2) / 2 ** (voxel.Z + 2)) * voxel.F;
+  // 底面標高 = f × (H / n) = f × 2^(25-Z)
+  const voxelHeight = Math.pow(2, 25 - voxel.Z);
+  return voxel.F * voxelHeight;
 }
 
 /**
@@ -100,8 +105,111 @@ function generateVoxelID(voxel: PureVoxel): string {
 }
 
 /**
- * ビジュアライゼーション用の高さ（階層に応じて）
+ * IPA空間ID仕様に基づくボクセルの高さ計算
+ * Z=25でボクセルの高さが1mになる
+ * 高さ = 2^(25-Z) メートル
+ * 緯度によらず一律（仕様書より）
  */
 function calculateElevation(voxel: PureVoxel): number {
-  return 33554432 / 2 ** (voxel.Z + 1);
+  return Math.pow(2, 25 - voxel.Z);
 }
+
+export type VoxelMeshProps = {
+  position: [number, number, number]; // [x, y, z] in meters from origin
+  size: [number, number, number]; // [width, depth, height] in meters
+  voxelID: string;
+};
+
+/**
+ * ボクセルをメートルオフセット座標に変換
+ */
+export function pvoxelToOffset(
+  voxel: PureVoxel,
+  origin: [number, number]
+): VoxelMeshProps {
+  const coordinates = pvoxelToCoordinates(voxel);
+  const { maxLon, minLon, maxLat, minLat } = coordinates;
+  const [originLon, originLat] = origin;
+
+  // 中心座標
+  const centerLon = (minLon + maxLon) / 2;
+  const centerLat = (minLat + maxLat) / 2;
+
+  // メートル単位のオフセット計算
+  // 緯度1度あたりの距離 (約111km)
+  const metersPerLat = 111319.49079327358;
+  // 経度1度あたりの距離 (緯度によって変わる)
+  const latRad = (centerLat * Math.PI) / 180;
+  const metersPerLon = 111319.49079327358 * Math.cos(latRad);
+
+  const x = (centerLon - originLon) * metersPerLon;
+  const y = (centerLat - originLat) * metersPerLat;
+
+  // IPA空間ID仕様に基づく高さ計算
+  // 底面標高 = f × 2^(25-Z) メートル
+  const bottomAltitude = getAltitude(voxel);
+  // ボクセルの高さ = 2^(25-Z) メートル（緯度によらず一律）
+  const voxelHeight = calculateElevation(voxel);
+
+  // 水平方向のサイズ計算（メートル単位）
+  // CubeGeometry は 2x2x2 の立方体なので、スケールを半分にする
+  // 経度方向のサイズ（メルカトルでcos(lat)がかかる）
+  const sizeX = Math.abs(maxLon - minLon) * metersPerLon / 2;
+
+  // IPA空間ID仕様: 底面は常に正方形（XYZタイルと同じ）
+  // 画面上で正方形になるよう、sizeY = sizeX を強制
+  const sizeY = sizeX;
+
+  // 高さはIPA仕様に従う: 2^(25-Z) メートル
+  // CubeGeometryの2x2x2を考慮して半分にする
+  const sizeZ = voxelHeight / 2;
+
+  // 立方体の中心 = 底面標高 + 高さ/2
+  const z = bottomAltitude + voxelHeight / 2;
+
+  return {
+    position: [x, y, z],
+    size: [sizeX, sizeY, sizeZ],
+    voxelID: generateVoxelID(voxel),
+  };
+}
+
+/**
+ * LNGLAT座標系用: ボクセルを経緯度座標で返す
+ * METER_OFFSETSの「地図外に飛ぶ」問題を回避
+ */
+export type VoxelLngLatProps = {
+  position: [number, number, number]; // [longitude, latitude, altitude]
+  size: [number, number, number]; // [width, depth, height] in meters
+  voxelID: string;
+};
+
+export function pvoxelToLngLat(voxel: PureVoxel): VoxelLngLatProps {
+  const coordinates = pvoxelToCoordinates(voxel);
+  const { maxLon, minLon, maxLat, minLat } = coordinates;
+
+  // 中心座標（経緯度）
+  const centerLon = (minLon + maxLon) / 2;
+  const centerLat = (minLat + maxLat) / 2;
+
+  // IPA空間ID仕様に基づく高さ計算
+  const bottomAltitude = getAltitude(voxel);
+  const voxelHeight = calculateElevation(voxel);
+
+  // 立方体の中心 = 底面標高 + 高さ/2
+  const z = bottomAltitude + voxelHeight / 2;
+
+  // 水平方向のサイズ計算（メートル単位）
+  const latRad = (centerLat * Math.PI) / 180;
+  const metersPerLon = 111319.49079327358 * Math.cos(latRad);
+  const sizeX = Math.abs(maxLon - minLon) * metersPerLon / 2;
+  const sizeY = sizeX; // 正方形を保証
+  const sizeZ = voxelHeight / 2;
+
+  return {
+    position: [centerLon, centerLat, z],
+    size: [sizeX, sizeY, sizeZ],
+    voxelID: generateVoxelID(voxel),
+  };
+}
+
