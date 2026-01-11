@@ -16,15 +16,15 @@ import { pvoxelToLngLat, VoxelLngLatProps, pvoxelToCoordinates, getAltitude, cal
 export default function generateLayer(item: Item[], isMapVisible: boolean = true): LayersList {
   let pointItem: Item<"point">[] = item.filter(
     (e): e is Item<"point"> =>
-      !e.isDeleted && !e.isVisible && e.type === "point"
+      !e.isDeleted && e.isVisible && e.type === "point"
   );
   let lineItem: Item<"line">[] = item.filter(
-    (e): e is Item<"line"> => !e.isDeleted && !e.isVisible && e.type === "line"
+    (e): e is Item<"line"> => !e.isDeleted && e.isVisible && e.type === "line"
   );
 
   let voxelItem: Item<"voxel">[] = item.filter(
     (e): e is Item<"voxel"> =>
-      !e.isDeleted && !e.isVisible && e.type === "voxel"
+      !e.isDeleted && e.isVisible && e.type === "voxel"
   );
 
   //PointはまとめてGeoJsonLayerとして表示

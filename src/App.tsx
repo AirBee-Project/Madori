@@ -269,6 +269,17 @@ export default function App() {
     console.log("片道ピクセル誤差: window.measureOneWayPixelError(lon, lat) を使用可能");
   }, [viewState]);
 
+  const handleFlyTo = useCallback((lat: number, lon: number, zoom: number) => {
+    setViewState({
+      ...INITIAL_VIEW_STATE,
+      longitude: lon,
+      latitude: lat,
+      zoom: zoom,
+      transitionDuration: 2000,
+      transitionInterpolator: new FlyToInterpolator(),
+    });
+  }, []);
+
   const layers = useMemo(() => generateLayer(item, isMapVisible), [item, isMapVisible]);
 
   return (
@@ -291,7 +302,7 @@ export default function App() {
                 case "line":
                   return <Line key={e.id} id={e.id} item={item} setItem={setItem} />;
                 case "voxel":
-                  return <Voxel key={e.id} id={e.id} item={item} setItem={setItem} />;
+                  return <Voxel key={e.id} id={e.id} item={item} setItem={setItem} onFlyTo={handleFlyTo} />;
                 default:
                   return null;
               }
