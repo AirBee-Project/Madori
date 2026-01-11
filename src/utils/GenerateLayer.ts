@@ -81,10 +81,14 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
         const sizeX = Math.abs(coords.maxLon - coords.minLon) * voxelMetersPerLon / 2;
         // IPA仕様: 東西方向と南北方向は同じ
         const sizeY = sizeX;
-        const sizeZ = voxelHeight / 2;
+        // メルカトル投影の拡大率 (1/cos(lat)) を打ち消すため、cos(lat) を掛ける
+        const sizeZ = (voxelHeight / 2) * Math.cos(voxelLatRad);
+
+        // メルカトル投影の拡大率 (1/cos(lat)) を打ち消すため、位置Zにも cos(lat) を掛ける
+        const correctedZ = z * Math.cos(voxelLatRad);
 
         voxelData.push({
-          position: [centerLon, centerLat, z],  // LNGLAT: [経度, 緯度, 高度]
+          position: [centerLon, centerLat, correctedZ],  // LNGLAT: [経度, 緯度, 高度]
           size: [sizeX, sizeY, sizeZ],
           color: color
         });

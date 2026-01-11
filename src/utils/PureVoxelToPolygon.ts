@@ -204,10 +204,14 @@ export function pvoxelToLngLat(voxel: PureVoxel): VoxelLngLatProps {
   const sizeX = Math.abs(maxLon - minLon) * metersPerLon / 2;
   // IPA仕様: 東西方向と南北方向は同じ（赤道で等しく、高緯度で両方とも短くなる）
   const sizeY = sizeX;
-  const sizeZ = voxelHeight / 2;
+  // メルカトル投影の拡大率 (1/cos(lat)) を打ち消すため、cos(lat) を掛ける
+  const sizeZ = (voxelHeight / 2) * Math.cos(latRad);
+
+  // メルカトル投影の拡大率 (1/cos(lat)) を打ち消すため、位置Zにも cos(lat) を掛ける
+  const correctedZ = z * Math.cos(latRad);
 
   return {
-    position: [centerLon, centerLat, z],
+    position: [centerLon, centerLat, correctedZ],
     size: [sizeX, sizeY, sizeZ],
     voxelID: generateVoxelID(voxel),
   };
