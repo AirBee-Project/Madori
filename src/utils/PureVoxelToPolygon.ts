@@ -73,7 +73,7 @@ export function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
  * H = 2^25 = 33,554,432m（鉛直方向の全体範囲）
  * 各ボクセルの高さ = H / 2^Z = 2^(25-Z) メートル
  */
-function getAltitude(voxel: PureVoxel): number {
+export function getAltitude(voxel: PureVoxel): number {
   // 底面標高 = f × (H / n) = f × 2^(25-Z)
   const voxelHeight = Math.pow(2, 25 - voxel.Z);
   return voxel.F * voxelHeight;
@@ -110,7 +110,7 @@ function generateVoxelID(voxel: PureVoxel): string {
  * 高さ = 2^(25-Z) メートル
  * 緯度によらず一律（仕様書より）
  */
-function calculateElevation(voxel: PureVoxel): number {
+export function calculateElevation(voxel: PureVoxel): number {
   return Math.pow(2, 25 - voxel.Z);
 }
 
@@ -156,8 +156,7 @@ export function pvoxelToOffset(
   // 経度方向のサイズ（メルカトルでcos(lat)がかかる）
   const sizeX = Math.abs(maxLon - minLon) * metersPerLon / 2;
 
-  // IPA空間ID仕様: 底面は常に正方形（XYZタイルと同じ）
-  // 画面上で正方形になるよう、sizeY = sizeX を強制
+  // IPA仕様: 東西方向と南北方向は同じ（赤道で等しく、高緯度で両方とも短くなる）
   const sizeY = sizeX;
 
   // 高さはIPA仕様に従う: 2^(25-Z) メートル
@@ -203,7 +202,8 @@ export function pvoxelToLngLat(voxel: PureVoxel): VoxelLngLatProps {
   const latRad = (centerLat * Math.PI) / 180;
   const metersPerLon = 111319.49079327358 * Math.cos(latRad);
   const sizeX = Math.abs(maxLon - minLon) * metersPerLon / 2;
-  const sizeY = sizeX; // 正方形を保証
+  // IPA仕様: 東西方向と南北方向は同じ（赤道で等しく、高緯度で両方とも短くなる）
+  const sizeY = sizeX;
   const sizeZ = voxelHeight / 2;
 
   return {

@@ -8,7 +8,7 @@ import { GeoJSON } from "geojson";
 import { COORDINATE_SYSTEM } from "@deck.gl/core";
 import colorHexToRgba from "./ColorHexToRgba";
 import hyperVoxelToPureVoxel from "./HyperVoxelToPureVoxel";
-import { pvoxelToLngLat, VoxelLngLatProps, pvoxelToCoordinates } from "./PureVoxelToPolygon";
+import { pvoxelToLngLat, VoxelLngLatProps, pvoxelToCoordinates, getAltitude, calculateElevation } from "./PureVoxelToPolygon";
 
 /**
  * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数a
@@ -59,7 +59,6 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
   let voxelData: any[] = [];
 
   if (voxelItem.length > 0) {
-    console.time("Voxel Data Generation");
 
     // 全ボクセルを変換
     for (const vItem of voxelItem) {
@@ -71,16 +70,17 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
         const centerLon = (coords.minLon + coords.maxLon) / 2;
         const centerLat = (coords.minLat + coords.maxLat) / 2;
 
-        // IPA仕様に基づく高さ計算
-        const voxelHeight = Math.pow(2, 25 - pv.Z);
-        const bottomAltitude = pv.F * voxelHeight;
+        // IPA仕様に基づく高さ計算（共通関数を使用）
+        const voxelHeight = calculateElevation(pv);
+        const bottomAltitude = getAltitude(pv);
         const z = bottomAltitude + voxelHeight / 2;
 
-        // 水平サイズ（メートル単位）- 各ボクセルの緯度で計算
+        // 水平サイズ（メートル単位）
         const voxelLatRad = (centerLat * Math.PI) / 180;
         const voxelMetersPerLon = 111319.49079327358 * Math.cos(voxelLatRad);
         const sizeX = Math.abs(coords.maxLon - coords.minLon) * voxelMetersPerLon / 2;
-        const sizeY = sizeX;  // IPA仕様: 正方形
+        // IPA仕様: 東西方向と南北方向は同じ
+        const sizeY = sizeX;
         const sizeZ = voxelHeight / 2;
 
         voxelData.push({
@@ -89,96 +89,6 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
           color: color
         });
       }
-    }
-
-    console.timeEnd("Voxel Data Generation");
-    console.log(`Total voxels: ${voxelData.length}`);
-
-    // 精密誤差測定（Z>=28のボクセルのみ）
-    if (voxelData.length > 0 && voxelData.length <= 10) {
-      console.group("=== 精密誤差測定 ===");
-      for (const vItem of voxelItem) {
-        const pVoxels = hyperVoxelToPureVoxel(vItem.data.voxel);
-        for (const pv of pVoxels) {
-          if (pv.Z >= 28) {
-            const n = Math.pow(2, pv.Z);
-
-            // IPA仕様による理論座標計算
-            const theoreticalMinLon = (pv.X / n) * 360 - 180;
-            const theoreticalMaxLon = ((pv.X + 1) / n) * 360 - 180;
-            const theoreticalMinLat = Math.atan(Math.sinh(Math.PI * (1 - 2 * (pv.Y + 1) / n))) * 180 / Math.PI;
-            const theoreticalMaxLat = Math.atan(Math.sinh(Math.PI * (1 - 2 * pv.Y / n))) * 180 / Math.PI;
-            const theoreticalCenterLon = (theoreticalMinLon + theoreticalMaxLon) / 2;
-            const theoreticalCenterLat = (theoreticalMinLat + theoreticalMaxLat) / 2;
-
-            // 実際に使用している座標
-            const coords = pvoxelToCoordinates(pv);
-            const actualCenterLon = (coords.minLon + coords.maxLon) / 2;
-            const actualCenterLat = (coords.minLat + coords.maxLat) / 2;
-
-            // 誤差計算（メートル単位）
-            const latRad = (actualCenterLat * Math.PI) / 180;
-            const metersPerLon = 111319.49079327358 * Math.cos(latRad);
-            const metersPerLat = 111319.49079327358;
-
-            const lonErrorDeg = Math.abs(actualCenterLon - theoreticalCenterLon);
-            const latErrorDeg = Math.abs(actualCenterLat - theoreticalCenterLat);
-            const lonErrorMeters = lonErrorDeg * metersPerLon;
-            const latErrorMeters = latErrorDeg * metersPerLat;
-
-            // タイルサイズ計算
-            const tileSizeDeg = 360 / n;
-            const tileSizeMeters = tileSizeDeg * metersPerLon;
-
-            console.log(`Voxel: ${pv.Z}/${pv.F}/${pv.X}/${pv.Y}`);
-            console.log(`  タイルサイズ: ${tileSizeMeters.toFixed(4)} m (${(tileSizeDeg * 1e9).toFixed(2)} × 10^-9 度)`);
-            console.log(`  理論中心: [${theoreticalCenterLon.toFixed(15)}, ${theoreticalCenterLat.toFixed(15)}]`);
-            console.log(`  実際中心: [${actualCenterLon.toFixed(15)}, ${actualCenterLat.toFixed(15)}]`);
-            console.log(`  経度誤差: ${lonErrorDeg.toExponential(6)} 度 = ${(lonErrorMeters * 1000).toFixed(6)} mm`);
-            console.log(`  緯度誤差: ${latErrorDeg.toExponential(6)} 度 = ${(latErrorMeters * 1000).toFixed(6)} mm`);
-            console.log(`  合計誤差: ${(Math.sqrt(lonErrorMeters ** 2 + latErrorMeters ** 2) * 1000).toFixed(6)} mm`);
-          }
-        }
-      }
-      console.groupEnd();
-
-      // 座標→ピクセル変換検証用のグローバル関数を登録
-      (window as any).verifyPixelProjection = (lon: number, lat: number, viewState: any) => {
-        console.group("=== 座標→ピクセル変換検証 ===");
-
-        // Web Mercator 手動計算
-        const TILE_SIZE = 512;
-        const worldScale = TILE_SIZE * Math.pow(2, viewState.zoom);
-
-        // Mercator projection formula
-        const x_world = (lon + 180) / 360 * worldScale;
-        const latRad = lat * Math.PI / 180;
-        const y_world = (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * worldScale;
-
-        // viewport center in world coordinates
-        const centerLonRad = viewState.longitude * Math.PI / 180;
-        const centerLatRad = viewState.latitude * Math.PI / 180;
-        const center_x = (viewState.longitude + 180) / 360 * worldScale;
-        const center_y = (1 - Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) / Math.PI) / 2 * worldScale;
-
-        // Offset from center
-        const dx = x_world - center_x;
-        const dy = y_world - center_y;
-
-        console.log(`入力座標: [${lon.toFixed(15)}, ${lat.toFixed(15)}]`);
-        console.log(`ズームレベル: ${viewState.zoom}`);
-        console.log(`ワールド座標: [${x_world.toFixed(6)}, ${y_world.toFixed(6)}]`);
-        console.log(`中心からのオフセット: [${dx.toFixed(6)}, ${dy.toFixed(6)}] pixels`);
-
-        // At high zoom, check if sub-pixel precision is maintained
-        const pixelPrecision = 1 / Math.pow(2, viewState.zoom);
-        console.log(`現在のズームでの1ピクセル = ${(pixelPrecision * 360 / TILE_SIZE).toExponential(4)} 度`);
-
-        console.groupEnd();
-        return { x_world, y_world, dx, dy };
-      };
-
-      console.log("座標→ピクセル検証: window.verifyPixelProjection(lon, lat, viewState) を使用可能");
     }
   }
 
@@ -196,6 +106,7 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
     material: false,
     pickable: true,
   })] : [];
+
   // 背景地図: Carto Voyager (明るい地図)
   const tileMapLayer = new TileLayer({
     id: "TileMapLayer",
@@ -220,7 +131,7 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
   });
 
   let reuslt: LayersList = [
-    tileMapLayer,
+    ...(isMapVisible ? [tileMapLayer] : []),
     pointGeoJsonLayer,
     lineGeoJsonLayer,
     ...voxelMeshLayers,
