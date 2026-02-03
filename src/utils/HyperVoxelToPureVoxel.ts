@@ -26,7 +26,7 @@ export default function hyperVoxelToPureVoxel(
   //また、生成ロジック上重複がない場合は不要であり、ある場合でも一旦パフォーマンス優先で削除
   //result = [...new Set(result)];
 
-  console.log(result);
+
   return result;
 }
 

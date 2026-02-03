@@ -1,7 +1,3 @@
-// ==============================
-// 型定義
-// ==============================
-
 type Polygon = {
   points: number[][]; // 経度・緯度・標高の三次元座標
   elevation: number; // 高さ情報（階層に応じて）
@@ -18,9 +14,6 @@ type PvoxelCoordinates = {
   minLat: number;
 };
 
-// ==============================
-// メイン処理
-// ==============================
 
 export default function pvoxelToPolygon(
   pvoxels: PureVoxel[],
@@ -41,14 +34,7 @@ export default function pvoxelToPolygon(
   });
 }
 
-// ==============================
-// 補助関数群
-// ==============================
 
-/**
- * 各ボクセルの経緯度範囲を計算
- * https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
- */
 export function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
   const n = 2 ** voxel.Z;
   const lonPerTile = 360 / n;
@@ -67,12 +53,7 @@ export function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
 
 }
 
-/**
- * IPA空間ID仕様に基づく底面標高の計算
- * 底面標高 = f × 2^(25-Z) メートル
- * H = 2^25 = 33,554,432m（鉛直方向の全体範囲）
- * 各ボクセルの高さ = H / 2^Z = 2^(25-Z) メートル
- */
+
 export function getAltitude(voxel: PureVoxel): number {
   // 底面標高 = f × (H / n) = f × 2^(25-Z)
   const voxelHeight = Math.pow(2, 25 - voxel.Z);
@@ -97,19 +78,11 @@ function generateRectanglePoints(
   ];
 }
 
-/**
- * 表示用のボクセルIDを生成
- */
 function generateVoxelID(voxel: PureVoxel): string {
   return `${voxel.Z}/${voxel.F}/${voxel.X}/${voxel.Y}`;
 }
 
-/**
- * IPA空間ID仕様に基づくボクセルの高さ計算
- * Z=25でボクセルの高さが1mになる
- * 高さ = 2^(25-Z) メートル
- * 緯度によらず一律（仕様書より）
- */
+
 export function calculateElevation(voxel: PureVoxel): number {
   return Math.pow(2, 25 - voxel.Z);
 }
@@ -145,25 +118,18 @@ export function pvoxelToOffset(
   const x = (centerLon - originLon) * metersPerLon;
   const y = (centerLat - originLat) * metersPerLat;
 
-  // IPA空間ID仕様に基づく高さ計算
-  // 底面標高 = f × 2^(25-Z) メートル
   const bottomAltitude = getAltitude(voxel);
-  // ボクセルの高さ = 2^(25-Z) メートル（緯度によらず一律）
+
   const voxelHeight = calculateElevation(voxel);
 
-  // 水平方向のサイズ計算（メートル単位）
-  // CubeGeometry は 2x2x2 の立方体なので、スケールを半分にする
-  // 経度方向のサイズ（メルカトルでcos(lat)がかかる）
   const sizeX = Math.abs(maxLon - minLon) * metersPerLon / 2;
 
-  // IPA仕様: 東西方向と南北方向は同じ（赤道で等しく、高緯度で両方とも短くなる）
+
   const sizeY = sizeX;
 
-  // 高さはIPA仕様に従う: 2^(25-Z) メートル
-  // CubeGeometryの2x2x2を考慮して半分にする
+
   const sizeZ = voxelHeight / 2;
 
-  // 立方体の中心 = 底面標高 + 高さ/2
   const z = bottomAltitude + voxelHeight / 2;
 
   return {
@@ -173,13 +139,10 @@ export function pvoxelToOffset(
   };
 }
 
-/**
- * LNGLAT座標系用: ボクセルを経緯度座標で返す
- * METER_OFFSETSの「地図外に飛ぶ」問題を回避
- */
+
 export type VoxelLngLatProps = {
-  position: [number, number, number]; // [longitude, latitude, altitude]
-  size: [number, number, number]; // [width, depth, height] in meters
+  position: [number, number, number];
+  size: [number, number, number];
   voxelID: string;
 };
 
@@ -187,27 +150,32 @@ export function pvoxelToLngLat(voxel: PureVoxel): VoxelLngLatProps {
   const coordinates = pvoxelToCoordinates(voxel);
   const { maxLon, minLon, maxLat, minLat } = coordinates;
 
-  // 中心座標（経緯度）
   const centerLon = (minLon + maxLon) / 2;
   const centerLat = (minLat + maxLat) / 2;
 
-  // IPA空間ID仕様に基づく高さ計算
   const bottomAltitude = getAltitude(voxel);
   const voxelHeight = calculateElevation(voxel);
-
-  // 立方体の中心 = 底面標高 + 高さ/2
   const z = bottomAltitude + voxelHeight / 2;
 
-  // 水平方向のサイズ計算（メートル単位）
   const latRad = (centerLat * Math.PI) / 180;
-  const metersPerLon = 111319.49079327358 * Math.cos(latRad);
-  const sizeX = Math.abs(maxLon - minLon) * metersPerLon / 2;
-  // IPA仕様: 東西方向と南北方向は同じ（赤道で等しく、高緯度で両方とも短くなる）
-  const sizeY = sizeX;
-  // メルカトル投影の拡大率 (1/cos(lat)) を打ち消すため、cos(lat) を掛ける
-  const sizeZ = (voxelHeight / 2) * Math.cos(latRad);
 
-  // メルカトル投影の拡大率 (1/cos(lat)) を打ち消すため、位置Zにも cos(lat) を掛ける
+  // GRS80楕円体パラメータ
+  const a = 6378137; // 長半径 (m)
+  const f = 1 / 298.257222101; // 扁平率
+  const e2 = f * (2 - f); // 離心率の2乗
+
+  // 経度方向（東西）: GRS80楕円体上の距離
+  const N = a / Math.sqrt(1 - e2 * Math.sin(latRad) * Math.sin(latRad));
+  const metersPerLonDeg = (Math.PI / 180) * N * Math.cos(latRad);
+  const sizeX = Math.abs(maxLon - minLon) * metersPerLonDeg / 2;
+
+  // 緯度方向（南北）: GRS80楕円体上の距離
+  const M = a * (1 - e2) / Math.pow(1 - e2 * Math.sin(latRad) * Math.sin(latRad), 1.5);
+  const metersPerLatDeg = (Math.PI / 180) * M;
+  const sizeY = Math.abs(maxLat - minLat) * metersPerLatDeg / 2;
+
+  // deck.gl LNGLAT座標系のMercatorスケーリング(1/cos(lat))を打ち消す
+  const sizeZ = (voxelHeight / 2) * Math.cos(latRad);
   const correctedZ = z * Math.cos(latRad);
 
   return {

@@ -8,7 +8,7 @@ import { GeoJSON } from "geojson";
 import { COORDINATE_SYSTEM } from "@deck.gl/core";
 import colorHexToRgba from "./ColorHexToRgba";
 import hyperVoxelToPureVoxel from "./HyperVoxelToPureVoxel";
-import { pvoxelToLngLat, VoxelLngLatProps, pvoxelToCoordinates, getAltitude, calculateElevation } from "./PureVoxelToPolygon";
+import { pvoxelToLngLat } from "./PureVoxelToPolygon";
 
 /**
  * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数a
@@ -53,8 +53,6 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
   });
 
   //VoxelはSimpleMeshLayerとしてまとめて出力
-  // LNGLAT座標系: 度単位で位置を指定（IPA仕様に準拠）
-  // Z=31テスト用
 
   let voxelData: any[] = [];
 
@@ -66,37 +64,16 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
       const color = colorHexToRgba(vItem.data.color, vItem.data.opacity);
 
       for (const pv of pVoxels) {
-        const coords = pvoxelToCoordinates(pv);
-        const centerLon = (coords.minLon + coords.maxLon) / 2;
-        const centerLat = (coords.minLat + coords.maxLat) / 2;
-
-        // IPA仕様に基づく高さ計算（共通関数を使用）
-        const voxelHeight = calculateElevation(pv);
-        const bottomAltitude = getAltitude(pv);
-        const z = bottomAltitude + voxelHeight / 2;
-
-        // 水平サイズ（メートル単位）
-        const voxelLatRad = (centerLat * Math.PI) / 180;
-        const voxelMetersPerLon = 111319.49079327358 * Math.cos(voxelLatRad);
-        const sizeX = Math.abs(coords.maxLon - coords.minLon) * voxelMetersPerLon / 2;
-        // IPA仕様: 東西方向と南北方向は同じ
-        const sizeY = sizeX;
-        // メルカトル投影の拡大率 (1/cos(lat)) を打ち消すため、cos(lat) を掛ける
-        const sizeZ = (voxelHeight / 2) * Math.cos(voxelLatRad);
-
-        // メルカトル投影の拡大率 (1/cos(lat)) を打ち消すため、位置Zにも cos(lat) を掛ける
-        const correctedZ = z * Math.cos(voxelLatRad);
-
+        const lngLatProps = pvoxelToLngLat(pv);
         voxelData.push({
-          position: [centerLon, centerLat, correctedZ],  // LNGLAT: [経度, 緯度, 高度]
-          size: [sizeX, sizeY, sizeZ],
+          position: lngLatProps.position,
+          size: lngLatProps.size,
           color: color
         });
       }
     }
   }
 
-  // LNGLAT座標系でレイヤーを生成
   const cubeGeometry = new CubeGeometry();
   const voxelMeshLayers = voxelData.length > 0 ? [new SimpleMeshLayer({
     id: "VoxelMeshLayer",
