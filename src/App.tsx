@@ -31,7 +31,7 @@ export default function App() {
         // Normalize color parameter - add # if not present
         let color = colorParam || "#0000FF";
         if (colorParam && !colorParam.startsWith("#")) {
-          color = `#${colorParam} `;
+          color = "#" + colorParam;
         }
 
         const newVoxel: Item = {
