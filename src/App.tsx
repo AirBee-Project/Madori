@@ -1,5 +1,5 @@
+
 import DeckGL from "@deck.gl/react";
-import { _GlobeView as GlobeView } from "deck.gl";
 import { useState, useEffect } from "react";
 import { Item } from "./types/Item";
 import Point from "./components/Point";
@@ -12,8 +12,8 @@ const INITIAL_VIEW_STATE = {
   longitude: 0,
   latitude: 0,
   zoom: 1,
-  pitch: 60,
-  bearing: 30,
+  pitch: 0,
+  bearing: 0,
 };
 
 export default function App() {
@@ -31,7 +31,7 @@ export default function App() {
         // Normalize color parameter - add # if not present
         let color = colorParam || "#0000FF";
         if (colorParam && !colorParam.startsWith("#")) {
-          color = `#${colorParam}`;
+          color = `#${colorParam} `;
         }
 
         const newVoxel: Item = {
@@ -145,13 +145,12 @@ export default function App() {
           </button>
           <DeckGL
             initialViewState={INITIAL_VIEW_STATE}
-            views={new GlobeView()}
             controller
             width="75vw"
             layers={generateLayer(item, isMapVisible)}
             getTooltip={({ object }) =>
               object && {
-                text: `${object.voxelID}`,
+                text: `${object.voxelID} `,
               }
             }
           />

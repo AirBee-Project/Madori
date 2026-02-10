@@ -45,11 +45,11 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
     stroked: true,
     filled: false,
     lineWidthUnits: "pixels",
-    getLineColor: (d) => d.properties.color as Color, // ← 色を個別設定
-    getLineWidth: (d) => d.properties.width, // ← 太さを個別設定
+    getLineColor: (d) => d.properties.color as Color,
+    getLineWidth: (d) => d.properties.width,
   });
 
-  //VoxelはPolygonLayerとしてまとめて出力
+  //PolygonLayerとして出力
 
   const voxelPolygonLayer = new PolygonLayer({
     // coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
@@ -62,20 +62,20 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
     getElevation: (d) => d.elevation,
     getFillColor: (d) => d.color,
 
-    getLineColor: [255, 255, 255, 125], // 輪郭線の色
-    getLineWidth: 100, // 輪郭線の幅（下の設定もセットで）
+    getLineColor: [255, 255, 255, 125],
+    getLineWidth: 100,
     lineWidthUnits: "pixels",
     lineWidthScale: 1,
     pickable: true,
   });
 
-  //国土地理院から取得したTileMapを表示
+
   const tileMapLayer = new TileLayer({
     id: "TileMapLayer",
-    data: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
-    maxZoom: 18,
+    data: "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
+    maxZoom: 19,
     minZoom: 0,
-    opacity: 0.5,
+    opacity: 1,
     renderSubLayers: (props) => {
       const { boundingBox } = props.tile;
       return new BitmapLayer(props, {
