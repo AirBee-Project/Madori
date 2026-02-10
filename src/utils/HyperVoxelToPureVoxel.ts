@@ -17,6 +17,8 @@ export default function hyperVoxelToPureVoxel(
             F: f[findex],
             X: x[xindex],
             Y: y[yindex],
+            startTime: Voxels[i].startTime,
+            endTime: Voxels[i].endTime,
           });
         }
       }
