@@ -3,4 +3,6 @@ export type PureVoxel = {
   X: number;
   Y: number;
   F: number;
+  startTime: number | null;
+  endTime: number | null;
 };

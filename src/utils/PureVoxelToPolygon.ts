@@ -3,10 +3,12 @@
 // ==============================
 
 type Polygon = {
-  points: number[][]; // 経度・緯度・標高の三次元座標
-  elevation: number; // 高さ情報（階層に応じて）
-  voxelID: string; // 一意のID
+  points: number[][];
+  elevation: number;
+  voxelID: string;
   color: Color;
+  startTime: number | null;
+  endTime: number | null;
 };
 import { Color } from "deck.gl";
 import { PureVoxel } from "../types/PureVoxel";
@@ -37,6 +39,8 @@ export default function pvoxelToPolygon(
       elevation: calculateElevation(voxel),
       voxelID: generateVoxelID(voxel),
       color: color,
+      startTime: voxel.startTime,
+      endTime: voxel.endTime,
     };
   });
 }

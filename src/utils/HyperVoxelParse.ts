@@ -15,27 +15,30 @@ export default function hyperVoxelParse(
     return result;
   }
 
-  //時間に関する情報を削除
-  voxelStringList = voxelStringList.map((voxelString) => {
-    if (!voxelString) return "";
-    const underscoreIndex = voxelString.indexOf("_");
-    if (underscoreIndex !== -1) {
-      return voxelString.substring(0, underscoreIndex);
-    }
-    return voxelString;
-  });
-  //型に変換
   for (let i = 0; i < voxelStringList.length; i++) {
-    if (voxelStringList[i] === "") {
-      continue;
+    if (!voxelStringList[i] || voxelStringList[i].trim() === "") continue;
+
+    let spatialPart = voxelStringList[i].trim();
+    let timePart: string | null = null;
+
+    const underscoreIndex = spatialPart.indexOf("_");
+    if (underscoreIndex !== -1) {
+      timePart = spatialPart.substring(underscoreIndex + 1);
+      spatialPart = spatialPart.substring(0, underscoreIndex);
     }
-    let voxelParseList = voxelStringList[i].split("/");
+
+    let voxelParseList = spatialPart.split("/");
     let zValue: number = Number(voxelParseList[0]);
+
+    const { startTime, endTime } = parseTimePart(timePart);
+
     let resultVoxel: VoxelDefinition = {
       Z: zValue,
       F: parseDimensionRange(zValue, "F", voxelParseList[1]),
       X: parseDimensionRange(zValue, "X", voxelParseList[2]),
       Y: parseDimensionRange(zValue, "Y", voxelParseList[3]),
+      startTime,
+      endTime,
     };
     result.push(resultVoxel);
   }
@@ -85,3 +88,32 @@ function parseDimensionRange(
     return Number(item);
   }
 }
+
+function parseTimePart(timePart: string | null): { startTime: number | null; endTime: number | null } {
+  if (timePart === null) {
+    return { startTime: null, endTime: null };
+  }
+
+  const parts = timePart.split("/");
+  const interval = Number(parts[0]);
+  const tPart = parts[1];
+
+  if (tPart === "-") {
+    return { startTime: null, endTime: null };
+  } else if (tPart.endsWith(":-")) {
+    const t = Number(tPart.split(":")[0]);
+    return { startTime: interval * t, endTime: Infinity };
+  } else if (tPart.startsWith("-:")) {
+    const t = Number(tPart.split(":")[1]);
+    return { startTime: 0, endTime: interval * (t + 1) };
+  } else if (tPart.indexOf(":") !== -1) {
+    const tList = tPart.split(":");
+    const t1 = Number(tList[0]);
+    const t2 = Number(tList[1]);
+    return { startTime: interval * t1, endTime: interval * (t2 + 1) };
+  } else {
+    const t = Number(tPart);
+    return { startTime: interval * t, endTime: interval * (t + 1) };
+  }
+}
+

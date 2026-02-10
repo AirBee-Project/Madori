@@ -10,7 +10,7 @@ import pvoxelToPolygon from "./PureVoxelToPolygon";
 /**
  * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数a
  */
-export default function generateLayer(item: Item[], isMapVisible: boolean = true): LayersList {
+export default function generateLayer(item: Item[], isMapVisible: boolean = true, currentTime: number = 0): LayersList {
   let pointItem: Item<"point">[] = item.filter(
     (e): e is Item<"point"> =>
       !e.isDeleted && !e.isVisible && e.type === "point"
@@ -54,7 +54,7 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
   const voxelPolygonLayer = new PolygonLayer({
     // coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
     id: "PolygonLayer",
-    data: generatePolygonLayer(voxelItem),
+    data: generatePolygonLayer(voxelItem, currentTime),
     extruded: true,
     wireframe: true,
     filled: true,
@@ -149,12 +149,14 @@ function generateLineGeoJson(line: Item<"line">[]): GeoJSON {
 }
 
 type Polygon = {
-  points: number[][]; // 経度・緯度・標高の三次元座標
-  elevation: number; // 高さ情報（階層に応じて）
-  voxelID: string; // 一意のID
+  points: number[][];
+  elevation: number;
+  voxelID: string;
   color: Color;
+  startTime: number | null;
+  endTime: number | null;
 };
-function generatePolygonLayer(voxel: Item<"voxel">[]): Polygon[] {
+function generatePolygonLayer(voxel: Item<"voxel">[], currentTime: number): Polygon[] {
   let result: Polygon[] = [];
   for (let i = 0; i < voxel.length; i++) {
     let pureVoxel = hyperVoxelToPureVoxel(voxel[i].data.voxel);
@@ -162,11 +164,13 @@ function generatePolygonLayer(voxel: Item<"voxel">[]): Polygon[] {
       pureVoxel,
       colorHexToRgba(voxel[i].data.color, voxel[i].data.opacity)
     );
-    // Use for loop instead of spread syntax to avoid "Maximum call stack size exceeded"
     for (const p of polygon) {
-      result.push(p);
+      if (p.startTime === null && p.endTime === null) {
+        result.push(p);
+      } else if (p.startTime !== null && p.endTime !== null && p.startTime <= currentTime && currentTime < p.endTime) {
+        result.push(p);
+      }
     }
-
   }
   return result;
 }

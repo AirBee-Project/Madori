@@ -19,6 +19,7 @@ const INITIAL_VIEW_STATE = {
 export default function App() {
   const [item, setItem] = useState<Item[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(true);
+  const [currentTime, setCurrentTime] = useState(0);
 
   // Load voxel from URL parameters on initial mount
   useEffect(() => {
@@ -95,7 +96,18 @@ export default function App() {
             <h1>オブジェクトたち</h1>
           </div>
           <div className="flex justify-center p-[1.5%]">
-            <h1>AfterUnlimitRange,BeforeUnlimitRangeには非対応</h1>
+          </div>
+          <div className="px-[6%] mb-[2%]">
+            <input
+              type="range"
+              min={0}
+              max={86400}
+              step={1}
+              value={currentTime}
+              onChange={(e) => setCurrentTime(Number(e.target.value))}
+              className="w-[100%]"
+            />
+            <p className="text-sm text-center">{currentTime} 秒</p>
           </div>
           <div>
             {item.map((e) => {
@@ -147,7 +159,7 @@ export default function App() {
             initialViewState={INITIAL_VIEW_STATE}
             controller
             width="75vw"
-            layers={generateLayer(item, isMapVisible)}
+            layers={generateLayer(item, isMapVisible, currentTime)}
             getTooltip={({ object }) =>
               object && {
                 text: `${object.voxelID} `,
@@ -156,6 +168,6 @@ export default function App() {
           />
         </div>
       </div>
-    </div>
+    </div >
   );
 }
