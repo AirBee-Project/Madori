@@ -71,7 +71,7 @@ function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
  * 標高の計算（Z, F を元に算出）
  */
 function getAltitude(voxel: PureVoxel): number {
-  return ((33554432 * 2) / 2 ** (voxel.Z + 2)) * voxel.F;
+  return (33554432 / 2 ** voxel.Z) * voxel.F;
 }
 
 /**
@@ -103,5 +103,5 @@ function generateVoxelID(voxel: PureVoxel): string {
  * ビジュアライゼーション用の高さ（階層に応じて）
  */
 function calculateElevation(voxel: PureVoxel): number {
-  return 33554432 / 2 ** (voxel.Z + 1);
+  return 33554432 / 2 ** voxel.Z;
 }
