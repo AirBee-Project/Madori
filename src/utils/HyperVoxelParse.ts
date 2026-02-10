@@ -59,12 +59,28 @@ function parseDimensionRange(
         return [0, 2 ** zoomLevel - 1];
       }
     }
+  } else if (item.endsWith(":-")) {
+    const start = Number(item.split(":")[0]);
+    if (dimension === "F") {
+      return [start, 2 ** zoomLevel - 1];
+    } else {
+      return [start, 2 ** zoomLevel - 1];
+    }
+  } else if (item.startsWith("-:")) {
+    const end = Number(item.split(":")[1]);
+    if (dimension === "F") {
+      return [-(2 ** zoomLevel), end];
+    } else {
+      return [0, end];
+    }
   } else if (item.indexOf(":") != -1) {
     let itemList = item.split(":");
-    let numberItemList: number[] = itemList.map((num) => Number(num));
-    numberItemList = numberItemList.sort();
-    console.log(numberItemList);
-    return [numberItemList[0], numberItemList[1]];
+    const start = Number(itemList[0]);
+    const end = Number(itemList[1]);
+    if (dimension !== "X") {
+      return [Math.min(start, end), Math.max(start, end)];
+    }
+    return [start, end];
   } else {
     return Number(item);
   }
