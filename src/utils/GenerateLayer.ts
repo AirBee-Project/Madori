@@ -67,6 +67,8 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
     lineWidthUnits: "pixels",
     lineWidthScale: 1,
     pickable: true,
+    autoHighlight: true,
+    highlightColor: [255, 255, 0, 200],
   });
 
 
