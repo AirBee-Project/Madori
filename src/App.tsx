@@ -1,12 +1,14 @@
 
 import DeckGL from "@deck.gl/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { FlyToInterpolator } from "@deck.gl/core";
 import { Item } from "./types/Item";
 import Point from "./components/Point";
 import Line from "./components/Line";
 import Voxel from "./components/Voxel";
 import generateLayer from "./utils/GenerateLayer";
 import hyperVoxelParse from "./utils/HyperVoxelParse";
+import { VoxelDefinition } from "./types/VoxelDefinition";
 
 const INITIAL_VIEW_STATE = {
   longitude: 0,
@@ -20,6 +22,36 @@ export default function App() {
   const [item, setItem] = useState<Item[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(true);
   const [compileMode, setCompileMode] = useState(true);
+  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+
+  const focusOnVoxel = useCallback((voxelDefs: VoxelDefinition[]) => {
+    if (voxelDefs.length === 0) return;
+
+    const v = voxelDefs[0];
+    const n = 2 ** v.Z;
+    const lonPerTile = 360 / n;
+
+    const xMin = typeof v.X === "number" ? v.X : v.X[0];
+    const xMax = typeof v.X === "number" ? v.X : v.X[1];
+    const yMin = typeof v.Y === "number" ? v.Y : v.Y[0];
+    const yMax = typeof v.Y === "number" ? v.Y : v.Y[1];
+
+    const centerLon = -180 + lonPerTile * ((xMin + xMax + 1) / 2);
+    const yCenter = (yMin + yMax + 1) / 2;
+    const centerLat =
+      (Math.atan(Math.sinh(Math.PI - (yCenter / n) * 2 * Math.PI)) * 180) /
+      Math.PI;
+
+    setViewState({
+      longitude: centerLon,
+      latitude: centerLat,
+      zoom: v.Z + 1,
+      pitch: 45,
+      bearing: 0,
+      transitionDuration: 1000,
+      transitionInterpolator: new FlyToInterpolator(),
+    } as any);
+  }, []);
 
   // Load voxel from URL parameters on initial mount
   useEffect(() => {
@@ -106,7 +138,7 @@ export default function App() {
                 case "line":
                   return <Line id={e.id} item={item} setItem={setItem} />;
                 case "voxel":
-                  return <Voxel id={e.id} item={item} setItem={setItem} />;
+                  return <Voxel id={e.id} item={item} setItem={setItem} onFocus={focusOnVoxel} />;
               }
             })}
           </div>
@@ -151,7 +183,8 @@ export default function App() {
             {compileMode ? "個別描画に切替" : "統合描画に切替"}
           </button>
           <DeckGL
-            initialViewState={INITIAL_VIEW_STATE}
+            viewState={viewState}
+            onViewStateChange={({ viewState }: any) => setViewState(viewState)}
             controller
             width="75vw"
             layers={generateLayer(item, isMapVisible, compileMode)}
