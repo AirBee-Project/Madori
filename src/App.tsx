@@ -19,6 +19,7 @@ const INITIAL_VIEW_STATE = {
 export default function App() {
   const [item, setItem] = useState<Item[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(true);
+  const [compileMode, setCompileMode] = useState(true);
 
   // Load voxel from URL parameters on initial mount
   useEffect(() => {
@@ -143,11 +144,17 @@ export default function App() {
           >
             {isMapVisible ? "地図を非表示" : "地図を表示"}
           </button>
+          <button
+            className="absolute top-16 right-4 z-10 bg-white border-2 border-gray-300 rounded-[4px] px-4 py-2 hover:bg-gray-100 transition duration-300 shadow-md"
+            onClick={() => setCompileMode(!compileMode)}
+          >
+            {compileMode ? "個別描画に切替" : "統合描画に切替"}
+          </button>
           <DeckGL
             initialViewState={INITIAL_VIEW_STATE}
             controller
             width="75vw"
-            layers={generateLayer(item, isMapVisible)}
+            layers={generateLayer(item, isMapVisible, compileMode)}
             getTooltip={({ object }) =>
               object && {
                 text: `${object.voxelID} `,
