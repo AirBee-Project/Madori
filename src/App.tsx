@@ -11,6 +11,8 @@ import Voxel from "./components/Voxel";
 import generateLayer from "./utils/GenerateLayer";
 import hyperVoxelParse from "./utils/HyperVoxelParse";
 import { VoxelDefinition } from "./types/VoxelDefinition";
+import TimeAxis from "./components/TimeAxis";
+import TimeControls from "./components/TimeControls";
 
 const INITIAL_VIEW_STATE = {
   longitude: 0,
@@ -26,6 +28,8 @@ export default function App() {
   const [compileMode, setCompileMode] = useState(true);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1); // 1x by default
 
   const focusOnVoxel = useCallback((voxelDefs: VoxelDefinition[]) => {
     if (voxelDefs.length === 0) return;
@@ -54,9 +58,12 @@ export default function App() {
       transitionDuration: 1000,
       transitionInterpolator: new FlyToInterpolator(),
     } as any);
+
+    if (v.startTime !== null) {
+      setCurrentTime(v.startTime);
+    }
   }, []);
 
-  // Load voxel from URL parameters on initial mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const voxelData = urlParams.get("voxel");
@@ -64,7 +71,6 @@ export default function App() {
 
     if (voxelData) {
       try {
-        // Normalize color parameter - add # if not present
         let color = colorParam || "#0000FF";
         if (colorParam && !colorParam.startsWith("#")) {
           color = "#" + colorParam;
@@ -88,6 +94,34 @@ export default function App() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    let animationFrameId: number;
+    let lastTimestamp: number = 0;
+
+    const animate = (timestamp: number) => {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+
+      const deltaTime = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      if (isPlaying) {
+        setCurrentTime((prevTime) => prevTime + deltaTime * playbackSpeed);
+      }
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    if (isPlaying) {
+      animationFrameId = requestAnimationFrame(animate);
+    } else {
+      lastTimestamp = 0;
+    }
+
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [isPlaying, playbackSpeed]);
 
   function addObject(type: "point" | "line" | "voxel") {
     let newObject: Item = {
@@ -133,16 +167,21 @@ export default function App() {
           <div className="flex justify-center p-[1.5%]">
           </div>
           <div className="px-[6%] mb-[2%]">
-            <input
-              type="range"
-              min={0}
-              max={86400}
-              step={1}
-              value={currentTime}
-              onChange={(e) => setCurrentTime(Number(e.target.value))}
-              className="w-[100%]"
+            <TimeAxis
+              currentTime={currentTime}
+              onTimeChange={setCurrentTime}
             />
-            <p className="text-sm text-center">{currentTime} 秒</p>
+            <p className="text-sm text-center">
+              {new Date(currentTime * 1000).toLocaleString()}
+            </p>
+            <div className="mt-4 flex justify-center">
+              <TimeControls
+                isPlaying={isPlaying}
+                onPlayPause={() => setIsPlaying(!isPlaying)}
+                speed={playbackSpeed}
+                onSpeedChange={setPlaybackSpeed}
+              />
+            </div>
           </div>
           <div>
             {item.map((e) => {
