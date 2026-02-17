@@ -45,7 +45,7 @@ export default function App() {
     setViewState({
       longitude: centerLon,
       latitude: centerLat,
-      zoom: v.Z + 1,
+      zoom: 20,
       pitch: 45,
       bearing: 0,
       transitionDuration: 1000,
@@ -185,7 +185,7 @@ export default function App() {
           <DeckGL
             viewState={viewState}
             onViewStateChange={({ viewState }: any) => setViewState(viewState)}
-            controller
+            controller={{ maxZoom: 25 } as any}
             width="75vw"
             layers={generateLayer(item, isMapVisible, compileMode)}
             getTooltip={({ object }) =>
