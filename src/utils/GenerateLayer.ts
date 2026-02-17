@@ -10,7 +10,7 @@ import pvoxelToPolygon from "./PureVoxelToPolygon";
 /**
  * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数a
  */
-export default function generateLayer(item: Item[], isMapVisible: boolean = true, currentTime: number = 0): LayersList {
+export default function generateLayer(item: Item[], isMapVisible: boolean = true, compileMode: boolean = true, currentTime: number = 0): LayersList {
   let pointItem: Item<"point">[] = item.filter(
     (e): e is Item<"point"> =>
       !e.isDeleted && !e.isVisible && e.type === "point"
@@ -54,7 +54,7 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
   const voxelPolygonLayer = new PolygonLayer({
     // coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
     id: "PolygonLayer",
-    data: generatePolygonLayer(voxelItem, currentTime),
+    data: generatePolygonLayer(voxelItem, compileMode, currentTime),
     extruded: true,
     wireframe: true,
     filled: true,
@@ -158,10 +158,10 @@ type Polygon = {
   startTime: number | null;
   endTime: number | null;
 };
-function generatePolygonLayer(voxel: Item<"voxel">[], currentTime: number): Polygon[] {
+function generatePolygonLayer(voxel: Item<"voxel">[], compileMode: boolean, currentTime: number): Polygon[] {
   let result: Polygon[] = [];
   for (let i = 0; i < voxel.length; i++) {
-    let pureVoxel = hyperVoxelToPureVoxel(voxel[i].data.voxel);
+    let pureVoxel = hyperVoxelToPureVoxel(voxel[i].data.voxel, compileMode);
     let polygon = pvoxelToPolygon(
       pureVoxel,
       colorHexToRgba(voxel[i].data.color, voxel[i].data.opacity)

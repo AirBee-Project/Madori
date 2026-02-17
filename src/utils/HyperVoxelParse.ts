@@ -116,4 +116,3 @@ function parseTimePart(timePart: string | null): { startTime: number | null; end
     return { startTime: interval * t, endTime: interval * (t + 1) };
   }
 }
-
