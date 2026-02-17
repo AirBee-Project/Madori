@@ -2,6 +2,8 @@
 import DeckGL from "@deck.gl/react";
 import { useState, useEffect, useCallback } from "react";
 import { FlyToInterpolator } from "@deck.gl/core";
+import { Map } from "react-map-gl/maplibre";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { Item } from "./types/Item";
 import Point from "./components/Point";
 import Line from "./components/Line";
@@ -205,7 +207,14 @@ export default function App() {
                 text: `${object.voxelID} `,
               }
             }
-          />
+          >
+            {isMapVisible && (
+              <Map
+                mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+                renderWorldCopies={false}
+              />
+            )}
+          </DeckGL>
         </div>
       </div>
     </div>
