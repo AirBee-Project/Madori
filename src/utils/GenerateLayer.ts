@@ -1,6 +1,5 @@
 import { Color, LayersList } from "deck.gl";
-import { TileLayer } from "@deck.gl/geo-layers";
-import { BitmapLayer, GeoJsonLayer, PolygonLayer } from "@deck.gl/layers";
+import { GeoJsonLayer, PolygonLayer } from "@deck.gl/layers";
 import { Item } from "../types/Item";
 import { GeoJSON } from "geojson";
 import { COORDINATE_SYSTEM } from "@deck.gl/core";
@@ -72,30 +71,7 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
   });
 
 
-  const tileMapLayer = new TileLayer({
-    id: "TileMapLayer",
-    data: "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
-    maxZoom: 19,
-    minZoom: 0,
-    opacity: 1,
-    renderSubLayers: (props) => {
-      const { boundingBox } = props.tile;
-      return new BitmapLayer(props, {
-        data: undefined,
-        image: props.data,
-        bounds: [
-          boundingBox[0][0],
-          boundingBox[0][1],
-          boundingBox[1][0],
-          boundingBox[1][1],
-        ],
-      });
-    },
-    pickable: true,
-  });
-
   let reuslt: LayersList = [
-    ...(isMapVisible ? [tileMapLayer] : []),
     pointGeoJsonLayer,
     lineGeoJsonLayer,
     voxelPolygonLayer,
