@@ -23,6 +23,7 @@ export default function App() {
   const [isMapVisible, setIsMapVisible] = useState(true);
   const [compileMode, setCompileMode] = useState(true);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const focusOnVoxel = useCallback((voxelDefs: VoxelDefinition[]) => {
     if (voxelDefs.length === 0) return;
@@ -128,7 +129,18 @@ export default function App() {
             <h1>オブジェクトたち</h1>
           </div>
           <div className="flex justify-center p-[1.5%]">
-            <h1>AfterUnlimitRange,BeforeUnlimitRangeには非対応</h1>
+          </div>
+          <div className="px-[6%] mb-[2%]">
+            <input
+              type="range"
+              min={0}
+              max={86400}
+              step={1}
+              value={currentTime}
+              onChange={(e) => setCurrentTime(Number(e.target.value))}
+              className="w-[100%]"
+            />
+            <p className="text-sm text-center">{currentTime} 秒</p>
           </div>
           <div>
             {item.map((e) => {
@@ -187,7 +199,7 @@ export default function App() {
             onViewStateChange={({ viewState }: any) => setViewState(viewState)}
             controller={{ maxZoom: 25 } as any}
             width="75vw"
-            layers={generateLayer(item, isMapVisible, compileMode)}
+            layers={generateLayer(item, isMapVisible, compileMode, currentTime)}
             getTooltip={({ object }) =>
               object && {
                 text: `${object.voxelID} `,

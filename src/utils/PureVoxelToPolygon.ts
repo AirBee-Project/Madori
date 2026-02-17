@@ -6,6 +6,8 @@ type Polygon = {
   elevation: number;
   voxelID: string;
   color: Color;
+  startTime: number | null;
+  endTime: number | null;
 };
 
 type PvoxelCoordinates = {
@@ -29,6 +31,8 @@ export default function pvoxelToPolygon(
       elevation: calculateElevation(voxel),
       voxelID: voxel.originalId,
       color: color,
+      startTime: voxel.startTime,
+      endTime: voxel.endTime,
     };
   });
 }

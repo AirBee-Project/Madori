@@ -35,6 +35,8 @@ function compileModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
       result.push({
         Z: v.Z, X: v.X, X2: v.X, Y: yMin, Y2: yMax, F: fMin, F2: fMax,
         originalId,
+        startTime: v.startTime,
+        endTime: v.endTime,
       });
     } else {
       const [xStart, xEnd] = v.X;
@@ -42,16 +44,22 @@ function compileModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
         result.push({
           Z: v.Z, X: xStart, X2: xEnd, Y: yMin, Y2: yMax, F: fMin, F2: fMax,
           originalId,
+          startTime: v.startTime,
+          endTime: v.endTime,
         });
       } else {
         const maxX = 2 ** v.Z - 1;
         result.push({
           Z: v.Z, X: xStart, X2: maxX, Y: yMin, Y2: yMax, F: fMin, F2: fMax,
           originalId,
+          startTime: v.startTime,
+          endTime: v.endTime,
         });
         result.push({
           Z: v.Z, X: 0, X2: xEnd, Y: yMin, Y2: yMax, F: fMin, F2: fMax,
           originalId,
+          startTime: v.startTime,
+          endTime: v.endTime,
         });
       }
     }
@@ -68,7 +76,6 @@ function expandModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
     const xValues = enumerateXRange(v.X, v.Z);
     const yValues = enumerateRange(v.Y);
     const fValues = enumerateRange(v.F);
-    const originalId = `${v.Z}/${formatDim(v.F)}/${formatDim(v.X)}/${formatDim(v.Y)}`;
 
     for (const x of xValues) {
       for (const y of yValues) {
@@ -76,6 +83,8 @@ function expandModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
           result.push({
             Z: v.Z, X: x, X2: x, Y: y, Y2: y, F: f, F2: f,
             originalId: `${v.Z}/${f}/${x}/${y}`,
+            startTime: v.startTime,
+            endTime: v.endTime,
           });
         }
       }

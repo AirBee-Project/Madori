@@ -7,4 +7,6 @@ export type PureVoxel = {
   F: number;
   F2: number;
   originalId: string;
+  startTime: number | null;
+  endTime: number | null;
 };
