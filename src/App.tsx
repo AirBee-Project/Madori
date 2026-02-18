@@ -1,4 +1,3 @@
-
 import DeckGL from "@deck.gl/react";
 import { useState, useEffect, useCallback } from "react";
 import { FlyToInterpolator } from "@deck.gl/core";
@@ -13,6 +12,16 @@ import hyperVoxelParse from "./utils/HyperVoxelParse";
 import { VoxelDefinition } from "./types/VoxelDefinition";
 import TimeAxis from "./components/TimeAxis";
 import TimeControls from "./components/TimeControls";
+import IdPanel from "./components/IdPanel";
+import {
+  IconCube,
+  IconFileText,
+  IconPoint,
+  IconLine,
+  IconRefresh,
+  IconClock,
+  IconMap
+} from '@tabler/icons-react';
 
 const INITIAL_VIEW_STATE = {
   longitude: 0,
@@ -30,6 +39,7 @@ export default function App() {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1); // 1x by default
+  const [isIdPanelVisible, setIsIdPanelVisible] = useState(false);
 
   const focusOnVoxel = useCallback((voxelDefs: VoxelDefinition[]) => {
     if (voxelDefs.length === 0) return;
@@ -63,6 +73,52 @@ export default function App() {
       setCurrentTime(v.startTime);
     }
   }, []);
+
+  const handleFocus = useCallback((id: number) => {
+    const targetItem = item.find((i) => i.id === id);
+    if (targetItem && targetItem.type === 'voxel' && targetItem.data.voxel.length > 0) {
+      focusOnVoxel(targetItem.data.voxel);
+    }
+  }, [item, focusOnVoxel]);
+
+  const handleUpdateVoxel = (id: number, newVoxelString: string) => {
+    setItem((prevItems) =>
+      prevItems.map((item) => {
+        if (item.id === id && item.type === 'voxel') {
+          try {
+            const newVoxelData = hyperVoxelParse(newVoxelString);
+            return {
+              ...item,
+              data: {
+                ...item.data,
+                voxelString: newVoxelString,
+                voxel: newVoxelData,
+              },
+            };
+          } catch (e) {
+            return {
+              ...item,
+              data: {
+                ...item.data,
+                voxelString: newVoxelString,
+                voxel: [],
+              },
+            };
+          }
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleDeleteVoxel = (id: number) => {
+    setItem((prev) => prev.filter(i => i.id !== id));
+  };
+
+  const handleColorChange = (id: number) => {
+    // Dummy for now
+    console.log("Color change requested for", id);
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -158,104 +214,123 @@ export default function App() {
   }
 
   return (
-    <div>
-      <div className="w-[100%] flex">
-        <div className="w-[25%] h-[100vh] flex-col overflow-y-scroll overflow-x-clip">
-          <div className="bg-amber-200 flex justify-center p-[1.5%]">
-            <h1>オブジェクトたち</h1>
-          </div>
-          <div className="flex justify-center p-[1.5%]">
-          </div>
-          <div className="px-[6%] mb-[2%]">
-            <TimeAxis
-              currentTime={currentTime}
-              onTimeChange={setCurrentTime}
-            />
-            <p className="text-sm text-center">
-              {new Date(currentTime * 1000).toLocaleString()}
-            </p>
-            <div className="mt-4 flex justify-center">
-              <TimeControls
-                isPlaying={isPlaying}
-                onPlayPause={() => setIsPlaying(!isPlaying)}
-                speed={playbackSpeed}
-                onSpeedChange={setPlaybackSpeed}
-              />
-            </div>
-          </div>
-          <div>
-            {item.map((e) => {
-              switch (e.type) {
-                case "point":
-                  return <Point id={e.id} item={item} setItem={setItem} />;
-                case "line":
-                  return <Line id={e.id} item={item} setItem={setItem} />;
-                case "voxel":
-                  return <Voxel id={e.id} item={item} setItem={setItem} onFocus={focusOnVoxel} />;
-              }
-            })}
-          </div>
-          <div className="flex justify-between p-[4%] px-[10%]">
-            <button
-              className="bg-[#eaeaea] border-1 border-gray-300 rounded-[4px] p-[3%] hover:bg-amber-400 transition duration-300"
-              onClick={() => {
-                addObject("point");
-              }}
-            >
-              <span className="bg-amber-200">Point</span>を追加
-            </button>
-            <button
-              className="bg-[#eaeaea] border-1 border-gray-300 rounded-[4px] p-[3%] hover:bg-blue-400 transition duration-300"
-              onClick={() => {
-                addObject("line");
-              }}
-            >
-              <span className="bg-blue-200">Line</span>を追加
-            </button>
-            <button
-              className="bg-[#eaeaea] border-1 border-gray-300 rounded-[4px] p-[3%] hover:bg-green-400 transition duration-300"
-              onClick={() => {
-                addObject("voxel");
-              }}
-            >
-              <span className="bg-green-200">Voxel</span>を追加
-            </button>
-          </div>
-        </div>
-        <div className="w-[75%] h-[100vh] relative">
-          <button
-            className="absolute top-4 right-4 z-10 bg-white border-2 border-gray-300 rounded-[4px] px-4 py-2 hover:bg-gray-100 transition duration-300 shadow-md"
-            onClick={() => setIsMapVisible(!isMapVisible)}
-          >
-            {isMapVisible ? "地図を非表示" : "地図を表示"}
-          </button>
-          <button
-            className="absolute top-16 right-4 z-10 bg-white border-2 border-gray-300 rounded-[4px] px-4 py-2 hover:bg-gray-100 transition duration-300 shadow-md"
-            onClick={() => setCompileMode(!compileMode)}
-          >
-            {compileMode ? "個別描画に切替" : "統合描画に切替"}
-          </button>
-          <DeckGL
-            viewState={viewState}
-            onViewStateChange={({ viewState }: any) => setViewState(viewState)}
-            controller={{ maxZoom: 25 } as any}
-            width="75vw"
-            layers={generateLayer(item, isMapVisible, compileMode, currentTime)}
-            getTooltip={({ object }) =>
-              object && {
-                text: `${object.voxelID} `,
-              }
+    <div className="relative w-full h-screen overflow-hidden bg-pink-100">
+      {/* Background Map & DeckGL */}
+      <div className="absolute inset-0 z-0">
+        <DeckGL
+          viewState={viewState}
+          onViewStateChange={({ viewState }: any) => setViewState(viewState)}
+          controller={{ maxZoom: 25 } as any}
+          width="100%"
+          height="100%"
+          layers={generateLayer(item, isMapVisible, compileMode, currentTime)}
+          getTooltip={({ object }) =>
+            object && {
+              text: `${object.voxelID} `,
             }
-          >
-            {isMapVisible && (
-              <Map
-                mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
-                renderWorldCopies={false}
-              />
-            )}
-          </DeckGL>
+          }
+        >
+          {isMapVisible && (
+            <Map
+              mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+              renderWorldCopies={false}
+            />
+          )}
+        </DeckGL>
+      </div>
+
+      {/* Top Left Toolbar */}
+      <div className="absolute top-4 left-4 z-10 flex gap-3">
+        <button
+          className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-md text-sm font-bold transition ${isIdPanelVisible ? 'bg-white text-[#0F766E]' : 'bg-white hover:bg-gray-50'}`}
+          onClick={() => setIsIdPanelVisible(!isIdPanelVisible)}
+        >
+          <IconCube size={16} /> ID
+        </button>
+        <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md text-sm font-bold hover:bg-gray-50 transition">
+          <IconFileText size={16} /> JSON
+        </button>
+        <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md text-sm font-bold hover:bg-gray-50 transition">
+          <IconPoint size={16} /> 点
+        </button>
+        <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md text-sm font-bold hover:bg-gray-50 transition">
+          <IconLine size={16} /> 直線
+        </button>
+      </div>
+
+      {/* ID Panel */}
+      {isIdPanelVisible && (
+        <IdPanel
+          items={item}
+          onAdd={() => addObject('voxel')}
+          onDelete={handleDeleteVoxel}
+          onFocus={handleFocus}
+          onUpdate={handleUpdateVoxel}
+          onColorChange={handleColorChange}
+        />
+      )}
+
+      {/* Bottom Right Tools */}
+      <div className="absolute bottom-24 right-4 z-10 flex flex-col gap-3">
+        <button
+          className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition"
+          onClick={() => setCompileMode(!compileMode)}
+          title="Toggle Compile Mode"
+        >
+          <IconRefresh size={20} />
+        </button>
+        <button className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition">
+          <IconClock size={20} />
+        </button>
+        <button
+          className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition"
+          onClick={() => setIsMapVisible(!isMapVisible)}
+          title="Toggle Map"
+        >
+          <IconMap size={20} />
+        </button>
+      </div>
+
+      {/* Time Controls and Axis (Footer) */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 bg-white/90 backdrop-blur-sm border-t border-gray-200">
+        <div className="relative w-full p-2 py-4">
+          {/* Timestamp Display */}
+          <div className="absolute top-2 left-6 text-sm font-bold text-gray-800">
+            {new Date(currentTime * 1000).toLocaleString()}
+          </div>
+
+          {/* Controls */}
+          <div className="flex justify-center mb-2">
+            <TimeControls
+              isPlaying={isPlaying}
+              onPlayPause={() => setIsPlaying(!isPlaying)}
+              speed={playbackSpeed}
+              onSpeedChange={setPlaybackSpeed}
+            />
+          </div>
+
+          {/* Timeline */}
+          <TimeAxis
+            currentTime={currentTime}
+            onTimeChange={setCurrentTime}
+          />
         </div>
       </div>
+
+      {/* Hidden Item Rendering logic */}
+      <div className="hidden">
+        {item.map((e) => {
+          switch (e.type) {
+            case "point":
+              return <Point id={e.id} item={item} setItem={setItem} />;
+            case "line":
+              return <Line id={e.id} item={item} setItem={setItem} />;
+            case "voxel":
+              return <Voxel id={e.id} item={item} setItem={setItem} onFocus={focusOnVoxel} />;
+          }
+        })}
+      </div>
+
     </div>
   );
 }

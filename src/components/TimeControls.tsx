@@ -26,7 +26,7 @@ const TimeControls: React.FC<TimeControlsProps> = ({
         <div className="flex items-center space-x-4 bg-white p-2 rounded shadow-sm border border-gray-200">
             <button
                 onClick={onPlayPause}
-                className={`px-4 py-2 rounded font-bold text-white transition-colors duration-200 ${isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+                className={`px-4 py-2 rounded font-bold text-white transition-colors duration-200 ${isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-[#0F766E] hover:bg-[#115E59]'
                     }`}
             >
                 {isPlaying ? 'Pause' : 'Play'}
@@ -37,7 +37,7 @@ const TimeControls: React.FC<TimeControlsProps> = ({
                 <select
                     value={speed}
                     onChange={(e) => onSpeedChange(Number(e.target.value))}
-                    className="p-2 border border-gray-300 rounded bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="p-2 border border-gray-300 rounded bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
                 >
                     {speeds.map((s) => (
                         <option key={s.value} value={s.value}>
