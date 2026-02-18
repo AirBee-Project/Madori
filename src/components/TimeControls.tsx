@@ -1,4 +1,5 @@
 import React from 'react';
+import { IconPlayerPlayFilled, IconPlayerPauseFilled, IconChevronDown } from '@tabler/icons-react';
 
 interface TimeControlsProps {
     isPlaying: boolean;
@@ -14,30 +15,33 @@ const TimeControls: React.FC<TimeControlsProps> = ({
     onSpeedChange,
 }) => {
     const speeds = [
-        { label: '1x', value: 1 },
-        { label: '10x', value: 10 },
+        { label: 'x1', value: 1 },
+        { label: 'x10', value: 10 },
         { label: '1min/s', value: 60 },
         { label: '1hr/s', value: 3600 },
         { label: '1day/s', value: 86400 },
-        { label: '1month/s', value: 2592000 },
+        { label: '1mo/s', value: 2592000 },
     ];
 
     return (
-        <div className="flex items-center space-x-4 bg-white p-2 rounded shadow-sm border border-gray-200">
+        <div className="flex items-center gap-0">
             <button
                 onClick={onPlayPause}
-                className={`px-4 py-2 rounded font-bold text-white transition-colors duration-200 ${isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-[#0F766E] hover:bg-[#115E59]'
-                    }`}
+                className="text-black hover:text-gray-700 transition-colors p-1 -translate-x-1/2"
+                title={isPlaying ? 'Pause' : 'Play'}
             >
-                {isPlaying ? 'Pause' : 'Play'}
+                {isPlaying ? (
+                    <IconPlayerPauseFilled size={24} className="text-black" />
+                ) : (
+                    <IconPlayerPlayFilled size={24} className="text-black" />
+                )}
             </button>
 
-            <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Speed:</span>
+            <div className="relative group">
                 <select
                     value={speed}
                     onChange={(e) => onSpeedChange(Number(e.target.value))}
-                    className="p-2 border border-gray-300 rounded bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+                    className="appearance-none bg-white pl-3 pr-7 py-1 rounded-full shadow-md text-sm font-bold text-black cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 hover:bg-gray-50 transition-colors"
                 >
                     {speeds.map((s) => (
                         <option key={s.value} value={s.value}>
@@ -45,6 +49,9 @@ const TimeControls: React.FC<TimeControlsProps> = ({
                         </option>
                     ))}
                 </select>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-black">
+                    <IconChevronDown size={14} stroke={3} />
+                </div>
             </div>
         </div>
     );

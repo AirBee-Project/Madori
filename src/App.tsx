@@ -292,15 +292,14 @@ export default function App() {
       </div>
 
       {/* Time Controls and Axis (Footer) */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-white/90 backdrop-blur-sm border-t border-gray-200">
-        <div className="relative w-full p-2 py-4">
-          {/* Timestamp Display */}
-          <div className="absolute top-2 left-6 text-sm font-bold text-gray-800">
+      <div className="absolute bottom-3 left-4 right-4 z-20 flex flex-col gap-1 pointer-events-none">
+        {/* Top Row: Timestamp and Controls */}
+        <div className="relative flex items-end justify-between px-2 mb-0">
+          <div className="text-sm font-bold text-gray-900 drop-shadow-sm pointer-events-auto">
             {new Date(currentTime * 1000).toLocaleString()}
           </div>
 
-          {/* Controls */}
-          <div className="flex justify-center mb-2">
+          <div className="absolute left-1/2 pointer-events-auto">
             <TimeControls
               isPlaying={isPlaying}
               onPlayPause={() => setIsPlaying(!isPlaying)}
@@ -308,8 +307,10 @@ export default function App() {
               onSpeedChange={setPlaybackSpeed}
             />
           </div>
+        </div>
 
-          {/* Timeline */}
+        {/* Timeline Bar */}
+        <div className="bg-white/95 backdrop-blur shadow-lg rounded-full h-10 pointer-events-auto overflow-hidden relative border border-gray-100">
           <TimeAxis
             currentTime={currentTime}
             onTimeChange={setCurrentTime}

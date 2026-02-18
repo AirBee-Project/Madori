@@ -63,8 +63,9 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
         canvas.height = height;
 
         ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = '#f0f0f0';
-        ctx.fillRect(0, 0, width, height);
+        // Background controlled by parent container
+        // ctx.fillStyle = '#f0f0f0';
+        // ctx.fillRect(0, 0, width, height);
 
         const startTime = viewCenter - viewDuration / 2;
         const endTime = viewCenter + viewDuration / 2;
@@ -108,7 +109,7 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
 
         const currentX = (currentTime - startTime) / timePerPixel;
         if (currentX >= -10 && currentX <= width + 10) {
-            ctx.strokeStyle = 'red';
+            ctx.strokeStyle = '#0F766E';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(currentX, 0);
@@ -199,7 +200,7 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
     return (
         <div
             ref={containerRef}
-            style={{ width: '100%', height: '50px', background: '#ccc', cursor: isDragging ? 'grabbing' : 'grab' }}
+            style={{ width: '100%', height: '100%', background: 'transparent', cursor: isDragging ? 'grabbing' : 'grab' }}
             onWheel={handleWheel}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
