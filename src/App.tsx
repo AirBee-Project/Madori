@@ -214,7 +214,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-pink-100">
+    <div className="relative w-full h-screen overflow-hidden bg-white">
       {/* Background Map & DeckGL */}
       <div className="absolute inset-0 z-0">
         <DeckGL

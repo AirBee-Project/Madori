@@ -75,7 +75,7 @@ const IdPanel: React.FC<IdPanelProps> = ({
             <div className="p-4 border-t border-gray-100 bg-gray-50/50">
                 <button
                     onClick={onAdd}
-                    className="w-full py-2 bg-white border border-[#0F766E] rounded-full shadow-sm text-[#0F766E] font-bold flex items-center justify-center gap-2 hover:bg-[#0F766E] hover:text-white transition-colors"
+                    className="w-full py-2 bg-white border border-gray-300 rounded-full text-gray-500 font-bold flex items-center justify-center gap-2 hover:text-[#0F766E] hover:border-[#0F766E] transition-colors"
                 >
                     <IconPlus size={18} /> ボクセルを追加
                 </button>
