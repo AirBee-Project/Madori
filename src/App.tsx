@@ -273,21 +273,21 @@ export default function App() {
       {/* Bottom Right Tools */}
       <div className="absolute bottom-24 right-4 z-10 flex flex-col gap-3">
         <button
-          className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition"
+          className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition group"
           onClick={() => setCompileMode(!compileMode)}
           title="Toggle Compile Mode"
         >
-          <IconRefresh size={20} />
+          <IconRefresh size={20} className="text-gray-600" />
         </button>
-        <button className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition">
-          <IconClock size={20} />
+        <button className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition group">
+          <IconClock size={20} className="text-gray-600" />
         </button>
         <button
-          className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition"
+          className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition group"
           onClick={() => setIsMapVisible(!isMapVisible)}
           title="Toggle Map"
         >
-          <IconMap size={20} />
+          <IconMap size={20} className="text-gray-600" />
         </button>
       </div>
 
