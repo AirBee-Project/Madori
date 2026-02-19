@@ -20,8 +20,8 @@ import {
   IconLine,
   IconRefresh,
   IconClock,
-  IconMap
-} from '@tabler/icons-react';
+  IconMap,
+} from "@tabler/icons-react";
 
 const INITIAL_VIEW_STATE = {
   longitude: 0,
@@ -74,17 +74,24 @@ export default function App() {
     }
   }, []);
 
-  const handleFocus = useCallback((id: number) => {
+  const handleFocus = useCallback(
+    (id: number) => {
     const targetItem = item.find((i) => i.id === id);
-    if (targetItem && targetItem.type === 'voxel' && targetItem.data.voxel.length > 0) {
+      if (
+        targetItem &&
+        targetItem.type === "voxel" &&
+        targetItem.data.voxel.length > 0
+      ) {
       focusOnVoxel(targetItem.data.voxel);
     }
-  }, [item, focusOnVoxel]);
+    },
+    [item, focusOnVoxel],
+  );
 
   const handleUpdateVoxel = (id: number, newVoxelString: string) => {
     setItem((prevItems) =>
       prevItems.map((item) => {
-        if (item.id === id && item.type === 'voxel') {
+        if (item.id === id && item.type === "voxel") {
           try {
             const newVoxelData = hyperVoxelParse(newVoxelString);
             return {
@@ -107,12 +114,12 @@ export default function App() {
           }
         }
         return item;
-      })
+      }),
     );
   };
 
   const handleDeleteVoxel = (id: number) => {
-    setItem((prev) => prev.filter(i => i.id !== id));
+    setItem((prev) => prev.filter((i) => i.id !== id));
   };
 
   const handleColorChange = (id: number) => {
@@ -242,7 +249,7 @@ export default function App() {
       {/* Top Left Toolbar */}
       <div className="absolute top-4 left-4 z-10 flex gap-3">
         <button
-          className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-md text-sm font-bold transition ${isIdPanelVisible ? 'bg-white text-[#0F766E]' : 'bg-white hover:bg-gray-50'}`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-md text-sm font-bold transition ${isIdPanelVisible ? "bg-white text-[#0F766E]" : "bg-white hover:bg-gray-50"}`}
           onClick={() => setIsIdPanelVisible(!isIdPanelVisible)}
         >
           <IconCube size={16} /> ID
@@ -262,7 +269,7 @@ export default function App() {
       {isIdPanelVisible && (
         <IdPanel
           items={item}
-          onAdd={() => addObject('voxel')}
+          onAdd={() => addObject("voxel")}
           onDelete={handleDeleteVoxel}
           onFocus={handleFocus}
           onUpdate={handleUpdateVoxel}
@@ -311,10 +318,7 @@ export default function App() {
 
         {/* Timeline Bar */}
         <div className="bg-white/95 backdrop-blur shadow-lg rounded-full h-10 pointer-events-auto overflow-hidden relative border border-gray-100">
-          <TimeAxis
-            currentTime={currentTime}
-            onTimeChange={setCurrentTime}
-          />
+          <TimeAxis currentTime={currentTime} onTimeChange={setCurrentTime} />
         </div>
       </div>
 
@@ -331,7 +335,6 @@ export default function App() {
           }
         })}
       </div>
-
     </div>
   );
 }
