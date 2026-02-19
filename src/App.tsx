@@ -76,14 +76,14 @@ export default function App() {
 
   const handleFocus = useCallback(
     (id: number) => {
-    const targetItem = item.find((i) => i.id === id);
+      const targetItem = item.find((i) => i.id === id);
       if (
         targetItem &&
         targetItem.type === "voxel" &&
         targetItem.data.voxel.length > 0
       ) {
-      focusOnVoxel(targetItem.data.voxel);
-    }
+        focusOnVoxel(targetItem.data.voxel);
+      }
     },
     [item, focusOnVoxel],
   );
@@ -195,27 +195,27 @@ export default function App() {
       data:
         type === "point"
           ? {
-            color: "#FF0000",
-            opacity: 80,
-            size: 10,
-            lat: 0,
-            lon: 0,
-          }
-          : type === "line"
-            ? {
-              color: "#00FF00",
+              color: "#FF0000",
               opacity: 80,
               size: 10,
-              lat1: 0,
-              lon1: 0,
-              lat2: 45,
-              lon2: 45,
+              lat: 0,
+              lon: 0,
             }
+          : type === "line"
+            ? {
+                color: "#00FF00",
+                opacity: 80,
+                size: 10,
+                lat1: 0,
+                lon1: 0,
+                lat2: 45,
+                lon2: 45,
+              }
             : {
-              color: "#0000FF",
-              opacity: 30,
-              voxel: [],
-            },
+                color: "#0000FF",
+                opacity: 30,
+                voxel: [],
+              },
     };
     setItem([...item, newObject]);
   }
@@ -327,11 +327,23 @@ export default function App() {
         {item.map((e) => {
           switch (e.type) {
             case "point":
-              return <Point id={e.id} item={item} setItem={setItem} />;
+              return (
+                <Point key={e.id} id={e.id} item={item} setItem={setItem} />
+              );
             case "line":
-              return <Line id={e.id} item={item} setItem={setItem} />;
+              return (
+                <Line key={e.id} id={e.id} item={item} setItem={setItem} />
+              );
             case "voxel":
-              return <Voxel id={e.id} item={item} setItem={setItem} onFocus={focusOnVoxel} />;
+              return (
+                <Voxel
+                  key={e.id}
+                  id={e.id}
+                  item={item}
+                  setItem={setItem}
+                  onFocus={focusOnVoxel}
+                />
+              );
           }
         })}
       </div>
