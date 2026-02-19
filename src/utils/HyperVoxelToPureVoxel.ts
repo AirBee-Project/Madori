@@ -13,7 +13,7 @@ function formatDim(item: [number, number] | number): string {
 
 export default function hyperVoxelToPureVoxel(
   Voxels: VoxelDefinition[],
-  compileMode: boolean = true
+  compileMode: boolean = true,
 ): PureVoxel[] {
   if (compileMode) {
     return compileModeParse(Voxels);
@@ -33,7 +33,13 @@ function compileModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
 
     if (typeof v.X === "number") {
       result.push({
-        Z: v.Z, X: v.X, X2: v.X, Y: yMin, Y2: yMax, F: fMin, F2: fMax,
+        Z: v.Z,
+        X: v.X,
+        X2: v.X,
+        Y: yMin,
+        Y2: yMax,
+        F: fMin,
+        F2: fMax,
         originalId,
         startTime: v.startTime,
         endTime: v.endTime,
@@ -42,7 +48,13 @@ function compileModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
       const [xStart, xEnd] = v.X;
       if (xStart <= xEnd) {
         result.push({
-          Z: v.Z, X: xStart, X2: xEnd, Y: yMin, Y2: yMax, F: fMin, F2: fMax,
+          Z: v.Z,
+          X: xStart,
+          X2: xEnd,
+          Y: yMin,
+          Y2: yMax,
+          F: fMin,
+          F2: fMax,
           originalId,
           startTime: v.startTime,
           endTime: v.endTime,
@@ -50,13 +62,25 @@ function compileModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
       } else {
         const maxX = 2 ** v.Z - 1;
         result.push({
-          Z: v.Z, X: xStart, X2: maxX, Y: yMin, Y2: yMax, F: fMin, F2: fMax,
+          Z: v.Z,
+          X: xStart,
+          X2: maxX,
+          Y: yMin,
+          Y2: yMax,
+          F: fMin,
+          F2: fMax,
           originalId,
           startTime: v.startTime,
           endTime: v.endTime,
         });
         result.push({
-          Z: v.Z, X: 0, X2: xEnd, Y: yMin, Y2: yMax, F: fMin, F2: fMax,
+          Z: v.Z,
+          X: 0,
+          X2: xEnd,
+          Y: yMin,
+          Y2: yMax,
+          F: fMin,
+          F2: fMax,
           originalId,
           startTime: v.startTime,
           endTime: v.endTime,
@@ -81,7 +105,13 @@ function expandModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
       for (const y of yValues) {
         for (const f of fValues) {
           result.push({
-            Z: v.Z, X: x, X2: x, Y: y, Y2: y, F: f, F2: f,
+            Z: v.Z,
+            X: x,
+            X2: x,
+            Y: y,
+            Y2: y,
+            F: f,
+            F2: f,
             originalId: `${v.Z}/${f}/${x}/${y}`,
             startTime: v.startTime,
             endTime: v.endTime,
@@ -94,21 +124,69 @@ function expandModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
   return result;
 }
 
+/**
+ * 配列列挙結果のキャッシュ（メモ化）
+ */
+const enumerateCache = new Map<string, number[]>();
+const enumerateXCache = new Map<string, number[]>();
+
 function enumerateRange(item: [number, number] | number): number[] {
-  if (typeof item === "number") return [item];
-  const [start, end] = [...item].sort((a, b) => a - b);
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  const key =
+    typeof item === "number" ? item.toString() : `${item[0]},${item[1]}`;
+
+  if (enumerateCache.has(key)) {
+    return enumerateCache.get(key)!;
+  }
+
+  let result: number[];
+  if (typeof item === "number") {
+    result = [item];
+  } else {
+    const [start, end] = [...item].sort((a, b) => a - b);
+    result = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  // キャッシュサイズ制限
+  if (enumerateCache.size > 1000) {
+    const firstKey = enumerateCache.keys().next().value;
+    if (firstKey) enumerateCache.delete(firstKey);
+  }
+
+  enumerateCache.set(key, result);
+  return result;
 }
 
-function enumerateXRange(item: [number, number] | number, zoomLevel: number): number[] {
-  if (typeof item === "number") return [item];
-  const [start, end] = item;
-  if (start <= end) {
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+function enumerateXRange(
+  item: [number, number] | number,
+  zoomLevel: number,
+): number[] {
+  const key = `${typeof item === "number" ? item : `${item[0]},${item[1]}`}:z${zoomLevel}`;
+
+  if (enumerateXCache.has(key)) {
+    return enumerateXCache.get(key)!;
   }
-  const maxX = 2 ** zoomLevel;
-  const result: number[] = [];
-  for (let x = start; x < maxX; x++) result.push(x);
-  for (let x = 0; x <= end; x++) result.push(x);
+
+  let result: number[];
+  if (typeof item === "number") {
+    result = [item];
+  } else {
+    const [start, end] = item;
+    if (start <= end) {
+      result = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    } else {
+      const maxX = 2 ** zoomLevel;
+      result = [];
+      for (let x = start; x < maxX; x++) result.push(x);
+      for (let x = 0; x <= end; x++) result.push(x);
+    }
+  }
+
+  // キャッシュサイズ制限
+  if (enumerateXCache.size > 1000) {
+    const firstKey = enumerateXCache.keys().next().value;
+    if (firstKey) enumerateXCache.delete(firstKey);
+  }
+
+  enumerateXCache.set(key, result);
   return result;
 }

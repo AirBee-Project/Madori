@@ -1,17 +1,20 @@
 import { Item } from "../types/Item";
 import { useState, useEffect } from "react";
+import React from "react";
 import hyperVoxelParse from "../utils/HyperVoxelParse";
 import { VoxelDefinition } from "../types/VoxelDefinition";
+
 type Props = {
   id: number;
   item: Item[];
   setItem: React.Dispatch<React.SetStateAction<Item[]>>;
   onFocus: (voxelDefs: VoxelDefinition[]) => void;
 };
-export default function Voxel({ id, item, setItem, onFocus }: Props) {
+
+const Voxel = React.memo(function Voxel({ id, item, setItem, onFocus }: Props) {
   const [inputVoxel, setInputVoxel] = useState<string>("");
   let myItem = item.find(
-    (e): e is Item<"voxel"> => e.id === id && e.type === "voxel"
+    (e): e is Item<"voxel"> => e.id === id && e.type === "voxel",
   )!;
 
   // Initialize inputVoxel from voxelString if available
@@ -106,4 +109,6 @@ export default function Voxel({ id, item, setItem, onFocus }: Props) {
       </div>
     </div>
   );
-}
+});
+
+export default Voxel;

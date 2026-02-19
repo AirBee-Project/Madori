@@ -1,5 +1,5 @@
 import DeckGL from "@deck.gl/react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { FlyToInterpolator } from "@deck.gl/core";
 import { Map } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -36,10 +36,24 @@ export default function App() {
   const [isMapVisible, setIsMapVisible] = useState(true);
   const [compileMode, setCompileMode] = useState(true);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const [debouncedViewState, setDebouncedViewState] =
+    useState(INITIAL_VIEW_STATE);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1); // 1x by default
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isIdPanelVisible, setIsIdPanelVisible] = useState(false);
+
+  // ビューステート変更をデバウンス（100ms ごとにまとめて更新）
+  const handleViewStateChange = useCallback((newViewState: any) => {
+    setViewState(newViewState);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedViewState(newViewState);
+    }, 100);
+  }, []);
 
   const focusOnVoxel = useCallback((voxelDefs: VoxelDefinition[]) => {
     if (voxelDefs.length === 0) return;
@@ -226,11 +240,23 @@ export default function App() {
       <div className="absolute inset-0 z-0">
         <DeckGL
           viewState={viewState}
-          onViewStateChange={({ viewState }: any) => setViewState(viewState)}
+          onViewStateChange={({ viewState }: any) =>
+            handleViewStateChange(viewState)
+          }
           controller={{ maxZoom: 25 } as any}
           width="100%"
           height="100%"
-          layers={generateLayer(item, isMapVisible, compileMode, currentTime)}
+          layers={useMemo(
+            () =>
+              generateLayer(
+                item,
+                isMapVisible,
+                compileMode,
+                currentTime,
+                debouncedViewState,
+              ),
+            [item, isMapVisible, compileMode, currentTime, debouncedViewState],
+          )}
           getTooltip={({ object }) =>
             object && {
               text: `${object.voxelID} `,
