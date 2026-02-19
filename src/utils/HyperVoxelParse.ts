@@ -1,7 +1,7 @@
 import type { VoxelDefinition } from "../types/VoxelDefinition";
 
 export default function hyperVoxelParse(
-  voxelsString: string
+  voxelsString: string,
 ): VoxelDefinition[] {
   voxelsString = voxelsString.replace("[", "");
   voxelsString = voxelsString.replace("]", "");
@@ -43,14 +43,13 @@ export default function hyperVoxelParse(
     result.push(resultVoxel);
   }
 
-  console.log(result);
   return result;
 }
 
 function parseDimensionRange(
   zoomLevel: number,
   dimension: "X" | "Y" | "F",
-  item: string
+  item: string,
 ): number | [number, number] {
   if (item === "-") {
     if (dimension == "F") {
@@ -89,7 +88,10 @@ function parseDimensionRange(
   }
 }
 
-function parseTimePart(timePart: string | null): { startTime: number | null; endTime: number | null } {
+function parseTimePart(timePart: string | null): {
+  startTime: number | null;
+  endTime: number | null;
+} {
   if (timePart === null) {
     return { startTime: null, endTime: null };
   }
