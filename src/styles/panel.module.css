@@ -52,10 +52,10 @@
 }
 
 .colorSwatch {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1rem;
+    height: 1rem;
     border-radius: 0.125rem;
-    border: 1px solid #d1d5db;
+    border: 1.5px solid black;
 }
 
 .colorButton {
