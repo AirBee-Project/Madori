@@ -1,5 +1,5 @@
-import { PureVoxel } from "../types/PureVoxel";
-import { VoxelDefinition } from "../types/VoxelDefinition";
+import { PureVoxel } from "../data/expanded-voxel";
+import { VoxelDefinition } from "../data/voxel-definition";
 
 function toRange(item: [number, number] | number): [number, number] {
   if (typeof item === "number") return [item, item];

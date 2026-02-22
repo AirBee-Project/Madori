@@ -1,5 +1,6 @@
 import React from 'react';
 import { IconPlayerPlayFilled, IconPlayerPauseFilled, IconChevronDown } from '@tabler/icons-react';
+import styles from '../styles/time-controls.module.css';
 
 interface TimeControlsProps {
     isPlaying: boolean;
@@ -24,24 +25,24 @@ const TimeControls: React.FC<TimeControlsProps> = ({
     ];
 
     return (
-        <div className="flex items-center gap-0">
+        <div className={styles.container}>
             <button
                 onClick={onPlayPause}
-                className="text-black hover:text-gray-700 transition-colors p-1 -translate-x-1/2"
+                className={styles.playButton}
                 title={isPlaying ? 'Pause' : 'Play'}
             >
                 {isPlaying ? (
-                    <IconPlayerPauseFilled size={24} className="text-black" />
+                    <IconPlayerPauseFilled size={24} className={styles.playIcon} />
                 ) : (
-                    <IconPlayerPlayFilled size={24} className="text-black" />
+                    <IconPlayerPlayFilled size={24} className={styles.playIcon} />
                 )}
             </button>
 
-            <div className="relative group">
+            <div className={styles.speedWrapper}>
                 <select
                     value={speed}
                     onChange={(e) => onSpeedChange(Number(e.target.value))}
-                    className="appearance-none bg-white pl-3 pr-7 py-1 rounded-full shadow-md text-sm font-bold text-black cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 hover:bg-gray-50 transition-colors"
+                    className={styles.speedSelect}
                 >
                     {speeds.map((s) => (
                         <option key={s.value} value={s.value}>
@@ -49,7 +50,7 @@ const TimeControls: React.FC<TimeControlsProps> = ({
                         </option>
                     ))}
                 </select>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-black">
+                <div className={styles.chevronIcon}>
                     <IconChevronDown size={14} stroke={3} />
                 </div>
             </div>

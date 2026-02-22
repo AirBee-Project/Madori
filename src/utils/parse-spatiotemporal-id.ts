@@ -1,4 +1,4 @@
-import type { VoxelDefinition } from "../types/VoxelDefinition";
+import type { VoxelDefinition } from "../data/voxel-definition";
 
 export default function hyperVoxelParse(
   voxelsString: string,

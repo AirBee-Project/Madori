@@ -1,6 +1,16 @@
 import React from 'react';
-import { Item } from '../types/Item';
+import { Item } from '../data/item';
+import { Color } from 'deck.gl';
 import { IconTrash, IconTarget, IconPlus } from '@tabler/icons-react';
+import styles from '../styles/id-panel.module.css';
+
+function rgbaCss(c: Color): string {
+    if (Array.isArray(c)) {
+        const [r, g, b, a = 255] = c;
+        return `rgba(${r},${g},${b},${a / 255})`;
+    }
+    return String(c);
+}
 
 interface IdPanelProps {
     items: Item[];
@@ -19,31 +29,26 @@ const IdPanel: React.FC<IdPanelProps> = ({
     onColorChange,
     onUpdate,
 }) => {
-    // Filter only voxel items
     const voxelItems = items.filter((item): item is Item<'voxel'> => item.type === 'voxel' && !item.isDeleted);
 
     return (
-        <div className="absolute top-15 left-4 w-88 max-h-[80vh] bg-white/95 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden flex flex-col z-30 border border-gray-100">
-
-            {/* Scrollable List Area */}
-            <div className="flex-1 overflow-y-auto space-y-1 pt-1.5">
-                <div className="space-y-1 divide-y-1 divide-gray-100">
+        <div className={styles.panelContainer}>
+            <div className={styles.scrollArea}>
+                <div className={styles.itemList}>
                     {voxelItems.map((item) => (
-                        <div key={item.id} className="flex gap-3 px-3 py-2">
-                            {/* Text Area */}
-                            <div className="flex-1">
+                        <div key={item.id} className={styles.itemRow}>
+                            <div className={styles.textAreaWrapper}>
                                 <textarea
-                                    className="w-full h-20 p-3 text-sm font-mono border border-gray-300 rounded-lg resize-none focus:outline-none focus:border-[#0F766E] bg-white"
+                                    className={styles.textArea}
                                     value={item.data.voxelString || ''}
                                     onChange={(e) => onUpdate(item.id, e.target.value)}
                                 />
                             </div>
 
-                            {/* Action Buttons */}
-                            <div className="flex flex-col h-20 justify-between items-center">
+                            <div className={styles.actionButtons}>
                                 <button
                                     onClick={() => onDelete(item.id)}
-                                    className="w-6 h-6 flex items-center justify-center text-black-500 hover:text-red-500 transition-colors rounded"
+                                    className={`${styles.iconButton} ${styles.deleteButton}`}
                                     title="Delete"
                                 >
                                     <IconTrash size={18} />
@@ -51,7 +56,7 @@ const IdPanel: React.FC<IdPanelProps> = ({
 
                                 <button
                                     onClick={() => onFocus(item.id)}
-                                    className="w-6 h-6 flex items-center justify-center text-black-500 hover:text-[#0F766E] transition-colors rounded"
+                                    className={styles.iconButton}
                                     title="Focus"
                                 >
                                     <IconTarget size={18} />
@@ -59,12 +64,12 @@ const IdPanel: React.FC<IdPanelProps> = ({
 
                                 <button
                                     onClick={() => onColorChange(item.id)}
-                                    className="w-6 h-6 flex items-center justify-center rounded transition-transform hover:scale-105"
+                                    className={styles.colorButton}
                                     title="Change Color"
                                 >
                                     <div
-                                        className="w-4 h-4 rounded-sm border border-black-300"
-                                        style={{ backgroundColor: item.data.color }}
+                                        className={styles.colorSwatch}
+                                        style={{ backgroundColor: rgbaCss(item.data.color) }}
                                     />
                                 </button>
                             </div>
@@ -73,11 +78,10 @@ const IdPanel: React.FC<IdPanelProps> = ({
                 </div>
             </div>
 
-            {/* Footer: Add Button */}
-            <div className="p-3 border-t border-gray-100 bg-gray-50/50">
+            <div className={styles.footer}>
                 <button
                     onClick={onAdd}
-                    className="w-80 py-0.8 bg-white border border-gray-300 rounded-full text-gray-500 font-normal text-sm flex items-center justify-center gap-2 hover:text-[#0F766E] hover:border-[#0F766E] transition-colors"
+                    className={styles.addButton}
                 >
                     <IconPlus size={18} /> 時空間IDを追加
                 </button>

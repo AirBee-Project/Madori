@@ -1,5 +1,5 @@
-import { KasaneJson, KasaneId } from "../types/KasaneJson";
-import { VoxelDefinition } from "../types/VoxelDefinition";
+import { KasaneJson, KasaneId } from "../data/voxel-json";
+import { VoxelDefinition } from "../data/voxel-definition";
 
 export type JsonVoxelResult = {
     voxelDefs: VoxelDefinition[];

@@ -1,5 +1,5 @@
 import { Color } from "deck.gl";
-import { PureVoxel } from "../types/PureVoxel";
+import { PureVoxel } from "../data/expanded-voxel";
 
 type Polygon = {
   points: number[][];

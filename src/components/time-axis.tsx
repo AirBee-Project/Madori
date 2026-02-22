@@ -63,9 +63,6 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
         canvas.height = height;
 
         ctx.clearRect(0, 0, width, height);
-        // Background controlled by parent container
-        // ctx.fillStyle = '#f0f0f0';
-        // ctx.fillRect(0, 0, width, height);
 
         const startTime = viewCenter - viewDuration / 2;
         const endTime = viewCenter + viewDuration / 2;

@@ -1,14 +1,10 @@
 import { Color, LayersList } from "deck.gl";
 import { GeoJsonLayer, PolygonLayer } from "@deck.gl/layers";
-import { Item } from "../types/Item";
+import { Item } from "../data/item";
 import { GeoJSON } from "geojson";
-import { COORDINATE_SYSTEM } from "@deck.gl/core";
-import colorHexToRgba from "./ColorHexToRgba";
-import hyperVoxelToPureVoxel from "./HyperVoxelToPureVoxel";
-import pvoxelToPolygon from "./PureVoxelToPolygon";
-/**
- * StateであるItem[]を入れると、DeckglのLayerに変換し出力する関数a
- */
+import expandVoxelRange from "./expand-voxel-range";
+import pvoxelToPolygon from "./voxel-to-polygon";
+
 export default function generateLayer(item: Item[], isMapVisible: boolean = true, compileMode: boolean = true, currentTime: number = 0): LayersList {
   let pointItem: Item<"point">[] = item.filter(
     (e): e is Item<"point"> =>
@@ -23,7 +19,6 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
       !e.isDeleted && !e.isVisible && e.type === "voxel"
   );
 
-  //PointはまとめてGeoJsonLayerとして表示
   const pointGeoJsonLayer = new GeoJsonLayer({
     id: "GeoJsonLayer",
     data: generatePointGeoJson(pointItem),
@@ -32,11 +27,10 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
     pointRadiusUnits: "pixels",
     pointRadiusMinPixels: 1,
     pointRadiusScale: 1,
-    getFillColor: (d) => d.properties.color, // 個別カラー
-    getRadius: (d) => d.properties.radius, // 個別サイズ
+    getFillColor: (d) => d.properties.color,
+    getRadius: (d) => d.properties.radius,
   });
 
-  //LineはまとめてGeoJsonLayerとして表示
   const lineGeoJsonLayer = new GeoJsonLayer({
     id: "geojson-lines",
     data: generateLineGeoJson(lineItem),
@@ -48,10 +42,7 @@ export default function generateLayer(item: Item[], isMapVisible: boolean = true
     getLineWidth: (d) => d.properties.width,
   });
 
-  //PolygonLayerとして出力
-
   const voxelPolygonLayer = new PolygonLayer({
-    // coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
     id: "PolygonLayer",
     data: generatePolygonLayer(voxelItem, compileMode, currentTime),
     extruded: true,
@@ -89,12 +80,12 @@ function generatePointGeoJson(point: Item<"point">[]): GeoJSON {
     result.features.push({
       type: "Feature",
       properties: {
-        color: colorHexToRgba(point[i].data.color, point[i].data.opacity),
+        color: point[i].data.color,
         radius: point[i].data.size,
       },
       geometry: {
         type: "Point",
-        coordinates: [point[i].data.lon, point[i].data.lat], // 東京
+        coordinates: [point[i].data.lon, point[i].data.lat],
       },
     });
   }
@@ -118,7 +109,7 @@ function generateLineGeoJson(line: Item<"line">[]): GeoJSON {
         ],
       },
       properties: {
-        color: colorHexToRgba(line[i].data.color, line[i].data.opacity), // 赤
+        color: line[i].data.color,
         width: line[i].data.size,
       },
     });
@@ -137,10 +128,10 @@ type Polygon = {
 function generatePolygonLayer(voxel: Item<"voxel">[], compileMode: boolean, currentTime: number): Polygon[] {
   let result: Polygon[] = [];
   for (let i = 0; i < voxel.length; i++) {
-    let pureVoxel = hyperVoxelToPureVoxel(voxel[i].data.voxel, compileMode);
+    let pureVoxel = expandVoxelRange(voxel[i].data.voxel, compileMode);
     let polygon = pvoxelToPolygon(
       pureVoxel,
-      colorHexToRgba(voxel[i].data.color, voxel[i].data.opacity)
+      voxel[i].data.color
     );
     for (const p of polygon) {
       if (p.startTime === null && p.endTime === null) {

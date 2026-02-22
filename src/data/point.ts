@@ -1,5 +1,7 @@
+import { Color } from "deck.gl";
+
 export type Point = {
-  color: string;
+  color: Color;
   opacity: number;
   size: number;
   lat: number;

@@ -1,6 +1,6 @@
-import { Line } from "./Line";
-import { Point } from "./Point";
-import { Voxel } from "./Voxel";
+import { Line } from "./line";
+import { Point } from "./point";
+import { Voxel } from "./voxel";
 
 type ItemMap = {
   point: Point;

@@ -1,5 +1,7 @@
+import { Color } from "deck.gl";
+
 export type Line = {
-  color: string;
+  color: Color;
   opacity: number;
   size: number;
   lat1: number;

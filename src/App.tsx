@@ -1,450 +1,51 @@
-import DeckGL from "@deck.gl/react";
-import { useState, useEffect, useCallback } from "react";
-import { FlyToInterpolator } from "@deck.gl/core";
-import { Map } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { Item } from "./types/Item";
-import Point from "./components/Point";
-import Line from "./components/Line";
-import Voxel from "./components/Voxel";
-import generateLayer from "./utils/GenerateLayer";
-import hyperVoxelParse from "./utils/HyperVoxelParse";
-import { VoxelDefinition } from "./types/VoxelDefinition";
-import jsonToVoxelDefinition from "./utils/JsonToVoxelDefinition";
-import { KasaneJson } from "./types/KasaneJson";
-import TimeAxis from "./components/TimeAxis";
-import TimeControls from "./components/TimeControls";
-import IdPanel from "./components/IdPanel";
-import JsonPanel, { JsonItem } from "./components/JsonPanel";
-import {
-  IconCube,
-  IconFileText,
-  IconPoint,
-  IconLine,
-  IconRefresh,
-  IconClock,
-  IconMap,
-} from "@tabler/icons-react";
+import { MapProvider, useMap } from "./context/map";
+import { TimeProvider, useTime } from "./context/time";
+import { ItemProvider } from "./context/item";
+import { JsonProvider } from "./context/json";
+import { useItem } from "./context/item";
+import MapViewer from "./components/map-viewer";
+import UpperControls from "./components/upper-controls";
+import FooterControls from "./components/footer-controls";
+import styles from "./styles/app.module.css";
 
-const INITIAL_VIEW_STATE = {
-  longitude: 0,
-  latitude: 0,
-  zoom: 1,
-  pitch: 0,
-  bearing: 0,
-};
-
-export default function App() {
-  const [item, setItem] = useState<Item[]>([]);
-  const [isMapVisible, setIsMapVisible] = useState(true);
-  const [compileMode, setCompileMode] = useState(true);
-  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1); // 1x by default
-  const [isIdPanelVisible, setIsIdPanelVisible] = useState(false);
-  const [isJsonPanelVisible, setIsJsonPanelVisible] = useState(false);
-  const [jsonItems, setJsonItems] = useState<JsonItem[]>([]);
-  const [nextJsonId, setNextJsonId] = useState(1);
-  const [nextItemId, setNextItemId] = useState(1000);
-  const [tooltipMap, setTooltipMap] = useState<globalThis.Map<string, string>>(new globalThis.Map());
-
-  const focusOnVoxel = useCallback((voxelDefs: VoxelDefinition[]) => {
-    if (voxelDefs.length === 0) return;
-
-    const v = voxelDefs[0];
-    const n = 2 ** v.Z;
-    const lonPerTile = 360 / n;
-
-    const xMin = typeof v.X === "number" ? v.X : v.X[0];
-    const xMax = typeof v.X === "number" ? v.X : v.X[1];
-    const yMin = typeof v.Y === "number" ? v.Y : v.Y[0];
-    const yMax = typeof v.Y === "number" ? v.Y : v.Y[1];
-
-    const centerLon = -180 + lonPerTile * ((xMin + xMax + 1) / 2);
-    const yCenter = (yMin + yMax + 1) / 2;
-    const centerLat =
-      (Math.atan(Math.sinh(Math.PI - (yCenter / n) * 2 * Math.PI)) * 180) /
-      Math.PI;
-
-    setViewState({
-      longitude: centerLon,
-      latitude: centerLat,
-      zoom: 20,
-      pitch: 45,
-      bearing: 0,
-      transitionDuration: 1000,
-      transitionInterpolator: new FlyToInterpolator(),
-    } as any);
-
-    if (v.startTime !== null) {
-      setCurrentTime(v.startTime);
-    }
-  }, []);
-
-  const handleFocus = useCallback(
-    (id: number) => {
-      const targetItem = item.find((i) => i.id === id);
-      if (
-        targetItem &&
-        targetItem.type === "voxel" &&
-        targetItem.data.voxel.length > 0
-      ) {
-        focusOnVoxel(targetItem.data.voxel);
-      }
-    },
-    [item, focusOnVoxel],
-  );
-
-  const handleUpdateVoxel = (id: number, newVoxelString: string) => {
-    setItem((prevItems) =>
-      prevItems.map((item) => {
-        if (item.id === id && item.type === "voxel") {
-          try {
-            const newVoxelData = hyperVoxelParse(newVoxelString);
-            return {
-              ...item,
-              data: {
-                ...item.data,
-                voxelString: newVoxelString,
-                voxel: newVoxelData,
-              },
-            };
-          } catch (e) {
-            return {
-              ...item,
-              data: {
-                ...item.data,
-                voxelString: newVoxelString,
-                voxel: [],
-              },
-            };
-          }
-        }
-        return item;
-      }),
-    );
-  };
-
-  const handleDeleteVoxel = (id: number) => {
-    setItem((prev) => prev.filter((i) => i.id !== id));
-  };
-
-  const handleColorChange = (id: number) => {
-    // Dummy for now
-    console.log("Color change requested for", id);
-  };
-
-  const handleJsonAdd = async (file: File) => {
-    try {
-      const text = await file.text();
-      const content = JSON.parse(text) as KasaneJson;
-      const { voxelDefs, tooltipMap: newTooltips } = jsonToVoxelDefinition(content);
-
-      const voxelItemIds: number[] = [];
-      const newVoxelItems: Item[] = [];
-      let currentId = nextItemId;
-
-      const color = '#0000FF';
-      newVoxelItems.push({
-        id: currentId,
-        type: 'voxel' as const,
-        isDeleted: false,
-        isVisible: false,
-        data: {
-          color,
-          opacity: 30,
-          voxel: voxelDefs,
-        },
-      });
-      voxelItemIds.push(currentId);
-      currentId++;
-
-      setNextItemId(currentId);
-      setItem((prev) => [...prev, ...newVoxelItems]);
-      setTooltipMap((prev) => {
-        const merged = new globalThis.Map(prev);
-        newTooltips.forEach((v, k) => merged.set(k, v));
-        return merged;
-      });
-
-      const newJsonItem: JsonItem = {
-        id: nextJsonId,
-        fileName: file.name,
-        content,
-        color,
-        voxelItemIds,
-      };
-      setJsonItems((prev) => [...prev, newJsonItem]);
-      setNextJsonId((prev) => prev + 1);
-    } catch (e) {
-      console.error('Failed to parse JSON file:', e);
-    }
-  };
-
-  const handleJsonDelete = (id: number) => {
-    const target = jsonItems.find((i) => i.id === id);
-    if (target && target.voxelItemIds) {
-      const idsToRemove = new Set(target.voxelItemIds);
-      setItem((prev) => prev.filter((i) => !idsToRemove.has(i.id)));
-    }
-    setJsonItems((prev) => prev.filter((i) => i.id !== id));
-  };
-
-  const handleJsonFocus = (id: number) => {
-    const target = jsonItems.find((i) => i.id === id);
-    if (target && target.voxelItemIds && target.voxelItemIds.length > 0) {
-      const voxelItem = item.find((i) => i.id === target.voxelItemIds![0]);
-      if (voxelItem && voxelItem.type === 'voxel' && voxelItem.data.voxel.length > 0) {
-        focusOnVoxel(voxelItem.data.voxel);
-      }
-    }
-  };
-
-  const handleJsonColorChange = (id: number) => {
-    console.log('Color change requested for JSON item', id);
-  };
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const voxelData = urlParams.get("voxel");
-    const colorParam = urlParams.get("color");
-
-    if (voxelData) {
-      try {
-        let color = colorParam || "#0000FF";
-        if (colorParam && !colorParam.startsWith("#")) {
-          color = "#" + colorParam;
-        }
-
-        const newVoxel: Item = {
-          id: 1,
-          type: "voxel",
-          isDeleted: false,
-          isVisible: false,
-          data: {
-            color: color,
-            opacity: 30,
-            voxel: hyperVoxelParse(voxelData),
-            voxelString: voxelData,
-          },
-        };
-        setItem([newVoxel]);
-      } catch (error) {
-        console.error("Failed to parse voxel data from URL parameters:", error);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    let animationFrameId: number;
-    let lastTimestamp: number = 0;
-
-    const animate = (timestamp: number) => {
-      if (!lastTimestamp) lastTimestamp = timestamp;
-
-      const deltaTime = (timestamp - lastTimestamp) / 1000;
-      lastTimestamp = timestamp;
-
-      if (isPlaying) {
-        setCurrentTime((prevTime) => prevTime + deltaTime * playbackSpeed);
-      }
-
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    if (isPlaying) {
-      animationFrameId = requestAnimationFrame(animate);
-    } else {
-      lastTimestamp = 0;
-    }
-
-    return () => {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    };
-  }, [isPlaying, playbackSpeed]);
-
-  function addObject(type: "point" | "line" | "voxel") {
-    let newObject: Item = {
-      id: item.length + 1,
-      type: type,
-      isDeleted: false,
-      isVisible: false,
-      data:
-        type === "point"
-          ? {
-            color: "#FF0000",
-            opacity: 80,
-            size: 10,
-            lat: 0,
-            lon: 0,
-          }
-          : type === "line"
-            ? {
-              color: "#00FF00",
-              opacity: 80,
-              size: 10,
-              lat1: 0,
-              lon1: 0,
-              lat2: 45,
-              lon2: 45,
-            }
-            : {
-              color: "#0000FF",
-              opacity: 30,
-              voxel: [],
-            },
-    };
-    setItem([...item, newObject]);
-  }
+function AppContent() {
+  const { items, setItems, focusOnVoxel, nextItemId, setNextItemId } = useItem();
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-white">
-      {/* Background Map & DeckGL */}
-      <div className="absolute inset-0 z-0">
-        <DeckGL
-          viewState={viewState}
-          onViewStateChange={({ viewState }: any) => setViewState(viewState)}
-          controller={{ maxZoom: 25 } as any}
-          width="100%"
-          height="100%"
-          layers={generateLayer(item, isMapVisible, compileMode, currentTime)}
-          getTooltip={({ object }) => {
-            if (!object) return null;
-            const tip = tooltipMap.get(object.voxelID);
-            return { text: tip || object.voxelID };
-          }}
-        >
-          {isMapVisible && (
-            <Map
-              mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
-              renderWorldCopies={false}
-            />
-          )}
-        </DeckGL>
+    <JsonProvider
+      items={items}
+      setItems={setItems}
+      nextItemId={nextItemId}
+      setNextItemId={setNextItemId}
+      focusOnVoxel={focusOnVoxel}
+    >
+      <div className={styles.appRoot}>
+        <MapViewer />
+        <UpperControls />
+        <FooterControls />
       </div>
+    </JsonProvider>
+  );
+}
 
-      {/* Top Left Toolbar */}
-      <div className="absolute top-4 left-4 z-10 flex gap-3">
-        <button
-          className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-md text-sm font-bold transition ${isIdPanelVisible ? "bg-white text-[#0F766E]" : "bg-white hover:bg-gray-50"}`}
-          onClick={() => {
-            setIsIdPanelVisible(!isIdPanelVisible);
-            if (!isIdPanelVisible) setIsJsonPanelVisible(false);
-          }}
-        >
-          <IconCube size={16} /> ID
-        </button>
-        <button
-          className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-md text-sm font-bold transition ${isJsonPanelVisible ? "bg-white text-[#0F766E]" : "bg-white hover:bg-gray-50"}`}
-          onClick={() => {
-            setIsJsonPanelVisible(!isJsonPanelVisible);
-            if (!isJsonPanelVisible) setIsIdPanelVisible(false);
-          }}
-        >
-          <IconFileText size={16} /> JSON
-        </button>
-        <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md text-sm font-bold hover:bg-gray-50 transition">
-          <IconPoint size={16} /> 点
-        </button>
-        <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md text-sm font-bold hover:bg-gray-50 transition">
-          <IconLine size={16} /> 直線
-        </button>
-      </div>
+function AppWithItem() {
+  const { flyTo } = useMap();
+  const { setCurrentTime } = useTime();
 
-      {/* ID Panel */}
-      {isIdPanelVisible && (
-        <IdPanel
-          items={item}
-          onAdd={() => addObject("voxel")}
-          onDelete={handleDeleteVoxel}
-          onFocus={handleFocus}
-          onUpdate={handleUpdateVoxel}
-          onColorChange={handleColorChange}
-        />
-      )}
+  return (
+    <ItemProvider onFlyTo={flyTo} onTimeJump={setCurrentTime}>
+      <AppContent />
+    </ItemProvider>
+  );
+}
 
-      {/* JSON Panel */}
-      {isJsonPanelVisible && (
-        <JsonPanel
-          jsonItems={jsonItems}
-          onAdd={handleJsonAdd}
-          onDelete={handleJsonDelete}
-          onFocus={handleJsonFocus}
-          onColorChange={handleJsonColorChange}
-        />
-      )}
-
-      {/* Bottom Right Tools */}
-      <div className="absolute bottom-24 right-4 z-10 flex flex-col gap-3">
-        <button
-          className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition group"
-          onClick={() => setCompileMode(!compileMode)}
-          title="Toggle Compile Mode"
-        >
-          <IconRefresh size={20} className="text-gray-600" />
-        </button>
-        <button className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition group">
-          <IconClock size={20} className="text-gray-600" />
-        </button>
-        <button
-          className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition group"
-          onClick={() => setIsMapVisible(!isMapVisible)}
-          title="Toggle Map"
-        >
-          <IconMap size={20} className="text-gray-600" />
-        </button>
-      </div>
-
-      {/* Time Controls and Axis (Footer) */}
-      <div className="absolute bottom-3 left-4 right-4 z-20 flex flex-col gap-1 pointer-events-none">
-        {/* Top Row: Timestamp and Controls */}
-        <div className="relative flex items-end justify-between px-2 mb-0">
-          <div className="text-sm font-bold text-gray-900 drop-shadow-sm pointer-events-auto">
-            {new Date(currentTime * 1000).toLocaleString()}
-          </div>
-
-          <div className="absolute left-1/2 pointer-events-auto">
-            <TimeControls
-              isPlaying={isPlaying}
-              onPlayPause={() => setIsPlaying(!isPlaying)}
-              speed={playbackSpeed}
-              onSpeedChange={setPlaybackSpeed}
-            />
-          </div>
-        </div>
-
-        {/* Timeline Bar */}
-        <div className="bg-white/95 backdrop-blur shadow-lg rounded-full h-10 pointer-events-auto overflow-hidden relative border border-gray-100">
-          <TimeAxis currentTime={currentTime} onTimeChange={setCurrentTime} />
-        </div>
-      </div>
-
-      {/* Hidden Item Rendering logic */}
-      <div className="hidden">
-        {item.map((e) => {
-          switch (e.type) {
-            case "point":
-              return (
-                <Point key={e.id} id={e.id} item={item} setItem={setItem} />
-              );
-            case "line":
-              return (
-                <Line key={e.id} id={e.id} item={item} setItem={setItem} />
-              );
-            case "voxel":
-              return (
-                <Voxel
-                  key={e.id}
-                  id={e.id}
-                  item={item}
-                  setItem={setItem}
-                  onFocus={focusOnVoxel}
-                />
-              );
-          }
-        })}
-      </div>
-    </div>
+export default function App() {
+  return (
+    <MapProvider>
+      <TimeProvider>
+        <AppWithItem />
+      </TimeProvider>
+    </MapProvider>
   );
 }

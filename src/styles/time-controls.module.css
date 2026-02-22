@@ -1,0 +1,59 @@
+.container {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.playButton {
+    color: black;
+    padding: 0.25rem;
+    transform: translateX(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.playButton:hover {
+    color: #374151;
+}
+
+.playIcon {
+    color: black;
+}
+
+.speedWrapper {
+    position: relative;
+}
+
+.speedSelect {
+    appearance: none;
+    background: white;
+    padding: 0.25rem 1.75rem 0.25rem 0.75rem;
+    border-radius: 9999px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: black;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s;
+}
+
+.speedSelect:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.2);
+}
+
+.speedSelect:hover {
+    background: #f9fafb;
+}
+
+.chevronIcon {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: black;
+}

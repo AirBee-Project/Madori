@@ -1,0 +1,46 @@
+.container {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    pointer-events: none;
+}
+
+.topRow {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 0.5rem;
+    margin-bottom: 0;
+}
+
+.timestamp {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #111827;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+    pointer-events: auto;
+}
+
+.controlsCenter {
+    position: absolute;
+    left: 50%;
+    pointer-events: auto;
+}
+
+.timelineBar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-radius: 9999px;
+    height: 2.5rem;
+    pointer-events: auto;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #f3f4f6;
+}
