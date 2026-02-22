@@ -5,3 +5,13 @@
 	overflow: hidden;
 	background: white;
 }
+
+.logo {
+	position: absolute;
+	top: 0rem;
+	right: 0rem;
+	height: 4rem;
+	z-index: 20;
+	pointer-events: none;
+
+}

@@ -21,6 +21,7 @@ function AppContent() {
 			focusOnVoxel={focusOnVoxel}
 		>
 			<div className={styles.appRoot}>
+				<img src="/logo.png" className={styles.logo} alt="AirBee Logo" />
 				<MapViewer />
 				<UpperControls />
 				<FooterControls />
