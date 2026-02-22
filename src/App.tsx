@@ -10,9 +10,12 @@ import Voxel from "./components/Voxel";
 import generateLayer from "./utils/GenerateLayer";
 import hyperVoxelParse from "./utils/HyperVoxelParse";
 import { VoxelDefinition } from "./types/VoxelDefinition";
+import jsonToVoxelDefinition from "./utils/JsonToVoxelDefinition";
+import { KasaneJson } from "./types/KasaneJson";
 import TimeAxis from "./components/TimeAxis";
 import TimeControls from "./components/TimeControls";
 import IdPanel from "./components/IdPanel";
+import JsonPanel, { JsonItem } from "./components/JsonPanel";
 import {
   IconCube,
   IconFileText,
@@ -40,6 +43,11 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1); // 1x by default
   const [isIdPanelVisible, setIsIdPanelVisible] = useState(false);
+  const [isJsonPanelVisible, setIsJsonPanelVisible] = useState(false);
+  const [jsonItems, setJsonItems] = useState<JsonItem[]>([]);
+  const [nextJsonId, setNextJsonId] = useState(1);
+  const [nextItemId, setNextItemId] = useState(1000);
+  const [tooltipMap, setTooltipMap] = useState<globalThis.Map<string, string>>(new globalThis.Map());
 
   const focusOnVoxel = useCallback((voxelDefs: VoxelDefinition[]) => {
     if (voxelDefs.length === 0) return;
@@ -127,6 +135,76 @@ export default function App() {
     console.log("Color change requested for", id);
   };
 
+  const handleJsonAdd = async (file: File) => {
+    try {
+      const text = await file.text();
+      const content = JSON.parse(text) as KasaneJson;
+      const { voxelDefs, tooltipMap: newTooltips } = jsonToVoxelDefinition(content);
+
+      const voxelItemIds: number[] = [];
+      const newVoxelItems: Item[] = [];
+      let currentId = nextItemId;
+
+      const color = '#0000FF';
+      newVoxelItems.push({
+        id: currentId,
+        type: 'voxel' as const,
+        isDeleted: false,
+        isVisible: false,
+        data: {
+          color,
+          opacity: 30,
+          voxel: voxelDefs,
+        },
+      });
+      voxelItemIds.push(currentId);
+      currentId++;
+
+      setNextItemId(currentId);
+      setItem((prev) => [...prev, ...newVoxelItems]);
+      setTooltipMap((prev) => {
+        const merged = new globalThis.Map(prev);
+        newTooltips.forEach((v, k) => merged.set(k, v));
+        return merged;
+      });
+
+      const newJsonItem: JsonItem = {
+        id: nextJsonId,
+        fileName: file.name,
+        content,
+        color,
+        voxelItemIds,
+      };
+      setJsonItems((prev) => [...prev, newJsonItem]);
+      setNextJsonId((prev) => prev + 1);
+    } catch (e) {
+      console.error('Failed to parse JSON file:', e);
+    }
+  };
+
+  const handleJsonDelete = (id: number) => {
+    const target = jsonItems.find((i) => i.id === id);
+    if (target && target.voxelItemIds) {
+      const idsToRemove = new Set(target.voxelItemIds);
+      setItem((prev) => prev.filter((i) => !idsToRemove.has(i.id)));
+    }
+    setJsonItems((prev) => prev.filter((i) => i.id !== id));
+  };
+
+  const handleJsonFocus = (id: number) => {
+    const target = jsonItems.find((i) => i.id === id);
+    if (target && target.voxelItemIds && target.voxelItemIds.length > 0) {
+      const voxelItem = item.find((i) => i.id === target.voxelItemIds![0]);
+      if (voxelItem && voxelItem.type === 'voxel' && voxelItem.data.voxel.length > 0) {
+        focusOnVoxel(voxelItem.data.voxel);
+      }
+    }
+  };
+
+  const handleJsonColorChange = (id: number) => {
+    console.log('Color change requested for JSON item', id);
+  };
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const voxelData = urlParams.get("voxel");
@@ -195,27 +273,27 @@ export default function App() {
       data:
         type === "point"
           ? {
-              color: "#FF0000",
-              opacity: 80,
-              size: 10,
-              lat: 0,
-              lon: 0,
-            }
+            color: "#FF0000",
+            opacity: 80,
+            size: 10,
+            lat: 0,
+            lon: 0,
+          }
           : type === "line"
             ? {
-                color: "#00FF00",
-                opacity: 80,
-                size: 10,
-                lat1: 0,
-                lon1: 0,
-                lat2: 45,
-                lon2: 45,
-              }
+              color: "#00FF00",
+              opacity: 80,
+              size: 10,
+              lat1: 0,
+              lon1: 0,
+              lat2: 45,
+              lon2: 45,
+            }
             : {
-                color: "#0000FF",
-                opacity: 30,
-                voxel: [],
-              },
+              color: "#0000FF",
+              opacity: 30,
+              voxel: [],
+            },
     };
     setItem([...item, newObject]);
   }
@@ -231,11 +309,11 @@ export default function App() {
           width="100%"
           height="100%"
           layers={generateLayer(item, isMapVisible, compileMode, currentTime)}
-          getTooltip={({ object }) =>
-            object && {
-              text: `${object.voxelID} `,
-            }
-          }
+          getTooltip={({ object }) => {
+            if (!object) return null;
+            const tip = tooltipMap.get(object.voxelID);
+            return { text: tip || object.voxelID };
+          }}
         >
           {isMapVisible && (
             <Map
@@ -250,11 +328,20 @@ export default function App() {
       <div className="absolute top-4 left-4 z-10 flex gap-3">
         <button
           className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-md text-sm font-bold transition ${isIdPanelVisible ? "bg-white text-[#0F766E]" : "bg-white hover:bg-gray-50"}`}
-          onClick={() => setIsIdPanelVisible(!isIdPanelVisible)}
+          onClick={() => {
+            setIsIdPanelVisible(!isIdPanelVisible);
+            if (!isIdPanelVisible) setIsJsonPanelVisible(false);
+          }}
         >
           <IconCube size={16} /> ID
         </button>
-        <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md text-sm font-bold hover:bg-gray-50 transition">
+        <button
+          className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-md text-sm font-bold transition ${isJsonPanelVisible ? "bg-white text-[#0F766E]" : "bg-white hover:bg-gray-50"}`}
+          onClick={() => {
+            setIsJsonPanelVisible(!isJsonPanelVisible);
+            if (!isJsonPanelVisible) setIsIdPanelVisible(false);
+          }}
+        >
           <IconFileText size={16} /> JSON
         </button>
         <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md text-sm font-bold hover:bg-gray-50 transition">
@@ -274,6 +361,17 @@ export default function App() {
           onFocus={handleFocus}
           onUpdate={handleUpdateVoxel}
           onColorChange={handleColorChange}
+        />
+      )}
+
+      {/* JSON Panel */}
+      {isJsonPanelVisible && (
+        <JsonPanel
+          jsonItems={jsonItems}
+          onAdd={handleJsonAdd}
+          onDelete={handleJsonDelete}
+          onFocus={handleJsonFocus}
+          onColorChange={handleJsonColorChange}
         />
       )}
 
