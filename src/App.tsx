@@ -1,51 +1,51 @@
 import "maplibre-gl/dist/maplibre-gl.css";
-import { MapProvider, useMap } from "./context/map";
-import { TimeProvider, useTime } from "./context/time";
-import { ItemProvider } from "./context/item";
-import { JsonProvider } from "./context/json";
-import { useItem } from "./context/item";
+import FooterControls from "./components/footer-controls";
 import MapViewer from "./components/map-viewer";
 import UpperControls from "./components/upper-controls";
-import FooterControls from "./components/footer-controls";
+import { ItemProvider, useItem } from "./context/item";
+import { JsonProvider } from "./context/json";
+import { MapProvider, useMap } from "./context/map";
+import { TimeProvider, useTime } from "./context/time";
 import styles from "./styles/app.module.css";
 
 function AppContent() {
-  const { items, setItems, focusOnVoxel, nextItemId, setNextItemId } = useItem();
+	const { items, setItems, focusOnVoxel, nextItemId, setNextItemId } =
+		useItem();
 
-  return (
-    <JsonProvider
-      items={items}
-      setItems={setItems}
-      nextItemId={nextItemId}
-      setNextItemId={setNextItemId}
-      focusOnVoxel={focusOnVoxel}
-    >
-      <div className={styles.appRoot}>
-        <MapViewer />
-        <UpperControls />
-        <FooterControls />
-      </div>
-    </JsonProvider>
-  );
+	return (
+		<JsonProvider
+			items={items}
+			setItems={setItems}
+			nextItemId={nextItemId}
+			setNextItemId={setNextItemId}
+			focusOnVoxel={focusOnVoxel}
+		>
+			<div className={styles.appRoot}>
+				<MapViewer />
+				<UpperControls />
+				<FooterControls />
+			</div>
+		</JsonProvider>
+	);
 }
 
 function AppWithItem() {
-  const { flyTo } = useMap();
-  const { setCurrentTime } = useTime();
+	const { flyTo } = useMap();
+	const { setCurrentTime } = useTime();
 
-  return (
-    <ItemProvider onFlyTo={flyTo} onTimeJump={setCurrentTime}>
-      <AppContent />
-    </ItemProvider>
-  );
+	return (
+		<ItemProvider onFlyTo={flyTo} onTimeJump={setCurrentTime}>
+			<AppContent />
+		</ItemProvider>
+	);
 }
 
 export default function App() {
-  return (
-    <MapProvider>
-      <TimeProvider>
-        <AppWithItem />
-      </TimeProvider>
-    </MapProvider>
-  );
+	return (
+		<MapProvider>
+			<TimeProvider>
+				<AppWithItem />
+			</TimeProvider>
+		</MapProvider>
+	);
 }

@@ -1,34 +1,34 @@
 .itemRow {
-    display: flex;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
+	display: flex;
+	gap: 0.75rem;
+	padding: 0.5rem 0.75rem;
 }
 
 .textAreaWrapper {
-    flex: 1;
+	flex: 1;
 }
 
 .textArea {
-    width: 100%;
-    height: 5rem;
-    padding: 0.75rem;
-    font-size: 0.875rem;
-    font-family: monospace;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    resize: none;
-    background: white;
+	width: 100%;
+	height: 5rem;
+	padding: 0.75rem;
+	font-size: 0.875rem;
+	font-family: monospace;
+	border: 1px solid #d1d5db;
+	border-radius: 0.5rem;
+	resize: none;
+	background: white;
 }
 
 .textArea:focus {
-    outline: none;
-    border-color: #0F766E;
+	outline: none;
+	border-color: #0f766e;
 }
 
 .actionButtons {
-    display: flex;
-    flex-direction: column;
-    height: 5rem;
-    justify-content: space-between;
-    align-items: center;
+	display: flex;
+	flex-direction: column;
+	height: 5rem;
+	justify-content: space-between;
+	align-items: center;
 }

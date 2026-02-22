@@ -1,3 +1,3 @@
 export default function LinePanel() {
-    return null;
+	return null;
 }

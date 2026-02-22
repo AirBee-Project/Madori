@@ -1,3 +1,3 @@
 export default function PointPanel() {
-    return null;
+	return null;
 }

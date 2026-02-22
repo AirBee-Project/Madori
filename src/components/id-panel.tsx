@@ -1,18 +1,11 @@
-import React, { useState } from 'react';
-import { Item } from '../data/item';
-import { Color } from 'deck.gl';
-import { IconTrash, IconTarget, IconPlus } from '@tabler/icons-react';
-import styles from '../styles/id-panel.module.css';
-import sharedStyles from '../styles/panel.module.css';
-import ColorPicker from './color-picker';
-
-function rgbaCss(c: Color): string {
-    if (Array.isArray(c)) {
-        const [r, g, b, a = 255] = c;
-        return `rgba(${r},${g},${b},${a / 255})`;
-    }
-    return String(c);
-}
+import { IconPlus, IconTarget, IconTrash } from "@tabler/icons-react";
+import type React from "react";
+import { useState } from "react";
+import type { Item } from "../data/item";
+import styles from "../styles/id-panel.module.css";
+import sharedStyles from "../styles/panel.module.css";
+import ColorPicker from "./color-picker";
+import { rgbaCss } from '../utils/color-utils';
 
 interface IdPanelProps {
     items: Item[];
@@ -31,12 +24,18 @@ const IdPanel: React.FC<IdPanelProps> = ({
     onColorChange,
     onUpdate,
 }) => {
-    const voxelItems = items.filter((item): item is Item<'voxel'> => item.type === 'voxel' && item.source !== 'json' && !item.isDeleted);
+    const voxelItems = items.filter(
+        (item): item is Item<"voxel"> =>
+            item.type === "voxel" && item.source !== "json" && !item.isDeleted,
+    );
 
     const [openPickerId, setOpenPickerId] = useState<number | null>(null);
     const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
 
-    const handleColorClick = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleColorClick = (
+        id: number,
+        e: React.MouseEvent<HTMLButtonElement>,
+    ) => {
         if (openPickerId === id) {
             setOpenPickerId(null);
         } else {
@@ -54,7 +53,7 @@ const IdPanel: React.FC<IdPanelProps> = ({
                             <div className={styles.textAreaWrapper}>
                                 <textarea
                                     className={styles.textArea}
-                                    value={item.data.voxelString || ''}
+                                    value={item.data.voxelString || ""}
                                     onChange={(e) => onUpdate(item.id, e.target.value)}
                                 />
                             </div>
@@ -62,7 +61,7 @@ const IdPanel: React.FC<IdPanelProps> = ({
                             <div className={styles.actionButtons}>
                                 <button
                                     onClick={() => onDelete(item.id)}
-                                    className={`${sharedStyles.iconButton} ${sharedStyles.deleteButton}`}
+                                    className={`${sharedStyles.iconButton} ${sharedStyles.deleteButton} `}
                                     title="Delete"
                                 >
                                     <IconTrash />
@@ -93,10 +92,7 @@ const IdPanel: React.FC<IdPanelProps> = ({
             </div>
 
             <div className={sharedStyles.footer}>
-                <button
-                    onClick={onAdd}
-                    className={sharedStyles.addButton}
-                >
+                <button onClick={onAdd} className={sharedStyles.addButton}>
                     <IconPlus /> 時空間IDを追加
                 </button>
             </div>
@@ -104,7 +100,11 @@ const IdPanel: React.FC<IdPanelProps> = ({
             {openPickerId !== null && pickerRect && (
                 <ColorPicker
                     triggerRect={pickerRect}
-                    color={(items.find(i => i.id === openPickerId)?.data as any)?.color || [0, 0, 0, 255]}
+                    color={
+                        (items.find((i) => i.id === openPickerId)?.data as any)?.color || [
+                            0, 0, 0, 255,
+                        ]
+                    }
                     onChange={(color) => {
                         onColorChange(openPickerId, color);
                     }}

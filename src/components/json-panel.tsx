@@ -1,8 +1,10 @@
-import React, { useRef, useState } from 'react';
-import { IconTrash, IconTarget, IconUpload } from '@tabler/icons-react';
-import styles from '../styles/json-panel.module.css';
-import sharedStyles from '../styles/panel.module.css';
-import ColorPicker from './color-picker';
+import { IconTarget, IconTrash, IconUpload } from "@tabler/icons-react";
+import type React from "react";
+import { useRef, useState } from "react";
+import styles from "../styles/json-panel.module.css";
+import sharedStyles from "../styles/panel.module.css";
+import ColorPicker from "./color-picker";
+import { rgbaCss } from '../utils/color-utils';
 
 export interface JsonItem {
     id: number;
@@ -11,10 +13,6 @@ export interface JsonItem {
     content: unknown;
     color: [number, number, number, number];
     voxelItemIds?: number[];
-}
-
-function rgbaCss(c: [number, number, number, number]): string {
-    return `rgba(${c[0]},${c[1]},${c[2]},${c[3] / 255})`;
 }
 
 interface JsonPanelProps {
@@ -37,7 +35,10 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
     const [openPickerId, setOpenPickerId] = useState<number | null>(null);
     const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
 
-    const handleColorClick = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleColorClick = (
+        id: number,
+        e: React.MouseEvent<HTMLButtonElement>,
+    ) => {
         if (openPickerId === id) {
             setOpenPickerId(null);
         } else {
@@ -114,7 +115,11 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
             {openPickerId !== null && pickerRect && (
                 <ColorPicker
                     triggerRect={pickerRect}
-                    color={jsonItems.find(i => i.id === openPickerId)?.color || [0, 0, 0, 255]}
+                    color={
+                        jsonItems.find((i) => i.id === openPickerId)?.color || [
+                            0, 0, 0, 255,
+                        ]
+                    }
                     onChange={(color) => {
                         onColorChange(openPickerId, color);
                     }}
