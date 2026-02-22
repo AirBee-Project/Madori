@@ -5,7 +5,7 @@ import { GeoJSON } from "geojson";
 import expandVoxelRange from "./expand-voxel-range";
 import pvoxelToPolygon from "./voxel-to-polygon";
 
-export default function generateLayer(item: Item[], isMapVisible: boolean = true, compileMode: boolean = true, currentTime: number = 0): LayersList {
+export default function generateLayer(item: Item[], compileMode: boolean = true, currentTime: number = 0): LayersList {
   let pointItem: Item<"point">[] = item.filter(
     (e): e is Item<"point"> =>
       !e.isDeleted && !e.isVisible && e.type === "point"

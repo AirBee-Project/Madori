@@ -3,6 +3,7 @@ import { Item } from '../data/item';
 import { Color } from 'deck.gl';
 import { IconTrash, IconTarget, IconPlus } from '@tabler/icons-react';
 import styles from '../styles/id-panel.module.css';
+import sharedStyles from '../styles/shared-panel.module.css';
 
 function rgbaCss(c: Color): string {
     if (Array.isArray(c)) {
@@ -32,9 +33,9 @@ const IdPanel: React.FC<IdPanelProps> = ({
     const voxelItems = items.filter((item): item is Item<'voxel'> => item.type === 'voxel' && !item.isDeleted);
 
     return (
-        <div className={styles.panelContainer}>
-            <div className={styles.scrollArea}>
-                <div className={styles.itemList}>
+        <div className={sharedStyles.panelContainer}>
+            <div className={sharedStyles.scrollArea}>
+                <div className={sharedStyles.itemList}>
                     {voxelItems.map((item) => (
                         <div key={item.id} className={styles.itemRow}>
                             <div className={styles.textAreaWrapper}>
@@ -48,27 +49,27 @@ const IdPanel: React.FC<IdPanelProps> = ({
                             <div className={styles.actionButtons}>
                                 <button
                                     onClick={() => onDelete(item.id)}
-                                    className={`${styles.iconButton} ${styles.deleteButton}`}
+                                    className={`${sharedStyles.iconButton} ${sharedStyles.deleteButton}`}
                                     title="Delete"
                                 >
-                                    <IconTrash size={18} />
+                                    <IconTrash />
                                 </button>
 
                                 <button
                                     onClick={() => onFocus(item.id)}
-                                    className={styles.iconButton}
+                                    className={sharedStyles.iconButton}
                                     title="Focus"
                                 >
-                                    <IconTarget size={18} />
+                                    <IconTarget />
                                 </button>
 
                                 <button
                                     onClick={() => onColorChange(item.id)}
-                                    className={styles.colorButton}
+                                    className={sharedStyles.colorButton}
                                     title="Change Color"
                                 >
                                     <div
-                                        className={styles.colorSwatch}
+                                        className={sharedStyles.colorSwatch}
                                         style={{ backgroundColor: rgbaCss(item.data.color) }}
                                     />
                                 </button>
@@ -78,12 +79,12 @@ const IdPanel: React.FC<IdPanelProps> = ({
                 </div>
             </div>
 
-            <div className={styles.footer}>
+            <div className={sharedStyles.footer}>
                 <button
                     onClick={onAdd}
-                    className={styles.addButton}
+                    className={sharedStyles.addButton}
                 >
-                    <IconPlus size={18} /> 時空間IDを追加
+                    <IconPlus /> 時空間IDを追加
                 </button>
             </div>
         </div>

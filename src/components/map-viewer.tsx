@@ -22,7 +22,7 @@ export default function MapViewer() {
                 controller={{ maxZoom: 25 } as any}
                 width="100%"
                 height="100%"
-                layers={generateLayer(items, isMapVisible, compileMode, currentTime)}
+                layers={generateLayer(items, compileMode, currentTime)}
                 getTooltip={({ object }) => {
                     if (!object) return null;
                     const tip = tooltipMap.get(object.voxelID);

@@ -22,7 +22,7 @@ type MapContextType = {
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
 export const MapProvider = ({ children }: { children: ReactNode }) => {
-    const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+    const [viewState, setViewState] = useState<any>(INITIAL_VIEW_STATE);
     const [isMapVisible, setIsMapVisible] = useState(true);
     const [compileMode, setCompileMode] = useState(true);
 

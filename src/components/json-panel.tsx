@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { IconTrash, IconTarget, IconUpload } from '@tabler/icons-react';
 import styles from '../styles/json-panel.module.css';
+import sharedStyles from '../styles/shared-panel.module.css';
 
 export interface JsonItem {
     id: number;
@@ -42,9 +43,9 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
     };
 
     return (
-        <div className={styles.panelContainer}>
-            <div className={styles.scrollArea}>
-                <div className={styles.itemList}>
+        <div className={sharedStyles.panelContainer}>
+            <div className={sharedStyles.scrollArea}>
+                <div className={sharedStyles.itemList}>
                     {jsonItems.map((item) => (
                         <div key={item.id} className={styles.itemRow}>
                             <div className={styles.fileName}>
@@ -56,22 +57,22 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
                             <div className={styles.actionButtons}>
                                 <button
                                     onClick={() => onDelete(item.id)}
-                                    className={`${styles.iconButton} ${styles.deleteButton}`}
+                                    className={`${sharedStyles.iconButton} ${sharedStyles.deleteButton}`}
                                 >
-                                    <IconTrash size={18} />
+                                    <IconTrash />
                                 </button>
                                 <button
                                     onClick={() => onFocus(item.id)}
-                                    className={styles.iconButton}
+                                    className={sharedStyles.iconButton}
                                 >
-                                    <IconTarget size={18} />
+                                    <IconTarget />
                                 </button>
                                 <button
                                     onClick={() => onColorChange(item.id)}
-                                    className={styles.colorButton}
+                                    className={sharedStyles.colorButton}
                                 >
                                     <div
-                                        className={styles.colorSwatch}
+                                        className={sharedStyles.colorSwatch}
                                         style={{ backgroundColor: rgbaCss(item.color) }}
                                     />
                                 </button>
@@ -81,7 +82,7 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
                 </div>
             </div>
 
-            <div className={styles.footer}>
+            <div className={sharedStyles.footer}>
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -91,9 +92,9 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
                 />
                 <button
                     onClick={() => fileInputRef.current?.click()}
-                    className={styles.addButton}
+                    className={sharedStyles.addButton}
                 >
-                    <IconUpload size={18} /> JSONを追加
+                    <IconUpload /> JSONを追加
                 </button>
             </div>
         </div>

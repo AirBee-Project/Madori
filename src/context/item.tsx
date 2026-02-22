@@ -126,10 +126,6 @@ export const ItemProvider = ({ children, onFlyTo, onTimeJump }: ItemProviderProp
         setItems((prev) => [...prev, newObject]);
     }
 
-    const handleColorChange = (id: number) => {
-        console.log("Color change requested for", id);
-    };
-
     return (
         <ItemContext.Provider
             value={{
