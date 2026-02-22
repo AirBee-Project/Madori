@@ -76,6 +76,7 @@ export const JsonProvider = ({
             const newJsonItem: JsonItem = {
                 id: nextJsonId,
                 fileName: file.name,
+                description: content.meta?.description,
                 content,
                 color,
                 voxelItemIds,

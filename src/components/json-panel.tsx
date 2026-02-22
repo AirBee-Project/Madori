@@ -1,11 +1,12 @@
 import React, { useRef } from 'react';
 import { IconTrash, IconTarget, IconUpload } from '@tabler/icons-react';
 import styles from '../styles/json-panel.module.css';
-import sharedStyles from '../styles/shared-panel.module.css';
+import sharedStyles from '../styles/panel.module.css';
 
 export interface JsonItem {
     id: number;
     fileName: string;
+    description?: string;
     content: unknown;
     color: [number, number, number, number];
     voxelItemIds?: number[];
@@ -50,7 +51,9 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
                         <div key={item.id} className={styles.itemRow}>
                             <div className={styles.fileName}>
                                 <div className={styles.fileNameBox}>
-                                    <span className={styles.fileNameText}>{item.fileName}</span>
+                                    <span className={styles.fileNameText} title={item.fileName}>
+                                        {item.description || item.fileName}
+                                    </span>
                                 </div>
                             </div>
 

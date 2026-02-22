@@ -3,7 +3,7 @@ import { Item } from '../data/item';
 import { Color } from 'deck.gl';
 import { IconTrash, IconTarget, IconPlus } from '@tabler/icons-react';
 import styles from '../styles/id-panel.module.css';
-import sharedStyles from '../styles/shared-panel.module.css';
+import sharedStyles from '../styles/panel.module.css';
 
 function rgbaCss(c: Color): string {
     if (Array.isArray(c)) {
