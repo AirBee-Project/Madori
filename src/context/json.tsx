@@ -11,7 +11,7 @@ type JsonContextType = {
     addJson: (file: File) => Promise<void>;
     deleteJson: (id: number) => void;
     focusJson: (id: number) => void;
-    colorChangeJson: (id: number) => void;
+    updateJsonColor: (id: number, color: [number, number, number, number]) => void;
 };
 
 const JsonContext = createContext<JsonContextType | undefined>(undefined);
@@ -111,8 +111,24 @@ export const JsonProvider = ({
         }
     };
 
-    const colorChangeJson = (id: number) => {
-        console.log("Color change requested for JSON item", id);
+    const updateJsonColor = (id: number, color: [number, number, number, number]) => {
+        setJsonItems((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, color } : item))
+        );
+        const target = jsonItems.find((i) => i.id === id);
+        if (target && target.voxelItemIds) {
+            const idsToUpdate = new Set(target.voxelItemIds);
+            setItems((prevItems) =>
+                prevItems.map((item) => {
+                    if (idsToUpdate.has(item.id)) {
+                        if (item.type === "point") return { ...item, data: { ...item.data, color } };
+                        if (item.type === "line") return { ...item, data: { ...item.data, color } };
+                        if (item.type === "voxel") return { ...item, data: { ...item.data, color } };
+                    }
+                    return item;
+                })
+            );
+        }
     };
 
     return (
@@ -123,7 +139,7 @@ export const JsonProvider = ({
                 addJson,
                 deleteJson,
                 focusJson,
-                colorChangeJson,
+                updateJsonColor,
             }}
         >
             {children}

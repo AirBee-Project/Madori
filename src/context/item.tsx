@@ -9,6 +9,7 @@ type ItemContextType = {
     addObject: (type: "point" | "line" | "voxel") => void;
     deleteItem: (id: number) => void;
     updateVoxel: (id: number, newVoxelString: string) => void;
+    updateColor: (id: number, color: [number, number, number, number]) => void;
     focusItem: (id: number) => void;
     focusOnVoxel: (voxelDefs: VoxelDefinition[]) => void;
     nextItemId: number;
@@ -100,6 +101,19 @@ export const ItemProvider = ({ children, onFlyTo, onTimeJump }: ItemProviderProp
         setItems((prev) => prev.filter((i) => i.id !== id));
     };
 
+    const updateColor = (id: number, color: [number, number, number, number]) => {
+        setItems((prevItems) =>
+            prevItems.map((item) => {
+                if (item.id === id) {
+                    if (item.type === "point") return { ...item, data: { ...item.data, color } };
+                    if (item.type === "line") return { ...item, data: { ...item.data, color } };
+                    if (item.type === "voxel") return { ...item, data: { ...item.data, color } };
+                }
+                return item;
+            })
+        );
+    };
+
     function addObject(type: "point" | "line" | "voxel") {
         const id = items.length + 1;
         let newObject: Item;
@@ -134,6 +148,7 @@ export const ItemProvider = ({ children, onFlyTo, onTimeJump }: ItemProviderProp
                 addObject,
                 deleteItem,
                 updateVoxel,
+                updateColor,
                 focusItem,
                 focusOnVoxel,
                 nextItemId,

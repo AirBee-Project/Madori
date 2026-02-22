@@ -1,7 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { IconTrash, IconTarget, IconUpload } from '@tabler/icons-react';
 import styles from '../styles/json-panel.module.css';
 import sharedStyles from '../styles/panel.module.css';
+import ColorPicker from './color-picker';
 
 export interface JsonItem {
     id: number;
@@ -21,7 +22,7 @@ interface JsonPanelProps {
     onAdd: (file: File) => void;
     onDelete: (id: number) => void;
     onFocus: (id: number) => void;
-    onColorChange: (id: number) => void;
+    onColorChange: (id: number, color: [number, number, number, number]) => void;
 }
 
 const JsonPanel: React.FC<JsonPanelProps> = ({
@@ -33,13 +34,22 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [openPickerId, setOpenPickerId] = useState<number | null>(null);
+    const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
+
+    const handleColorClick = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
+        if (openPickerId === id) {
+            setOpenPickerId(null);
+        } else {
+            setPickerRect(e.currentTarget.getBoundingClientRect());
+            setOpenPickerId(id);
+        }
+    };
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             onAdd(file);
-        }
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
         }
     };
 
@@ -71,7 +81,7 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
                                     <IconTarget />
                                 </button>
                                 <button
-                                    onClick={() => onColorChange(item.id)}
+                                    onClick={(e) => handleColorClick(item.id, e)}
                                     className={sharedStyles.colorButton}
                                 >
                                     <div
@@ -100,6 +110,18 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
                     <IconUpload /> JSONを追加
                 </button>
             </div>
+
+            {openPickerId !== null && pickerRect && (
+                <ColorPicker
+                    triggerRect={pickerRect}
+                    color={jsonItems.find(i => i.id === openPickerId)?.color || [0, 0, 0, 255]}
+                    onChange={(color) => {
+                        onColorChange(openPickerId, color);
+                    }}
+                    onClose={() => setOpenPickerId(null)}
+                    lazyUpdate={false}
+                />
+            )}
         </div>
     );
 };

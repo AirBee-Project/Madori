@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Item } from '../data/item';
 import { Color } from 'deck.gl';
 import { IconTrash, IconTarget, IconPlus } from '@tabler/icons-react';
 import styles from '../styles/id-panel.module.css';
 import sharedStyles from '../styles/panel.module.css';
+import ColorPicker from './color-picker';
 
 function rgbaCss(c: Color): string {
     if (Array.isArray(c)) {
@@ -18,7 +19,7 @@ interface IdPanelProps {
     onAdd: () => void;
     onDelete: (id: number) => void;
     onFocus: (id: number) => void;
-    onColorChange: (id: number) => void;
+    onColorChange: (id: number, color: [number, number, number, number]) => void;
     onUpdate: (id: number, newVoxelString: string) => void;
 }
 
@@ -31,6 +32,18 @@ const IdPanel: React.FC<IdPanelProps> = ({
     onUpdate,
 }) => {
     const voxelItems = items.filter((item): item is Item<'voxel'> => item.type === 'voxel' && !item.isDeleted);
+
+    const [openPickerId, setOpenPickerId] = useState<number | null>(null);
+    const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
+
+    const handleColorClick = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
+        if (openPickerId === id) {
+            setOpenPickerId(null);
+        } else {
+            setPickerRect(e.currentTarget.getBoundingClientRect());
+            setOpenPickerId(id);
+        }
+    };
 
     return (
         <div className={sharedStyles.panelContainer}>
@@ -64,7 +77,7 @@ const IdPanel: React.FC<IdPanelProps> = ({
                                 </button>
 
                                 <button
-                                    onClick={() => onColorChange(item.id)}
+                                    onClick={(e) => handleColorClick(item.id, e)}
                                     className={sharedStyles.colorButton}
                                     title="Change Color"
                                 >
@@ -87,6 +100,18 @@ const IdPanel: React.FC<IdPanelProps> = ({
                     <IconPlus /> 時空間IDを追加
                 </button>
             </div>
+
+            {openPickerId !== null && pickerRect && (
+                <ColorPicker
+                    triggerRect={pickerRect}
+                    color={(items.find(i => i.id === openPickerId)?.data as any)?.color || [0, 0, 0, 255]}
+                    onChange={(color) => {
+                        onColorChange(openPickerId, color);
+                    }}
+                    onClose={() => setOpenPickerId(null)}
+                    lazyUpdate={false}
+                />
+            )}
         </div>
     );
 };

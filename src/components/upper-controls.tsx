@@ -18,13 +18,9 @@ import styles from "../styles/upper-controls.module.css";
 export default function UpperControls() {
     const [isIdPanelVisible, setIsIdPanelVisible] = useState(false);
     const [isJsonPanelVisible, setIsJsonPanelVisible] = useState(false);
-    const { items, addObject, deleteItem, focusItem, updateVoxel } = useItem();
+    const { items, addObject, deleteItem, focusItem, updateVoxel, updateColor } = useItem();
     const { compileMode, setCompileMode, isMapVisible, setIsMapVisible } = useMap();
-    const { jsonItems, addJson, deleteJson, focusJson, colorChangeJson } = useJson();
-
-    const handleColorChange = (id: number) => {
-        console.log("Color change requested for", id);
-    };
+    const { jsonItems, addJson, deleteJson, focusJson, updateJsonColor } = useJson();
 
     return (
         <>
@@ -62,7 +58,7 @@ export default function UpperControls() {
                     onDelete={deleteItem}
                     onFocus={focusItem}
                     onUpdate={updateVoxel}
-                    onColorChange={handleColorChange}
+                    onColorChange={updateColor}
                 />
             )}
 
@@ -72,7 +68,7 @@ export default function UpperControls() {
                     onAdd={addJson}
                     onDelete={deleteJson}
                     onFocus={focusJson}
-                    onColorChange={colorChangeJson}
+                    onColorChange={updateJsonColor}
                 />
             )}
 
