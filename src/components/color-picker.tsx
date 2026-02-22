@@ -44,7 +44,6 @@ export default function ColorPicker({
 		onClose();
 	};
 
-	// 外側クリックで確定して閉じる
 	useClickOutside(pickerRef, handleConfirmAndClose);
 
 	const handleChange = (c: ColorResult) => {
@@ -54,18 +53,15 @@ export default function ColorPicker({
 		}
 	};
 
-	// 表示位置の計算
 	const [position, setPosition] = useState<React.CSSProperties>({});
 
 	useEffect(() => {
 		if (triggerRect) {
-			let top = triggerRect.bottom + 8; // ちょっと余白
+			let top = triggerRect.bottom + 8;
 
-			// ID/JSONパネルと中心を揃えるため、パネル自体の位置を取得して合わせる
 			const panel = document.querySelector('[class*="panelContainer"]');
 			let left = panel ? panel.getBoundingClientRect().left : 16;
 
-			// 画面外にはみ出ないように補正
 			if (left < 10) left = 10;
 			if (top + 150 > window.innerHeight) {
 				top = triggerRect.top - 160; // 上に出す
