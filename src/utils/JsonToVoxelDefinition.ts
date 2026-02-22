@@ -73,7 +73,7 @@ export default function jsonToVoxelDefinition(json: KasaneJson): JsonVoxelResult
             const refValue = dataEntry.value[id.ref];
             const valueText = `${dataEntry.name}: ${formatValue(refValue)}`;
             const existing = tooltipMap.get(key);
-            tooltipMap.set(key, existing ? `${existing}\n${valueText}` : `${key} | ${valueText}`);
+            tooltipMap.set(key, existing ? `${existing}\n${valueText}` : `${key}\n${valueText}`);
         }
     }
 
