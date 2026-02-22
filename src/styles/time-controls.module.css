@@ -17,7 +17,6 @@
     cursor: pointer;
     color: black;
     transform: translateX(-50%);
-    transition: background 0.15s, color 0.15s;
 }
 
 .playButton:hover {
