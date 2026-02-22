@@ -1,61 +1,61 @@
 .pickerContainer {
-	position: fixed;
-	z-index: 9999;
-	width: 22.5rem;
-	background: rgba(255, 255, 255, 0.95);
-	backdrop-filter: blur(4px);
-	box-shadow:
-		0 20px 25px -5px rgba(0, 0, 0, 0.1),
-		0 8px 10px -6px rgba(0, 0, 0, 0.1);
-	border-radius: 0.75rem;
-	overflow: hidden;
-	font-family: inherit;
-	padding: 0.75rem;
-	cursor: default;
-	transform-origin: top right;
-	border: 1px solid #f3f4f6;
-	animation: fadeInZoom 0.1s ease-out;
+    position: fixed;
+    z-index: 9999;
+    width: 22.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    font-family: inherit;
+    padding: 0.75rem;
+    cursor: default;
+    transform-origin: top right;
+    border: 1px solid #f3f4f6;
+    animation: fadeInZoom 0.1s ease-out;
 }
 
 @keyframes fadeInZoom {
-	from {
-		opacity: 0;
-		transform: scale(0.95);
-	}
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
 
-	to {
-		opacity: 1;
-		transform: scale(1);
-	}
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .circlePickerWrapper {
-	margin-bottom: 1rem;
-	display: flex;
-	justify-content: center;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
 }
 
 .alphaSection {
-	margin-bottom: 0.5rem;
-	padding: 0 0.5rem;
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .alphaText {
-	font-size: 0.75rem;
-	font-weight: 700;
-	color: #9ca3af;
-	width: 2rem;
-	text-align: right;
-	height: 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: black;
+    width: 2rem;
+    text-align: right;
+    height: 1rem;
 }
 
 .alphaPickerWrapper {
-	flex: 1;
-	position: relative;
-	height: 1rem;
-	display: flex;
-	align-items: center;
+    flex: 1;
+    position: relative;
+    height: 1rem;
+    display: flex;
+    align-items: center;
 }
