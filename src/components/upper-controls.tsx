@@ -30,7 +30,7 @@ export default function UpperControls() {
         <>
             <div className={styles.toolbar}>
                 <button
-                    className={isIdPanelVisible ? styles.toolbarButtonActive : styles.toolbarButton}
+                    className={`${styles.toolbarButton} ${isIdPanelVisible ? styles.toolbarButtonActive : ""}`}
                     onClick={() => {
                         setIsIdPanelVisible(!isIdPanelVisible);
                         if (!isIdPanelVisible) setIsJsonPanelVisible(false);
@@ -39,7 +39,7 @@ export default function UpperControls() {
                     <IconCube size={16} /> ID
                 </button>
                 <button
-                    className={isJsonPanelVisible ? styles.toolbarButtonActive : styles.toolbarButton}
+                    className={`${styles.toolbarButton} ${isJsonPanelVisible ? styles.toolbarButtonActive : ""}`}
                     onClick={() => {
                         setIsJsonPanelVisible(!isJsonPanelVisible);
                         if (!isJsonPanelVisible) setIsIdPanelVisible(false);

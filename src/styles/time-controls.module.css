@@ -37,7 +37,6 @@
     color: black;
     cursor: pointer;
     border: none;
-    transition: background 0.15s;
 }
 
 .speedSelect:focus {
