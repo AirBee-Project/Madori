@@ -54,6 +54,7 @@ export const JsonProvider = ({
             newVoxelItems.push({
                 id: currentId,
                 type: "voxel" as const,
+                source: "json",
                 isDeleted: false,
                 isVisible: false,
                 data: {

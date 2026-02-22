@@ -115,24 +115,25 @@ export const ItemProvider = ({ children, onFlyTo, onTimeJump }: ItemProviderProp
     };
 
     function addObject(type: "point" | "line" | "voxel") {
-        const id = items.length + 1;
+        const id = nextItemId;
+        setNextItemId((prev) => prev + 1);
         let newObject: Item;
         switch (type) {
             case "point":
                 newObject = {
-                    id, type: "point", isDeleted: false, isVisible: false,
+                    id, type: "point", source: "manual", isDeleted: false, isVisible: false,
                     data: { color: [255, 0, 0, 204], opacity: 80, size: 10, lat: 0, lon: 0 },
                 };
                 break;
             case "line":
                 newObject = {
-                    id, type: "line", isDeleted: false, isVisible: false,
+                    id, type: "line", source: "manual", isDeleted: false, isVisible: false,
                     data: { color: [0, 255, 0, 204], opacity: 80, size: 10, lat1: 0, lon1: 0, lat2: 45, lon2: 45 },
                 };
                 break;
             case "voxel":
                 newObject = {
-                    id, type: "voxel", isDeleted: false, isVisible: false,
+                    id, type: "voxel", source: "manual", isDeleted: false, isVisible: false,
                     data: { color: [0, 0, 255, 76], opacity: 30, voxel: [] },
                 };
                 break;

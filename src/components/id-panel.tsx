@@ -31,7 +31,7 @@ const IdPanel: React.FC<IdPanelProps> = ({
     onColorChange,
     onUpdate,
 }) => {
-    const voxelItems = items.filter((item): item is Item<'voxel'> => item.type === 'voxel' && !item.isDeleted);
+    const voxelItems = items.filter((item): item is Item<'voxel'> => item.type === 'voxel' && item.source !== 'json' && !item.isDeleted);
 
     const [openPickerId, setOpenPickerId] = useState<number | null>(null);
     const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
