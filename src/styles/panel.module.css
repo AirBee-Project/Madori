@@ -1,0 +1,109 @@
+.panelContainer {
+	position: absolute;
+	top: 3.75rem;
+	left: 1rem;
+	width: 22.5rem;
+	max-height: 80vh;
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(4px);
+	box-shadow:
+		0 20px 25px -5px rgba(0, 0, 0, 0.1),
+		0 8px 10px -6px rgba(0, 0, 0, 0.1);
+	border-radius: 0.75rem;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	z-index: 30;
+	border: 1px solid #f3f4f6;
+}
+
+.scrollArea {
+	flex: 1;
+	overflow-y: auto;
+	padding-top: 0.375rem;
+}
+
+.itemList {
+	display: flex;
+	flex-direction: column;
+}
+
+.itemList > * + * {
+	border-top: 1px solid #f3f4f6;
+}
+
+.iconButton {
+	width: 2rem;
+	height: 2rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0.25rem;
+	background: none;
+	border: none;
+	cursor: pointer;
+	transition: color 0.15s;
+}
+
+.iconButton:hover {
+	color: #0f766e;
+}
+
+.deleteButton:hover {
+	color: #ef4444;
+}
+
+.colorSwatch {
+	width: 1rem;
+	height: 1rem;
+	border-radius: 0.125rem;
+	border: 1.5px solid black;
+}
+
+.colorButton {
+	width: 2rem;
+	height: 2rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0.25rem;
+	background: none;
+	border: none;
+	cursor: pointer;
+	transition:
+		transform 0.15s,
+		color 0.15s;
+}
+
+.colorButton:hover {
+	transform: scale(1.05);
+}
+
+.footer {
+	padding: 0.75rem;
+	border-top: 1px solid #f3f4f6;
+	background: rgba(249, 250, 251, 0.5);
+}
+
+.addButton {
+	width: 20rem;
+	padding: 0.2rem 0;
+	background: white;
+	border: 1px solid #d1d5db;
+	border-radius: 9999px;
+	color: #6b7280;
+	font-size: 0.875rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	transition:
+		color 0.15s,
+		border-color 0.15s;
+}
+
+.addButton:hover {
+	color: #0f766e;
+	border-color: #0f766e;
+}
