@@ -2,24 +2,15 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import FooterControls from "./components/footer-controls/footer-controls";
 import MapViewer from "./components/map-viewer/map-viewer";
 import UpperControls from "./components/upper-controls/upper-controls";
-import { ItemProvider, useItem } from "./context/item";
 import { JsonProvider } from "./context/json";
 import { MapProvider, useMap } from "./context/map";
 import { TimeProvider, useTime } from "./context/time";
+import { VoxelProvider } from "./context/voxel";
 import styles from "./styles/app.module.scss";
 
 function AppContent() {
-	const { items, setItems, focusOnVoxel, nextItemId, setNextItemId } =
-		useItem();
-
 	return (
-		<JsonProvider
-			items={items}
-			setItems={setItems}
-			nextItemId={nextItemId}
-			setNextItemId={setNextItemId}
-			focusOnVoxel={focusOnVoxel}
-		>
+		<JsonProvider>
 			<div className={styles.appRoot}>
 				<img src="/logo.png" className={styles.logo} alt="AirBee Logo" />
 				<MapViewer />
@@ -30,14 +21,14 @@ function AppContent() {
 	);
 }
 
-function AppWithItem() {
+function AppWithVoxel() {
 	const { flyTo } = useMap();
 	const { setCurrentTime } = useTime();
 
 	return (
-		<ItemProvider onFlyTo={flyTo} onTimeJump={setCurrentTime}>
+		<VoxelProvider onFlyTo={flyTo} onTimeJump={setCurrentTime}>
 			<AppContent />
-		</ItemProvider>
+		</VoxelProvider>
 	);
 }
 
@@ -45,7 +36,7 @@ export default function App() {
 	return (
 		<MapProvider>
 			<TimeProvider>
-				<AppWithItem />
+				<AppWithVoxel />
 			</TimeProvider>
 		</MapProvider>
 	);

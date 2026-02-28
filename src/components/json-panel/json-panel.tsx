@@ -5,7 +5,7 @@ import type { KasaneJson } from "../../data/voxel-json";
 import styles from "./json-panel.module.scss";
 import sharedStyles from "../../styles/panel.module.scss";
 import JsonColorPanel from "../json-color-panel/json-color-panel";
-import { useJson } from "../../context/json";
+import { useVoxel } from "../../context/voxel";
 
 export interface JsonItem {
     id: number;
@@ -31,7 +31,7 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const { setVoxelColorOverrides, valueColorMaps, setValueColorMaps } = useJson();
+    const { setVoxelColorOverrides, valueColorMaps, setValueColorMaps } = useVoxel();
 
     const [openPickerId, setOpenPickerId] = useState<number | null>(null);
     const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
