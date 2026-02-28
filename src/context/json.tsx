@@ -20,7 +20,7 @@ type JsonProviderProps = {
 export const JsonProvider = ({ children }: JsonProviderProps) => {
 	const [jsonItems, setJsonItems] = useState<JsonItem[]>([]);
 	const [nextJsonId, setNextJsonId] = useState(1);
-	const { voxelItems, addVoxel, deleteVoxel, focusOnVoxelDefs, setTooltipMap } =
+	const { voxelItems, addVoxel, deleteVoxel, focusOnVoxelDefs, addTooltips } =
 		useVoxel();
 
 	const addJson = async (file: File) => {
@@ -39,13 +39,7 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 				keys: Array.from(newTooltips.keys()),
 			});
 
-			setTooltipMap((prev) => {
-				const merged = new globalThis.Map(prev);
-				newTooltips.forEach((v, k) => {
-					merged.set(k, v);
-				});
-				return merged;
-			});
+			addTooltips(newTooltips);
 
 			const newJsonItem: JsonItem = {
 				id: nextJsonId,

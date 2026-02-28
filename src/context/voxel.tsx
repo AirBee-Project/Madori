@@ -25,6 +25,7 @@ type VoxelContextType = {
 	updateVoxelColor: (id: number, color: RGBA) => void;
 	focusVoxel: (id: number) => void;
 	focusOnVoxelDefs: (voxelDefs: VoxelDefinition[]) => void;
+	addTooltips: (newTooltips: Map<string, string>) => void;
 	voxelColorOverrides: globalThis.Map<string, RGBA>;
 	setVoxelColorOverrides: React.Dispatch<
 		React.SetStateAction<globalThis.Map<string, RGBA>>
@@ -102,6 +103,16 @@ export const VoxelProvider = ({
 		},
 		[voxelItems, focusOnVoxelDefs],
 	);
+
+	const addTooltips = useCallback((newTooltips: Map<string, string>) => {
+		setTooltipMap((prev) => {
+			const merged = new globalThis.Map(prev);
+			for (const [key, value] of newTooltips) {
+				merged.set(key, value);
+			}
+			return merged;
+		});
+	}, []);
 
 	const addVoxel = (data?: {
 		color: RGBA;
@@ -208,6 +219,7 @@ export const VoxelProvider = ({
 				updateVoxelColor,
 				focusVoxel,
 				focusOnVoxelDefs,
+				addTooltips,
 				voxelColorOverrides,
 				setVoxelColorOverrides,
 				valueColorMaps,
