@@ -12,7 +12,7 @@ export default function MapViewer() {
 	const { viewState, setViewState, isMapVisible, compileMode } = useMap();
 	const { items } = useItem();
 	const { currentTime } = useTime();
-	const { tooltipMap } = useJson();
+	const { tooltipMap, voxelColorOverrides } = useJson();
 
 	return (
 		<div className={styles.mapContainer}>
@@ -22,7 +22,7 @@ export default function MapViewer() {
 				controller={{ maxZoom: 25 } as any}
 				width="100%"
 				height="100%"
-				layers={generateLayer(items, compileMode, currentTime)}
+				layers={generateLayer(items, compileMode, currentTime, voxelColorOverrides)}
 				getTooltip={({ object }) => {
 					if (!object) return null;
 					const tip = tooltipMap.get(object.voxelID);

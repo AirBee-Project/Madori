@@ -8,6 +8,8 @@ import jsonToVoxelDefinition from "../utils/parse-voxel-json";
 type JsonContextType = {
 	jsonItems: JsonItem[];
 	tooltipMap: globalThis.Map<string, string>;
+	voxelColorOverrides: globalThis.Map<string, [number, number, number, number]>;
+	setVoxelColorOverrides: React.Dispatch<React.SetStateAction<globalThis.Map<string, [number, number, number, number]>>>;
 	addJson: (file: File) => Promise<void>;
 	deleteJson: (id: number) => void;
 	focusJson: (id: number) => void;
@@ -39,6 +41,9 @@ export const JsonProvider = ({
 	const [jsonItems, setJsonItems] = useState<JsonItem[]>([]);
 	const [nextJsonId, setNextJsonId] = useState(1);
 	const [tooltipMap, setTooltipMap] = useState<globalThis.Map<string, string>>(
+		new globalThis.Map(),
+	);
+	const [voxelColorOverrides, setVoxelColorOverrides] = useState<globalThis.Map<string, [number, number, number, number]>>(
 		new globalThis.Map(),
 	);
 
@@ -146,6 +151,8 @@ export const JsonProvider = ({
 			value={{
 				jsonItems,
 				tooltipMap,
+				voxelColorOverrides,
+				setVoxelColorOverrides,
 				addJson,
 				deleteJson,
 				focusJson,

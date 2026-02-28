@@ -9,6 +9,7 @@ export default function generateLayer(
 	item: Item[],
 	compileMode: boolean = true,
 	currentTime: number = 0,
+	voxelColorOverrides?: globalThis.Map<string, [number, number, number, number]>,
 ): LayersList {
 	const pointItem: Item<"point">[] = item.filter(
 		(e): e is Item<"point"> =>
@@ -48,7 +49,7 @@ export default function generateLayer(
 
 	const voxelPolygonLayer = new PolygonLayer({
 		id: "PolygonLayer",
-		data: generatePolygonLayer(voxelItem, compileMode, currentTime),
+		data: generatePolygonLayer(voxelItem, compileMode, currentTime, voxelColorOverrides),
 		extruded: true,
 		wireframe: true,
 		filled: true,
@@ -132,12 +133,19 @@ function generatePolygonLayer(
 	voxel: Item<"voxel">[],
 	compileMode: boolean,
 	currentTime: number,
+	voxelColorOverrides?: globalThis.Map<string, [number, number, number, number]>,
 ): Polygon[] {
 	const result: Polygon[] = [];
 	for (let i = 0; i < voxel.length; i++) {
 		const pureVoxel = expandVoxelRange(voxel[i].data.voxel, compileMode);
 		const polygon = pvoxelToPolygon(pureVoxel, voxel[i].data.color);
 		for (const p of polygon) {
+			if (voxelColorOverrides && voxelColorOverrides.size > 0) {
+				const override = voxelColorOverrides.get(p.voxelID);
+				if (override) {
+					p.color = override;
+				}
+			}
 			if (p.startTime === null && p.endTime === null) {
 				result.push(p);
 			} else if (

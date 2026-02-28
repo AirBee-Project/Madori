@@ -1,9 +1,11 @@
 import { IconEdit, IconTarget, IconTrash, IconUpload } from "@tabler/icons-react";
 import type React from "react";
 import { useRef, useState } from "react";
+import type { KasaneJson } from "../data/voxel-json";
 import styles from "../styles/json-panel.module.css";
 import sharedStyles from "../styles/panel.module.css";
-import ColorPicker from "./color-picker";
+import JsonColorPanel from "./json-color-panel";
+import { useJson } from "../context/json";
 
 export interface JsonItem {
     id: number;
@@ -30,9 +32,12 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
     onColorChange,
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const { setVoxelColorOverrides } = useJson();
 
     const [openPickerId, setOpenPickerId] = useState<number | null>(null);
     const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
+    const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
 
     const handleColorClick = (
         id: number,
@@ -42,6 +47,7 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
             setOpenPickerId(null);
         } else {
             setPickerRect(e.currentTarget.getBoundingClientRect());
+            setContainerRect(containerRef.current?.getBoundingClientRect() ?? null);
             setOpenPickerId(id);
         }
     };
@@ -54,77 +60,78 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
     };
 
     return (
-        <div className={sharedStyles.panelContainer}>
-            <div className={sharedStyles.scrollArea}>
-                <div className={sharedStyles.itemList}>
-                    {jsonItems.map((item) => (
-                        <div key={item.id} className={styles.itemRow}>
-                            <div className={styles.fileName}>
-                                <div className={styles.fileNameBox}>
-                                    <span className={styles.fileNameText} title={item.fileName}>
-                                        {item.description || item.fileName}
-                                    </span>
+        <>
+            <div ref={containerRef} className={sharedStyles.panelContainer}>
+                <div className={sharedStyles.scrollArea}>
+                    <div className={sharedStyles.itemList}>
+                        {jsonItems.map((item) => (
+                            <div key={item.id} className={styles.itemRow}>
+                                <div className={styles.fileName}>
+                                    <div className={styles.fileNameBox}>
+                                        <span className={styles.fileNameText} title={item.fileName}>
+                                            {item.description || item.fileName}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className={styles.actionButtons}>
+                                    <button
+                                        onClick={() => onDelete(item.id)}
+                                        className={`${sharedStyles.iconButton} ${sharedStyles.deleteButton}`}
+                                    >
+                                        <IconTrash />
+                                    </button>
+                                    <button
+                                        onClick={() => onFocus(item.id)}
+                                        className={sharedStyles.iconButton}
+                                    >
+                                        <IconTarget />
+                                    </button>
+                                    <button
+                                        onClick={(e) => handleColorClick(item.id, e)}
+                                        className={sharedStyles.iconButton}
+                                    >
+                                        <IconEdit />
+                                    </button>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                </div>
 
-                            <div className={styles.actionButtons}>
-                                <button
-                                    onClick={() => onDelete(item.id)}
-                                    className={`${sharedStyles.iconButton} ${sharedStyles.deleteButton}`}
-                                >
-                                    <IconTrash />
-                                </button>
-                                <button
-                                    onClick={() => onFocus(item.id)}
-                                    className={sharedStyles.iconButton}
-                                >
-                                    <IconTarget />
-                                </button>
-                                <button
-                                    onClick={(e) => handleColorClick(item.id, e)}
-                                    className={sharedStyles.iconButton}
-                                >
-                                    <IconEdit />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                <div className={sharedStyles.footer}>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".json"
+                        className={styles.hiddenInput}
+                        onChange={handleFileChange}
+                    />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className={sharedStyles.addButton}
+                    >
+                        <IconUpload /> JSONを追加
+                    </button>
                 </div>
             </div>
 
-            <div className={sharedStyles.footer}>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".json"
-                    className={styles.hiddenInput}
-                    onChange={handleFileChange}
-                />
-                <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className={sharedStyles.addButton}
-                >
-                    <IconUpload /> JSONを追加
-                </button>
-            </div>
-
-            {openPickerId !== null && pickerRect && (
-                <ColorPicker
-                    triggerRect={pickerRect}
-                    color={
-                        jsonItems.find((i) => i.id === openPickerId)?.color || [
-                            0, 0, 0, 255,
-                        ]
-                    }
-                    onChange={(color) => {
-                        onColorChange(openPickerId, color);
-                    }}
-                    onClose={() => setOpenPickerId(null)}
-                    lazyUpdate={false}
-                />
-            )}
-        </div>
+            {openPickerId !== null && pickerRect && containerRect && (() => {
+                const target = jsonItems.find((i) => i.id === openPickerId);
+                if (!target) return null;
+                return (
+                    <JsonColorPanel
+                        content={target.content as KasaneJson}
+                        triggerRect={pickerRect}
+                        containerRight={containerRect.right}
+                        onColorMapChange={setVoxelColorOverrides}
+                        onClose={() => setOpenPickerId(null)}
+                    />
+                );
+            })()}
+        </>
     );
 };
 
 export default JsonPanel;
+
