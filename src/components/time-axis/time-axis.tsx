@@ -74,7 +74,7 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
 		ctx.fillStyle = "#333";
 		ctx.textAlign = "center";
 		ctx.textBaseline = "top";
-		ctx.font = "10px sans-serif";
+		ctx.font = "10px 'Noto Sans JP";
 
 		let tickInterval = 3600;
 		if (viewDuration > 31536000 * 5) tickInterval = 31536000;
