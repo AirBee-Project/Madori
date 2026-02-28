@@ -6,4 +6,5 @@ export type Voxel = {
 	opacity: number;
 	voxel: VoxelDefinition[];
 	voxelString?: string;
+	keys?: string[];
 };

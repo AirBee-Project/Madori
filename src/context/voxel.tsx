@@ -18,6 +18,7 @@ type VoxelContextType = {
 		opacity: number;
 		voxel: VoxelDefinition[];
 		source?: "manual" | "json";
+		keys?: string[];
 	}) => number;
 	deleteVoxel: (id: number) => void;
 	updateVoxelString: (id: number, newVoxelString: string) => void;
@@ -107,6 +108,7 @@ export const VoxelProvider = ({
 		opacity: number;
 		voxel: VoxelDefinition[];
 		source?: "manual" | "json";
+		keys?: string[];
 	}): number => {
 		const id = nextVoxelId;
 		setNextVoxelId((prev) => prev + 1);
@@ -117,7 +119,12 @@ export const VoxelProvider = ({
 			isDeleted: false,
 			isVisible: false,
 			data: data
-				? { color: data.color, opacity: data.opacity, voxel: data.voxel }
+				? {
+						color: data.color,
+						opacity: data.opacity,
+						voxel: data.voxel,
+						keys: data.keys,
+					}
 				: { color: [0, 0, 255, 76], opacity: 30, voxel: [] },
 		};
 		setVoxelItems((prev) => [...prev, newItem]);
@@ -125,6 +132,28 @@ export const VoxelProvider = ({
 	};
 
 	const deleteVoxel = (id: number) => {
+		const targetItem = voxelItems.find((i) => i.id === id);
+		if (targetItem?.data.keys?.length) {
+			const keysToRemove = targetItem.data.keys;
+
+			setTooltipMap((prev) => {
+				const next = new globalThis.Map(prev);
+				let changed = false;
+				for (const key of keysToRemove) {
+					if (next.delete(key)) changed = true;
+				}
+				return changed ? next : prev;
+			});
+
+			setVoxelColorOverrides((prev) => {
+				const next = new globalThis.Map(prev);
+				let changed = false;
+				for (const key of keysToRemove) {
+					if (next.delete(key)) changed = true;
+				}
+				return changed ? next : prev;
+			});
+		}
 		setVoxelItems((prev) => prev.filter((i) => i.id !== id));
 	};
 

@@ -36,6 +36,7 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 				opacity: 30,
 				voxel: voxelDefs,
 				source: "json",
+				keys: Array.from(newTooltips.keys()),
 			});
 
 			setTooltipMap((prev) => {
