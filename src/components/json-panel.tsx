@@ -1,10 +1,9 @@
-import { IconTarget, IconTrash, IconUpload } from "@tabler/icons-react";
+import { IconEdit, IconTarget, IconTrash, IconUpload } from "@tabler/icons-react";
 import type React from "react";
 import { useRef, useState } from "react";
 import styles from "../styles/json-panel.module.css";
 import sharedStyles from "../styles/panel.module.css";
 import ColorPicker from "./color-picker";
-import { rgbaCss } from '../utils/color-utils';
 
 export interface JsonItem {
     id: number;
@@ -83,12 +82,9 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
                                 </button>
                                 <button
                                     onClick={(e) => handleColorClick(item.id, e)}
-                                    className={sharedStyles.colorButton}
+                                    className={sharedStyles.iconButton}
                                 >
-                                    <div
-                                        className={sharedStyles.colorSwatch}
-                                        style={{ backgroundColor: rgbaCss(item.color) }}
-                                    />
+                                    <IconEdit />
                                 </button>
                             </div>
                         </div>
