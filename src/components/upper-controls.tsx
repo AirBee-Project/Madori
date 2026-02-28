@@ -22,7 +22,7 @@ export default function UpperControls() {
 		useItem();
 	const { compileMode, setCompileMode, isMapVisible, setIsMapVisible } =
 		useMap();
-	const { jsonItems, addJson, deleteJson, focusJson, updateJsonColor } =
+	const { jsonItems, addJson, deleteJson, focusJson } =
 		useJson();
 
 	return (
@@ -71,7 +71,6 @@ export default function UpperControls() {
 					onAdd={addJson}
 					onDelete={deleteJson}
 					onFocus={focusJson}
-					onColorChange={updateJsonColor}
 				/>
 			)}
 

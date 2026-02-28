@@ -21,7 +21,6 @@ interface JsonPanelProps {
     onAdd: (file: File) => void;
     onDelete: (id: number) => void;
     onFocus: (id: number) => void;
-    onColorChange: (id: number, color: [number, number, number, number]) => void;
 }
 
 const JsonPanel: React.FC<JsonPanelProps> = ({
@@ -29,11 +28,10 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
     onAdd,
     onDelete,
     onFocus,
-    onColorChange,
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const { setVoxelColorOverrides } = useJson();
+    const { setVoxelColorOverrides, valueColorMaps, setValueColorMaps } = useJson();
 
     const [openPickerId, setOpenPickerId] = useState<number | null>(null);
     const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
@@ -124,6 +122,8 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
                         content={target.content as KasaneJson}
                         triggerRect={pickerRect}
                         containerRight={containerRect.right}
+                        valueColorMaps={valueColorMaps}
+                        setValueColorMaps={setValueColorMaps}
                         onColorMapChange={setVoxelColorOverrides}
                         onClose={() => setOpenPickerId(null)}
                     />

@@ -16,16 +16,11 @@ function isPrimitiveArray(values: unknown[]): boolean {
 	);
 }
 
-function formatValue(v: unknown): string {
-	if (typeof v === "object" && v !== null) return JSON.stringify(v);
-	return String(v);
-}
-
 function uniqueValues(values: unknown[]): string[] {
 	const seen = new Set<string>();
 	const result: string[] = [];
 	for (const v of values) {
-		const s = formatValue(v);
+		const s = String(v);
 		if (!seen.has(s)) {
 			seen.add(s);
 			result.push(s);
@@ -66,6 +61,8 @@ interface JsonColorPanelProps {
 	content: KasaneJson;
 	triggerRect: DOMRect;
 	containerRight: number;
+	valueColorMaps: Map<string, Map<string, [number, number, number, number]>>;
+	setValueColorMaps: React.Dispatch<React.SetStateAction<Map<string, Map<string, [number, number, number, number]>>>>;
 	onColorMapChange: (overrides: Map<string, [number, number, number, number]>) => void;
 	onClose: () => void;
 }
@@ -74,6 +71,8 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 	content,
 	triggerRect,
 	containerRight,
+	valueColorMaps,
+	setValueColorMaps,
 	onColorMapChange,
 	onClose,
 }) => {
@@ -98,35 +97,34 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 		nameEntries.length > 0 ? nameEntries[0].name : null,
 	);
 
-	const [colorMaps, setColorMaps] = useState<Map<string, Map<string, [number, number, number, number]>>>(() => {
-		const initial = new Map<string, Map<string, [number, number, number, number]>>();
-		for (const entry of nameEntries) {
-			initial.set(entry.name, buildInitialColorMap(entry.values));
+	for (const entry of nameEntries) {
+		if (!valueColorMaps.has(entry.name)) {
+			valueColorMaps.set(entry.name, buildInitialColorMap(entry.values));
 		}
-		return initial;
-	});
+	}
 
 	const [pickerTarget, setPickerTarget] = useState<{ value: string; rect: DOMRect } | null>(null);
 
-	const currentColorMap = selectedName ? colorMaps.get(selectedName) : undefined;
+	const currentColorMap = selectedName ? valueColorMaps.get(selectedName) : undefined;
 	const selectedEntry = nameEntries.find((e) => e.name === selectedName);
 
 	useEffect(() => {
 		if (!selectedName || !currentColorMap) return;
+
 
 		const dataEntry = content.data.find((e) => e.name === selectedName);
 		if (!dataEntry) return;
 
 		const overrides = new Map<string, [number, number, number, number]>();
 		for (const id of dataEntry.ids) {
-			const valueStr = formatValue(dataEntry.value[id.ref]);
+			const valueStr = String(dataEntry.value[id.ref]);
 			const color = currentColorMap.get(valueStr);
 			if (color) {
 				overrides.set(spatialKey(id), color);
 			}
 		}
 		onColorMapChange(overrides);
-	}, [selectedName, colorMaps, content, currentColorMap, onColorMapChange]);
+	}, [selectedName, valueColorMaps, content, currentColorMap, onColorMapChange]);
 
 	const handleSwatchClick = (value: string, e: React.MouseEvent<HTMLButtonElement>) => {
 		setPickerTarget({ value, rect: e.currentTarget.getBoundingClientRect() });
@@ -135,7 +133,7 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 
 	const handleColorChange = (value: string, color: [number, number, number, number]) => {
 		if (!selectedName) return;
-		setColorMaps((prev) => {
+		setValueColorMaps((prev) => {
 			const next = new Map(prev);
 			const nameMap = new Map(next.get(selectedName) ?? new Map());
 			nameMap.set(value, color);

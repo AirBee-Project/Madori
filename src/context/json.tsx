@@ -5,17 +5,21 @@ import type { VoxelDefinition } from "../data/voxel-definition";
 import type { KasaneJson } from "../data/voxel-json";
 import jsonToVoxelDefinition from "../utils/parse-voxel-json";
 
+type RGBA = [number, number, number, number];
+
 type JsonContextType = {
 	jsonItems: JsonItem[];
 	tooltipMap: globalThis.Map<string, string>;
-	voxelColorOverrides: globalThis.Map<string, [number, number, number, number]>;
-	setVoxelColorOverrides: React.Dispatch<React.SetStateAction<globalThis.Map<string, [number, number, number, number]>>>;
+	voxelColorOverrides: globalThis.Map<string, RGBA>;
+	setVoxelColorOverrides: React.Dispatch<React.SetStateAction<globalThis.Map<string, RGBA>>>;
+	valueColorMaps: globalThis.Map<string, globalThis.Map<string, RGBA>>;
+	setValueColorMaps: React.Dispatch<React.SetStateAction<globalThis.Map<string, globalThis.Map<string, RGBA>>>>;
 	addJson: (file: File) => Promise<void>;
 	deleteJson: (id: number) => void;
 	focusJson: (id: number) => void;
 	updateJsonColor: (
 		id: number,
-		color: [number, number, number, number],
+		color: RGBA,
 	) => void;
 };
 
@@ -43,7 +47,10 @@ export const JsonProvider = ({
 	const [tooltipMap, setTooltipMap] = useState<globalThis.Map<string, string>>(
 		new globalThis.Map(),
 	);
-	const [voxelColorOverrides, setVoxelColorOverrides] = useState<globalThis.Map<string, [number, number, number, number]>>(
+	const [voxelColorOverrides, setVoxelColorOverrides] = useState<globalThis.Map<string, RGBA>>(
+		new globalThis.Map(),
+	);
+	const [valueColorMaps, setValueColorMaps] = useState<globalThis.Map<string, globalThis.Map<string, RGBA>>>(
 		new globalThis.Map(),
 	);
 
@@ -153,6 +160,8 @@ export const JsonProvider = ({
 				tooltipMap,
 				voxelColorOverrides,
 				setVoxelColorOverrides,
+				valueColorMaps,
+				setValueColorMaps,
 				addJson,
 				deleteJson,
 				focusJson,
