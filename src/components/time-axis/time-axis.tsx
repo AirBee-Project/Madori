@@ -201,6 +201,11 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
 
 	return (
 		<div
+			role="slider"
+			aria-valuenow={currentTime}
+			aria-valuemin={minTime}
+			aria-valuemax={maxTime}
+			tabIndex={0}
 			ref={containerRef}
 			style={{
 				width: "100%",

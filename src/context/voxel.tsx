@@ -30,9 +30,7 @@ type VoxelContextType = {
 	>;
 	valueColorMaps: globalThis.Map<string, globalThis.Map<string, RGBA>>;
 	setValueColorMaps: React.Dispatch<
-		React.SetStateAction<
-			globalThis.Map<string, globalThis.Map<string, RGBA>>
-		>
+		React.SetStateAction<globalThis.Map<string, globalThis.Map<string, RGBA>>>
 	>;
 	tooltipMap: globalThis.Map<string, string>;
 	setTooltipMap: React.Dispatch<
@@ -62,9 +60,9 @@ export const VoxelProvider = ({
 	const [valueColorMaps, setValueColorMaps] = useState<
 		globalThis.Map<string, globalThis.Map<string, RGBA>>
 	>(new globalThis.Map());
-	const [tooltipMap, setTooltipMap] = useState<
-		globalThis.Map<string, string>
-	>(new globalThis.Map());
+	const [tooltipMap, setTooltipMap] = useState<globalThis.Map<string, string>>(
+		new globalThis.Map(),
+	);
 
 	const focusOnVoxelDefs = useCallback(
 		(voxelDefs: VoxelDefinition[]) => {
@@ -82,8 +80,7 @@ export const VoxelProvider = ({
 			const centerLon = -180 + lonPerTile * ((xMin + xMax + 1) / 2);
 			const yCenter = (yMin + yMax + 1) / 2;
 			const centerLat =
-				(Math.atan(Math.sinh(Math.PI - (yCenter / n) * 2 * Math.PI)) *
-					180) /
+				(Math.atan(Math.sinh(Math.PI - (yCenter / n) * 2 * Math.PI)) * 180) /
 				Math.PI;
 
 			onFlyTo(centerLon, centerLat);
@@ -161,10 +158,7 @@ export const VoxelProvider = ({
 		);
 	};
 
-	const updateVoxelColor = (
-		id: number,
-		color: RGBA,
-	) => {
+	const updateVoxelColor = (id: number, color: RGBA) => {
 		setVoxelItems((prevItems) =>
 			prevItems.map((item) => {
 				if (item.id === id) {
@@ -200,7 +194,6 @@ export const VoxelProvider = ({
 
 export const useVoxel = () => {
 	const context = useContext(VoxelContext);
-	if (!context)
-		throw new Error("useVoxel must be used within a VoxelProvider");
+	if (!context) throw new Error("useVoxel must be used within a VoxelProvider");
 	return context;
 };

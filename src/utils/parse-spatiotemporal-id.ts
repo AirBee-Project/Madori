@@ -52,10 +52,10 @@ function parseDimensionRange(
 	item: string,
 ): number | [number, number] {
 	if (item === "-") {
-		if (dimension == "F") {
+		if (dimension === "F") {
 			return [2 ** zoomLevel - 1, -(2 ** zoomLevel)];
 		} else {
-			if (zoomLevel == 0) {
+			if (zoomLevel === 0) {
 				return 0;
 			} else {
 				return [0, 2 ** zoomLevel - 1];
@@ -75,7 +75,7 @@ function parseDimensionRange(
 		} else {
 			return [0, end];
 		}
-	} else if (item.indexOf(":") != -1) {
+	} else if (item.indexOf(":") !== -1) {
 		const itemList = item.split(":");
 		const start = Number(itemList[0]);
 		const end = Number(itemList[1]);

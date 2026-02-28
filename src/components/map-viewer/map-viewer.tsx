@@ -1,10 +1,11 @@
+import type { MapViewState } from "@deck.gl/core";
 import DeckGL from "@deck.gl/react";
-import { Map } from "react-map-gl/maplibre";
+import { Map as MapGL } from "react-map-gl/maplibre";
 import { useMap } from "../../context/map";
 import { useTime } from "../../context/time";
 import { useVoxel } from "../../context/voxel";
-import styles from "./map-viewer.module.scss";
 import generateLayer from "../../utils/generate-layers";
+import styles from "./map-viewer.module.scss";
 
 export default function MapViewer() {
 	const { viewState, setViewState, isMapVisible, compileMode } = useMap();
@@ -15,8 +16,10 @@ export default function MapViewer() {
 		<div className={styles.mapContainer}>
 			<DeckGL
 				viewState={viewState}
-				onViewStateChange={({ viewState }: any) => setViewState(viewState)}
-				controller={{ maxZoom: 25 } as any}
+				onViewStateChange={({ viewState }) =>
+					setViewState(viewState as MapViewState)
+				}
+				controller={{ maxZoom: 25 } as Record<string, unknown>}
 				width="100%"
 				height="100%"
 				layers={generateLayer(
@@ -32,7 +35,7 @@ export default function MapViewer() {
 				}}
 			>
 				{isMapVisible && (
-					<Map
+					<MapGL
 						mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
 						renderWorldCopies={false}
 					/>

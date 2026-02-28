@@ -11,9 +11,9 @@ import { useState } from "react";
 import { useJson } from "../../context/json";
 import { useMap } from "../../context/map";
 import { useVoxel } from "../../context/voxel";
-import styles from "./upper-controls.module.scss";
 import IdPanel from "../id-panel/id-panel";
 import JsonPanel from "../json-panel/json-panel";
+import styles from "./upper-controls.module.scss";
 
 export default function UpperControls() {
 	const [isIdPanelVisible, setIsIdPanelVisible] = useState(false);

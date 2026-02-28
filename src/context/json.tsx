@@ -20,13 +20,8 @@ type JsonProviderProps = {
 export const JsonProvider = ({ children }: JsonProviderProps) => {
 	const [jsonItems, setJsonItems] = useState<JsonItem[]>([]);
 	const [nextJsonId, setNextJsonId] = useState(1);
-	const {
-		voxelItems,
-		addVoxel,
-		deleteVoxel,
-		focusOnVoxelDefs,
-		setTooltipMap,
-	} = useVoxel();
+	const { voxelItems, addVoxel, deleteVoxel, focusOnVoxelDefs, setTooltipMap } =
+		useVoxel();
 
 	const addJson = async (file: File) => {
 		try {
@@ -45,7 +40,9 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 
 			setTooltipMap((prev) => {
 				const merged = new globalThis.Map(prev);
-				newTooltips.forEach((v, k) => merged.set(k, v));
+				newTooltips.forEach((v, k) => {
+					merged.set(k, v);
+				});
 				return merged;
 			});
 
@@ -66,7 +63,7 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 
 	const deleteJson = (id: number) => {
 		const target = jsonItems.find((i) => i.id === id);
-		if (target && target.voxelItemIds) {
+		if (target?.voxelItemIds) {
 			for (const voxelId of target.voxelItemIds) {
 				deleteVoxel(voxelId);
 			}
@@ -76,9 +73,9 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 
 	const focusJson = (id: number) => {
 		const target = jsonItems.find((i) => i.id === id);
-		if (target && target.voxelItemIds && target.voxelItemIds.length > 0) {
+		if (target?.voxelItemIds && target.voxelItemIds.length > 0) {
 			const voxelItem = voxelItems.find(
-				(i) => i.id === target.voxelItemIds![0],
+				(i) => i.id === target.voxelItemIds?.[0],
 			);
 			if (voxelItem && voxelItem.data.voxel.length > 0) {
 				focusOnVoxelDefs(voxelItem.data.voxel);

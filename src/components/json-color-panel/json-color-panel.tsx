@@ -1,18 +1,16 @@
 import { IconChevronRight } from "@tabler/icons-react";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { KasaneJson } from "../../data/voxel-json";
 import { preset_colors } from "../../data/colors";
-import styles from "./json-color-panel.module.scss";
+import type { KasaneJson } from "../../data/voxel-json";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import ColorPicker from "../color-picker/color-picker";
+import styles from "./json-color-panel.module.scss";
 
 function isPrimitiveArray(values: unknown[]): boolean {
 	return values.every(
 		(v) =>
-			typeof v === "string" ||
-			typeof v === "number" ||
-			typeof v === "boolean",
+			typeof v === "string" || typeof v === "number" || typeof v === "boolean",
 	);
 }
 
@@ -29,14 +27,19 @@ function uniqueValues(values: unknown[]): string[] {
 	return result;
 }
 
-function hexToRgba(hex: string, alpha: number): [number, number, number, number] {
+function hexToRgba(
+	hex: string,
+	alpha: number,
+): [number, number, number, number] {
 	const r = Number.parseInt(hex.slice(1, 3), 16);
 	const g = Number.parseInt(hex.slice(3, 5), 16);
 	const b = Number.parseInt(hex.slice(5, 7), 16);
 	return [r, g, b, alpha];
 }
 
-function buildInitialColorMap(values: string[]): Map<string, [number, number, number, number]> {
+function buildInitialColorMap(
+	values: string[],
+): Map<string, [number, number, number, number]> {
 	const map = new Map<string, [number, number, number, number]>();
 	for (let i = 0; i < values.length; i++) {
 		map.set(values[i], hexToRgba(preset_colors[i % preset_colors.length], 200));
@@ -44,11 +47,28 @@ function buildInitialColorMap(values: string[]): Map<string, [number, number, nu
 	return map;
 }
 
-function spatialKey(id: { z: number; f?: [number] | [number, number]; x?: [number] | [number, number]; y?: [number] | [number, number] }): string {
+function spatialKey(id: {
+	z: number;
+	f?: [number] | [number, number];
+	x?: [number] | [number, number];
+	y?: [number] | [number, number];
+}): string {
 	const z = id.z;
-	const f = id.f ? (id.f.length === 2 ? `${id.f[0]}:${id.f[1]}` : `${id.f[0]}`) : "-";
-	const x = id.x ? (id.x.length === 2 ? `${id.x[0]}:${id.x[1]}` : `${id.x[0]}`) : "-";
-	const y = id.y ? (id.y.length === 2 ? `${id.y[0]}:${id.y[1]}` : `${id.y[0]}`) : "-";
+	const f = id.f
+		? id.f.length === 2
+			? `${id.f[0]}:${id.f[1]}`
+			: `${id.f[0]}`
+		: "-";
+	const x = id.x
+		? id.x.length === 2
+			? `${id.x[0]}:${id.x[1]}`
+			: `${id.x[0]}`
+		: "-";
+	const y = id.y
+		? id.y.length === 2
+			? `${id.y[0]}:${id.y[1]}`
+			: `${id.y[0]}`
+		: "-";
 	return `${z}/${f}/${x}/${y}`;
 }
 
@@ -62,8 +82,14 @@ interface JsonColorPanelProps {
 	triggerRect: DOMRect;
 	containerRight: number;
 	valueColorMaps: Map<string, Map<string, [number, number, number, number]>>;
-	setValueColorMaps: React.Dispatch<React.SetStateAction<Map<string, Map<string, [number, number, number, number]>>>>;
-	onColorMapChange: (overrides: Map<string, [number, number, number, number]>) => void;
+	setValueColorMaps: React.Dispatch<
+		React.SetStateAction<
+			Map<string, Map<string, [number, number, number, number]>>
+		>
+	>;
+	onColorMapChange: (
+		overrides: Map<string, [number, number, number, number]>,
+	) => void;
 	onClose: () => void;
 }
 
@@ -113,14 +139,18 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 		}
 	}, [nameEntries, valueColorMaps, setValueColorMaps]);
 
-	const [pickerTarget, setPickerTarget] = useState<{ value: string; rect: DOMRect } | null>(null);
+	const [pickerTarget, setPickerTarget] = useState<{
+		value: string;
+		rect: DOMRect;
+	} | null>(null);
 
-	const currentColorMap = selectedName ? valueColorMaps.get(selectedName) : undefined;
+	const currentColorMap = selectedName
+		? valueColorMaps.get(selectedName)
+		: undefined;
 	const selectedEntry = nameEntries.find((e) => e.name === selectedName);
 
 	useEffect(() => {
 		if (!selectedName || !currentColorMap) return;
-
 
 		const dataEntry = content.data.find((e) => e.name === selectedName);
 		if (!dataEntry) return;
@@ -134,14 +164,20 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 			}
 		}
 		onColorMapChange(overrides);
-	}, [selectedName, valueColorMaps, content, currentColorMap, onColorMapChange]);
+	}, [selectedName, content, currentColorMap, onColorMapChange]);
 
-	const handleSwatchClick = (value: string, e: React.MouseEvent<HTMLButtonElement>) => {
+	const handleSwatchClick = (
+		value: string,
+		e: React.MouseEvent<HTMLButtonElement>,
+	) => {
 		setPickerTarget({ value, rect: e.currentTarget.getBoundingClientRect() });
 		pickerOpenRef.current = true;
 	};
 
-	const handleColorChange = (value: string, color: [number, number, number, number]) => {
+	const handleColorChange = (
+		value: string,
+		color: [number, number, number, number],
+	) => {
 		if (!selectedName) return;
 		setValueColorMaps((prev) => {
 			const next = new Map(prev);
@@ -167,9 +203,7 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 			{!selectedName && (
 				<div className={styles.nameList}>
 					{nameEntries.length === 0 && (
-						<div className={styles.emptyText}>
-							対象の項目がありません
-						</div>
+						<div className={styles.emptyText}>対象の項目がありません</div>
 					)}
 					{nameEntries.map((entry) => (
 						<button
@@ -211,7 +245,9 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 					</button>
 					<div className={styles.valueList}>
 						{selectedEntry.values.map((value) => {
-							const color = currentColorMap?.get(value) ?? [0, 0, 0, 200] as [number, number, number, number];
+							const color =
+								currentColorMap?.get(value) ??
+								([0, 0, 0, 200] as [number, number, number, number]);
 							return (
 								<div key={value} className={styles.valueItem}>
 									<span className={styles.valueText}>{value}</span>

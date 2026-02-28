@@ -31,6 +31,7 @@ const TimeControls: React.FC<TimeControlsProps> = ({
 	return (
 		<div className={styles.container}>
 			<button
+				type="button"
 				onClick={onPlayPause}
 				className={styles.playButton}
 				title={isPlaying ? "Pause" : "Play"}

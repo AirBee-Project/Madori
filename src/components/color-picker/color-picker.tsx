@@ -75,10 +75,13 @@ export default function ColorPicker({
 
 	return createPortal(
 		<div
+			role="dialog"
+			aria-label="Color Picker"
 			ref={pickerRef}
 			className={styles.pickerContainer}
 			style={position}
 			onClick={(e) => e.stopPropagation()}
+			onKeyDown={(e) => e.stopPropagation()}
 		>
 			<div className={styles.circlePickerWrapper}>
 				<CirclePicker
@@ -124,7 +127,7 @@ export default function ColorPicker({
 									}}
 								/>
 							),
-						} as any)}
+						} as Record<string, unknown>)}
 					/>
 				</div>
 			</div>
