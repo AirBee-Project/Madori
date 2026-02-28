@@ -97,11 +97,21 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 		nameEntries.length > 0 ? nameEntries[0].name : null,
 	);
 
-	for (const entry of nameEntries) {
-		if (!valueColorMaps.has(entry.name)) {
-			valueColorMaps.set(entry.name, buildInitialColorMap(entry.values));
+	useEffect(() => {
+		let hasChanges = false;
+		const newMap = new Map(valueColorMaps);
+
+		for (const entry of nameEntries) {
+			if (!newMap.has(entry.name)) {
+				newMap.set(entry.name, buildInitialColorMap(entry.values));
+				hasChanges = true;
+			}
 		}
-	}
+
+		if (hasChanges) {
+			setValueColorMaps(newMap);
+		}
+	}, [nameEntries, valueColorMaps, setValueColorMaps]);
 
 	const [pickerTarget, setPickerTarget] = useState<{ value: string; rect: DOMRect } | null>(null);
 
