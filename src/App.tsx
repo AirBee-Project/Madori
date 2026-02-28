@@ -12,7 +12,11 @@ function AppContent() {
 	return (
 		<JsonProvider>
 			<div className={styles.appRoot}>
-				<img src="/logo.png" className={styles.logo} alt="AirBee Logo" />
+				<img
+					src={`${import.meta.env.BASE_URL}logo.png`}
+					className={styles.logo}
+					alt="AirBee Logo"
+				/>
 				<MapViewer />
 				<UpperControls />
 				<FooterControls />
