@@ -1,11 +1,11 @@
 import { IconEdit, IconTarget, IconTrash, IconUpload } from "@tabler/icons-react";
 import type React from "react";
 import { useRef, useState } from "react";
-import type { KasaneJson } from "../data/voxel-json";
-import styles from "../styles/json-panel.module.css";
-import sharedStyles from "../styles/panel.module.css";
-import JsonColorPanel from "./json-color-panel";
-import { useJson } from "../context/json";
+import type { KasaneJson } from "../../data/voxel-json";
+import styles from "./json-panel.module.scss";
+import sharedStyles from "../../styles/panel.module.scss";
+import JsonColorPanel from "../json-color-panel/json-color-panel";
+import { useJson } from "../../context/json";
 
 export interface JsonItem {
     id: number;

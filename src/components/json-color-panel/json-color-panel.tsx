@@ -1,11 +1,11 @@
 import { IconChevronRight } from "@tabler/icons-react";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { KasaneJson } from "../data/voxel-json";
-import { preset_colors } from "../data/colors";
-import styles from "../styles/json-color-panel.module.css";
-import { useClickOutside } from "../hooks/useClickOutside";
-import ColorPicker from "./color-picker";
+import type { KasaneJson } from "../../data/voxel-json";
+import { preset_colors } from "../../data/colors";
+import styles from "./json-color-panel.module.scss";
+import { useClickOutside } from "../../hooks/useClickOutside";
+import ColorPicker from "../color-picker/color-picker";
 
 function isPrimitiveArray(values: unknown[]): boolean {
 	return values.every(

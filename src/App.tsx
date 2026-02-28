@@ -1,12 +1,12 @@
 import "maplibre-gl/dist/maplibre-gl.css";
-import FooterControls from "./components/footer-controls";
-import MapViewer from "./components/map-viewer";
-import UpperControls from "./components/upper-controls";
+import FooterControls from "./components/footer-controls/footer-controls";
+import MapViewer from "./components/map-viewer/map-viewer";
+import UpperControls from "./components/upper-controls/upper-controls";
 import { ItemProvider, useItem } from "./context/item";
 import { JsonProvider } from "./context/json";
 import { MapProvider, useMap } from "./context/map";
 import { TimeProvider, useTime } from "./context/time";
-import styles from "./styles/app.module.css";
+import styles from "./styles/app.module.scss";
 
 function AppContent() {
 	const { items, setItems, focusOnVoxel, nextItemId, setNextItemId } =

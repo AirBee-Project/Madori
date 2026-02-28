@@ -7,9 +7,9 @@ import {
 	type RGBColor,
 } from "react-color";
 import { createPortal } from "react-dom";
-import { preset_colors } from "../data/colors";
-import { useClickOutside } from "../hooks/useClickOutside";
-import styles from "../styles/color-picker.module.css";
+import { preset_colors } from "../../data/colors";
+import { useClickOutside } from "../../hooks/useClickOutside";
+import styles from "./color-picker.module.scss";
 
 type Props = {
 	color: [number, number, number, number];

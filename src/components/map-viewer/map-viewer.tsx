@@ -1,12 +1,12 @@
 import DeckGL from "@deck.gl/react";
 import { Map } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useItem } from "../context/item";
-import { useJson } from "../context/json";
-import { useMap } from "../context/map";
-import { useTime } from "../context/time";
-import styles from "../styles/map-viewer.module.css";
-import generateLayer from "../utils/generate-layers";
+import { useItem } from "../../context/item";
+import { useJson } from "../../context/json";
+import { useMap } from "../../context/map";
+import { useTime } from "../../context/time";
+import styles from "./map-viewer.module.scss";
+import generateLayer from "../../utils/generate-layers";
 
 export default function MapViewer() {
 	const { viewState, setViewState, isMapVisible, compileMode } = useMap();

@@ -1,7 +1,7 @@
-import { useTime } from "../context/time";
-import styles from "../styles/footer-controls.module.css";
-import TimeAxis from "./time-axis";
-import TimeControls from "./time-controls";
+import { useTime } from "../../context/time";
+import styles from "./footer-controls.module.scss";
+import TimeAxis from "../time-axis";
+import TimeControls from "../time-controls/time-controls";
 
 export default function FooterControls() {
 	const {

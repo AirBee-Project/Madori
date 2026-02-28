@@ -8,12 +8,12 @@ import {
 	IconRefresh,
 } from "@tabler/icons-react";
 import { useState } from "react";
-import { useItem } from "../context/item";
-import { useJson } from "../context/json";
-import { useMap } from "../context/map";
-import styles from "../styles/upper-controls.module.css";
-import IdPanel from "./id-panel";
-import JsonPanel from "./json-panel";
+import { useItem } from "../../context/item";
+import { useJson } from "../../context/json";
+import { useMap } from "../../context/map";
+import styles from "./upper-controls.module.scss";
+import IdPanel from "../id-panel/id-panel";
+import JsonPanel from "../json-panel/json-panel";
 
 export default function UpperControls() {
 	const [isIdPanelVisible, setIsIdPanelVisible] = useState(false);

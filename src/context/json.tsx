@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
-import type { JsonItem } from "../components/json-panel";
+import type { JsonItem } from "../components/json-panel/json-panel";
 import type { Item } from "../data/item";
 import type { VoxelDefinition } from "../data/voxel-definition";
 import type { KasaneJson } from "../data/voxel-json";

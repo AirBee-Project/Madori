@@ -1,11 +1,11 @@
 import { IconPlus, IconTarget, IconTrash } from "@tabler/icons-react";
 import type React from "react";
 import { useState } from "react";
-import type { Item } from "../data/item";
-import styles from "../styles/id-panel.module.css";
-import sharedStyles from "../styles/panel.module.css";
-import ColorPicker from "./color-picker";
-import { rgbaCss } from '../utils/color-utils';
+import type { Item } from "../../data/item";
+import styles from "./id-panel.module.scss";
+import sharedStyles from "../../styles/panel.module.scss";
+import ColorPicker from "../color-picker/color-picker";
+import { rgbaCss } from '../../utils/color-utils';
 
 interface IdPanelProps {
     items: Item[];

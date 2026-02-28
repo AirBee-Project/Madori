@@ -4,7 +4,7 @@ import {
 	IconPlayerPlayFilled,
 } from "@tabler/icons-react";
 import type React from "react";
-import styles from "../styles/time-controls.module.css";
+import styles from "./time-controls.module.scss";
 
 interface TimeControlsProps {
 	isPlaying: boolean;
