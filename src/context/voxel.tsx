@@ -3,6 +3,7 @@ import {
 	type ReactNode,
 	useCallback,
 	useContext,
+	useMemo,
 	useState,
 } from "react";
 import type { Item } from "../data/item";
@@ -114,91 +115,100 @@ export const VoxelProvider = ({
 		});
 	}, []);
 
-	const addVoxel = (data?: {
-		color: RGBA;
-		opacity: number;
-		voxel: VoxelDefinition[];
-		source?: "manual" | "json";
-		keys?: string[];
-	}): number => {
-		const id = nextVoxelId;
-		setNextVoxelId((prev) => prev + 1);
-		const newItem: Item<"voxel"> = {
-			id,
-			type: "voxel",
-			source: data?.source ?? "manual",
-			isDeleted: false,
-			isVisible: false,
-			data: data
-				? {
-						color: data.color,
-						opacity: data.opacity,
-						voxel: data.voxel,
-						keys: data.keys,
+	const addVoxel = useCallback(
+		(data?: {
+			color: RGBA;
+			opacity: number;
+			voxel: VoxelDefinition[];
+			source?: "manual" | "json";
+			keys?: string[];
+		}): number => {
+			const id = nextVoxelId;
+			setNextVoxelId((prev) => prev + 1);
+			const newItem: Item<"voxel"> = {
+				id,
+				type: "voxel",
+				source: data?.source ?? "manual",
+				isDeleted: false,
+				isVisible: false,
+				data: data
+					? {
+							color: data.color,
+							opacity: data.opacity,
+							voxel: data.voxel,
+							keys: data.keys,
+						}
+					: { color: [0, 0, 255, 76], opacity: 30, voxel: [] },
+			};
+			setVoxelItems((prev) => [...prev, newItem]);
+			return id;
+		},
+		[nextVoxelId],
+	);
+
+	const deleteVoxel = useCallback(
+		(id: number) => {
+			const targetItem = voxelItems.find((i) => i.id === id);
+			if (targetItem?.data.keys?.length) {
+				const keysToRemove = targetItem.data.keys;
+
+				setTooltipMap((prev) => {
+					const next = new globalThis.Map(prev);
+					let changed = false;
+					for (const key of keysToRemove) {
+						if (next.delete(key)) changed = true;
 					}
-				: { color: [0, 0, 255, 76], opacity: 30, voxel: [] },
-		};
-		setVoxelItems((prev) => [...prev, newItem]);
-		return id;
-	};
+					return changed ? next : prev;
+				});
 
-	const deleteVoxel = (id: number) => {
-		const targetItem = voxelItems.find((i) => i.id === id);
-		if (targetItem?.data.keys?.length) {
-			const keysToRemove = targetItem.data.keys;
-
-			setTooltipMap((prev) => {
-				const next = new globalThis.Map(prev);
-				let changed = false;
-				for (const key of keysToRemove) {
-					if (next.delete(key)) changed = true;
-				}
-				return changed ? next : prev;
-			});
-
-			setVoxelColorOverrides((prev) => {
-				const next = new globalThis.Map(prev);
-				let changed = false;
-				for (const key of keysToRemove) {
-					if (next.delete(key)) changed = true;
-				}
-				return changed ? next : prev;
-			});
-		}
-		setVoxelItems((prev) => prev.filter((i) => i.id !== id));
-	};
-
-	const updateVoxelString = (id: number, newVoxelString: string) => {
-		setVoxelItems((prevItems) =>
-			prevItems.map((item) => {
-				if (item.id === id) {
-					try {
-						const newVoxelData = hyperVoxelParse(newVoxelString);
-						return {
-							...item,
-							data: {
-								...item.data,
-								voxelString: newVoxelString,
-								voxel: newVoxelData,
-							},
-						};
-					} catch (_e) {
-						return {
-							...item,
-							data: {
-								...item.data,
-								voxelString: newVoxelString,
-								voxel: [],
-							},
-						};
+				setVoxelColorOverrides((prev) => {
+					const next = new globalThis.Map(prev);
+					let changed = false;
+					for (const key of keysToRemove) {
+						if (next.delete(key)) changed = true;
 					}
-				}
-				return item;
-			}),
-		);
-	};
+					return changed ? next : prev;
+				});
+			}
+			setVoxelItems((prev) => prev.filter((i) => i.id !== id));
+		},
+		[voxelItems],
+	);
 
-	const updateVoxelColor = (id: number, color: RGBA) => {
+	const updateVoxelString = useCallback(
+		(id: number, newVoxelString: string) => {
+			setVoxelItems((prevItems) =>
+				prevItems.map((item) => {
+					if (item.id === id) {
+						try {
+							const newVoxelData = hyperVoxelParse(newVoxelString);
+							return {
+								...item,
+								data: {
+									...item.data,
+									voxelString: newVoxelString,
+									voxel: newVoxelData,
+								},
+							};
+						} catch (_e) {
+							return {
+								...item,
+								data: {
+									...item.data,
+									voxelString: newVoxelString,
+									voxel: [],
+								},
+							};
+						}
+					}
+					return item;
+				}),
+			);
+		},
+		[],
+	);
+
+	const updateVoxelColor = useCallback((id: number, color: RGBA) => {
 		setVoxelItems((prevItems) =>
 			prevItems.map((item) => {
 				if (item.id === id) {
@@ -207,27 +217,42 @@ export const VoxelProvider = ({
 				return item;
 			}),
 		);
-	};
+	}, []);
+
+	const contextValue = useMemo(
+		() => ({
+			voxelItems,
+			addVoxel,
+			deleteVoxel,
+			updateVoxelString,
+			updateVoxelColor,
+			focusVoxel,
+			focusOnVoxelDefs,
+			addTooltips,
+			voxelColorOverrides,
+			setVoxelColorOverrides,
+			valueColorMaps,
+			setValueColorMaps,
+			tooltipMap,
+			setTooltipMap,
+		}),
+		[
+			voxelItems,
+			addVoxel,
+			deleteVoxel,
+			updateVoxelString,
+			updateVoxelColor,
+			focusVoxel,
+			focusOnVoxelDefs,
+			addTooltips,
+			voxelColorOverrides,
+			valueColorMaps,
+			tooltipMap,
+		],
+	);
 
 	return (
-		<VoxelContext.Provider
-			value={{
-				voxelItems,
-				addVoxel,
-				deleteVoxel,
-				updateVoxelString,
-				updateVoxelColor,
-				focusVoxel,
-				focusOnVoxelDefs,
-				addTooltips,
-				voxelColorOverrides,
-				setVoxelColorOverrides,
-				valueColorMaps,
-				setValueColorMaps,
-				tooltipMap,
-				setTooltipMap,
-			}}
-		>
+		<VoxelContext.Provider value={contextValue}>
 			{children}
 		</VoxelContext.Provider>
 	);

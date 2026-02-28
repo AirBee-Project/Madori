@@ -1,4 +1,11 @@
-import { createContext, type ReactNode, useContext, useState } from "react";
+import {
+	createContext,
+	type ReactNode,
+	useCallback,
+	useContext,
+	useMemo,
+	useState,
+} from "react";
 import type { JsonItem } from "../components/json-panel/json-panel";
 import type { KasaneJson } from "../data/voxel-json";
 import jsonToVoxelDefinition from "../utils/parse-voxel-json";
@@ -23,72 +30,82 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 	const { voxelItems, addVoxel, deleteVoxel, focusOnVoxelDefs, addTooltips } =
 		useVoxel();
 
-	const addJson = async (file: File) => {
-		try {
-			const text = await file.text();
-			const content = JSON.parse(text) as KasaneJson;
-			const { voxelDefs, tooltipMap: newTooltips } =
-				jsonToVoxelDefinition(content);
+	const addJson = useCallback(
+		async (file: File) => {
+			try {
+				const text = await file.text();
+				const content = JSON.parse(text) as KasaneJson;
+				const { voxelDefs, tooltipMap: newTooltips } =
+					jsonToVoxelDefinition(content);
 
-			const color: [number, number, number, number] = [0, 0, 255, 76];
-			const voxelId = addVoxel({
-				color,
-				opacity: 30,
-				voxel: voxelDefs,
-				source: "json",
-				keys: Array.from(newTooltips.keys()),
-			});
+				const color: [number, number, number, number] = [0, 0, 255, 76];
+				const voxelId = addVoxel({
+					color,
+					opacity: 30,
+					voxel: voxelDefs,
+					source: "json",
+					keys: Array.from(newTooltips.keys()),
+				});
 
-			addTooltips(newTooltips);
+				addTooltips(newTooltips);
 
-			const newJsonItem: JsonItem = {
-				id: nextJsonId,
-				fileName: file.name,
-				description: content.meta?.description,
-				content,
-				color,
-				voxelItemIds: [voxelId],
-			};
-			setJsonItems((prev) => [...prev, newJsonItem]);
-			setNextJsonId((prev) => prev + 1);
-		} catch (e) {
-			console.error("Failed to parse JSON file:", e);
-		}
-	};
-
-	const deleteJson = (id: number) => {
-		const target = jsonItems.find((i) => i.id === id);
-		if (target?.voxelItemIds) {
-			for (const voxelId of target.voxelItemIds) {
-				deleteVoxel(voxelId);
+				const newJsonItem: JsonItem = {
+					id: nextJsonId,
+					fileName: file.name,
+					description: content.meta?.description,
+					content,
+					color,
+					voxelItemIds: [voxelId],
+				};
+				setJsonItems((prev) => [...prev, newJsonItem]);
+				setNextJsonId((prev) => prev + 1);
+			} catch (e) {
+				console.error("Failed to parse JSON file:", e);
 			}
-		}
-		setJsonItems((prev) => prev.filter((i) => i.id !== id));
-	};
+		},
+		[addVoxel, addTooltips, nextJsonId],
+	);
 
-	const focusJson = (id: number) => {
-		const target = jsonItems.find((i) => i.id === id);
-		if (target?.voxelItemIds && target.voxelItemIds.length > 0) {
-			const voxelItem = voxelItems.find(
-				(i) => i.id === target.voxelItemIds?.[0],
-			);
-			if (voxelItem && voxelItem.data.voxel.length > 0) {
-				focusOnVoxelDefs(voxelItem.data.voxel);
+	const deleteJson = useCallback(
+		(id: number) => {
+			const target = jsonItems.find((i) => i.id === id);
+			if (target?.voxelItemIds) {
+				for (const voxelId of target.voxelItemIds) {
+					deleteVoxel(voxelId);
+				}
 			}
-		}
-	};
+			setJsonItems((prev) => prev.filter((i) => i.id !== id));
+		},
+		[jsonItems, deleteVoxel],
+	);
+
+	const focusJson = useCallback(
+		(id: number) => {
+			const target = jsonItems.find((i) => i.id === id);
+			if (target?.voxelItemIds && target.voxelItemIds.length > 0) {
+				const voxelItem = voxelItems.find(
+					(i) => i.id === target.voxelItemIds?.[0],
+				);
+				if (voxelItem && voxelItem.data.voxel.length > 0) {
+					focusOnVoxelDefs(voxelItem.data.voxel);
+				}
+			}
+		},
+		[jsonItems, voxelItems, focusOnVoxelDefs],
+	);
+
+	const contextValue = useMemo(
+		() => ({
+			jsonItems,
+			addJson,
+			deleteJson,
+			focusJson,
+		}),
+		[jsonItems, addJson, deleteJson, focusJson],
+	);
 
 	return (
-		<JsonContext.Provider
-			value={{
-				jsonItems,
-				addJson,
-				deleteJson,
-				focusJson,
-			}}
-		>
-			{children}
-		</JsonContext.Provider>
+		<JsonContext.Provider value={contextValue}>{children}</JsonContext.Provider>
 	);
 };
 

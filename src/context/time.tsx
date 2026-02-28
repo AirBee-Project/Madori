@@ -3,6 +3,7 @@ import {
 	type ReactNode,
 	useContext,
 	useEffect,
+	useMemo,
 	useState,
 } from "react";
 
@@ -50,19 +51,20 @@ export const TimeProvider = ({ children }: { children: ReactNode }) => {
 		};
 	}, [isPlaying, playbackSpeed]);
 
+	const contextValue = useMemo(
+		() => ({
+			currentTime,
+			setCurrentTime,
+			isPlaying,
+			setIsPlaying,
+			playbackSpeed,
+			setPlaybackSpeed,
+		}),
+		[currentTime, isPlaying, playbackSpeed],
+	);
+
 	return (
-		<TimeContext.Provider
-			value={{
-				currentTime,
-				setCurrentTime,
-				isPlaying,
-				setIsPlaying,
-				playbackSpeed,
-				setPlaybackSpeed,
-			}}
-		>
-			{children}
-		</TimeContext.Provider>
+		<TimeContext.Provider value={contextValue}>{children}</TimeContext.Provider>
 	);
 };
 

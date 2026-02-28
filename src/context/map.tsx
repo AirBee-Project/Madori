@@ -1,5 +1,12 @@
 import { FlyToInterpolator, type MapViewState } from "@deck.gl/core";
-import { createContext, type ReactNode, useContext, useState } from "react";
+import {
+	createContext,
+	type ReactNode,
+	useCallback,
+	useContext,
+	useMemo,
+	useState,
+} from "react";
 
 const INITIAL_VIEW_STATE: MapViewState = {
 	longitude: 0,
@@ -26,32 +33,36 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
 	const [isMapVisible, setIsMapVisible] = useState(true);
 	const [compileMode, setCompileMode] = useState(true);
 
-	const flyTo = (lon: number, lat: number, zoom = 17, pitch = 45) => {
-		setViewState({
-			longitude: lon,
-			latitude: lat,
-			zoom,
-			pitch,
-			bearing: 0,
-			transitionDuration: 1000,
-			transitionInterpolator: new FlyToInterpolator(),
-		});
-	};
+	const flyTo = useCallback(
+		(lon: number, lat: number, zoom = 17, pitch = 45) => {
+			setViewState({
+				longitude: lon,
+				latitude: lat,
+				zoom,
+				pitch,
+				bearing: 0,
+				transitionDuration: 1000,
+				transitionInterpolator: new FlyToInterpolator(),
+			});
+		},
+		[],
+	);
+
+	const contextValue = useMemo(
+		() => ({
+			viewState,
+			setViewState,
+			isMapVisible,
+			setIsMapVisible,
+			compileMode,
+			setCompileMode,
+			flyTo,
+		}),
+		[viewState, isMapVisible, compileMode, flyTo],
+	);
 
 	return (
-		<MapContext.Provider
-			value={{
-				viewState,
-				setViewState,
-				isMapVisible,
-				setIsMapVisible,
-				compileMode,
-				setCompileMode,
-				flyTo,
-			}}
-		>
-			{children}
-		</MapContext.Provider>
+		<MapContext.Provider value={contextValue}>{children}</MapContext.Provider>
 	);
 };
 
