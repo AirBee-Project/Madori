@@ -6,7 +6,7 @@ export type JsonVoxelResult = {
 	tooltipMap: Map<string, string>;
 };
 
-function spatialKey(id: KasaneId): string {
+function voxelKey(id: KasaneId): string {
 	const z = id.z;
 	const f = id.f
 		? id.f.length === 2
@@ -23,7 +23,10 @@ function spatialKey(id: KasaneId): string {
 			? `${id.y[0]}:${id.y[1]}`
 			: `${id.y[0]}`
 		: "-";
-	return `${z}/${f}/${x}/${y}`;
+	const { startTime, endTime } = parseTime(id);
+	const t =
+		startTime !== null && endTime !== null ? `${startTime}:${endTime}` : "-";
+	return `${z}/${f}/${x}/${y}/${t}`;
 }
 
 function parseDim(
@@ -81,7 +84,7 @@ export default function jsonToVoxelDefinition(
 			const Y = parseDim(id.y, z, false);
 			const { startTime, endTime } = parseTime(id);
 
-			const key = spatialKey(id);
+			const key = voxelKey(id);
 			if (!seenKeys.has(key)) {
 				voxelDefs.push({ Z: z, F, X, Y, startTime, endTime });
 				seenKeys.add(key);

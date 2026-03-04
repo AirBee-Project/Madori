@@ -47,11 +47,13 @@ function buildInitialColorMap(
 	return map;
 }
 
-function spatialKey(id: {
+function voxelKey(id: {
 	z: number;
 	f?: [number] | [number, number];
 	x?: [number] | [number, number];
 	y?: [number] | [number, number];
+	i?: number;
+	t?: [number] | [number, number];
 }): string {
 	const z = id.z;
 	const f = id.f
@@ -69,7 +71,20 @@ function spatialKey(id: {
 			? `${id.y[0]}:${id.y[1]}`
 			: `${id.y[0]}`
 		: "-";
-	return `${z}/${f}/${x}/${y}`;
+	let t = "-";
+	if (id.t && id.i !== undefined) {
+		const interval = id.i;
+		if (id.t.length === 1) {
+			const start = interval * id.t[0];
+			const end = interval * (id.t[0] + 1);
+			t = `${start}:${end}`;
+		} else {
+			const start = interval * id.t[0];
+			const end = interval * (id.t[1] + 1);
+			t = `${start}:${end}`;
+		}
+	}
+	return `${z}/${f}/${x}/${y}/${t}`;
 }
 
 interface NameEntry {
@@ -160,7 +175,7 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 			const valueStr = String(dataEntry.value[id.ref]);
 			const color = currentColorMap.get(valueStr);
 			if (color) {
-				overrides.set(spatialKey(id), color);
+				overrides.set(voxelKey(id), color);
 			}
 		}
 		onColorMapChange(overrides);

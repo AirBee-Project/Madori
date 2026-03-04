@@ -11,6 +11,11 @@ function formatDim(item: [number, number] | number): string {
 	return `${item[0]}:${item[1]}`;
 }
 
+function formatTime(startTime: number | null, endTime: number | null): string {
+	if (startTime !== null && endTime !== null) return `${startTime}:${endTime}`;
+	return "-";
+}
+
 export default function hyperVoxelToPureVoxel(
 	Voxels: VoxelDefinition[],
 	compileMode: boolean = true,
@@ -29,7 +34,7 @@ function compileModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
 		const v = Voxels[i];
 		const [fMin, fMax] = toRange(v.F);
 		const [yMin, yMax] = toRange(v.Y);
-		const originalId = `${v.Z}/${formatDim(v.F)}/${formatDim(v.X)}/${formatDim(v.Y)}`;
+		const originalId = `${v.Z}/${formatDim(v.F)}/${formatDim(v.X)}/${formatDim(v.Y)}/${formatTime(v.startTime, v.endTime)}`;
 
 		if (typeof v.X === "number") {
 			result.push({
@@ -112,7 +117,7 @@ function expandModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
 						Y2: y,
 						F: f,
 						F2: f,
-						originalId: `${v.Z}/${f}/${x}/${y}`,
+						originalId: `${v.Z}/${f}/${x}/${y}/${formatTime(v.startTime, v.endTime)}`,
 						startTime: v.startTime,
 						endTime: v.endTime,
 					});
