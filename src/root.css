@@ -11,3 +11,12 @@ body {
 *::after {
 	box-sizing: border-box;
 }
+
+.maplibregl-ctrl-bottom-right {
+	bottom: 3.875rem !important;
+	z-index: 10;
+}
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+	margin-bottom: 0 !important;
+	margin-right: 1rem !important;
+}
