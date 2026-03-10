@@ -3,6 +3,7 @@ import {
 	type ReactNode,
 	useCallback,
 	useContext,
+	useEffect,
 	useMemo,
 	useState,
 } from "react";
@@ -49,13 +50,18 @@ type VoxelProviderProps = {
 	onTimeJump: (time: number) => void;
 };
 
+const DEFAULT_VOXEL_STRING = "23/0:9/7451036:7451045/3303254:3303263";
+
 export const VoxelProvider = ({
 	children,
 	onFlyTo,
 	onTimeJump,
 }: VoxelProviderProps) => {
-	const [voxelItems, setVoxelItems] = useState<Item<"voxel">[]>([]);
-	const [nextVoxelId, setNextVoxelId] = useState(1000);
+	const [voxelItems, setVoxelItems] = useState<Item<"voxel">[]>([{
+		id: 1000, type: "voxel", source: "manual", isDeleted: false, isVisible: false,
+		data: { color: [0, 0, 255, 76], opacity: 30, voxel: hyperVoxelParse(DEFAULT_VOXEL_STRING), voxelString: DEFAULT_VOXEL_STRING },
+	}]);
+	const [nextVoxelId, setNextVoxelId] = useState(1001);
 
 	const [voxelColorOverrides, setVoxelColorOverrides] = useState<
 		globalThis.Map<string, RGBA>
@@ -95,6 +101,8 @@ export const VoxelProvider = ({
 		[onFlyTo, onTimeJump],
 	);
 
+	useEffect(() => { focusOnVoxelDefs(hyperVoxelParse(DEFAULT_VOXEL_STRING)); }, []);
+
 	const focusVoxel = useCallback(
 		(id: number) => {
 			const targetItem = voxelItems.find((i) => i.id === id);
@@ -133,11 +141,11 @@ export const VoxelProvider = ({
 				isVisible: false,
 				data: data
 					? {
-							color: data.color,
-							opacity: data.opacity,
-							voxel: data.voxel,
-							keys: data.keys,
-						}
+						color: data.color,
+						opacity: data.opacity,
+						voxel: data.voxel,
+						keys: data.keys,
+					}
 					: { color: [0, 0, 255, 76], opacity: 30, voxel: [] },
 			};
 			setVoxelItems((prev) => [...prev, newItem]);
