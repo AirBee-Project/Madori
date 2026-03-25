@@ -1,4 +1,4 @@
-import { GeoJsonLayer, PolygonLayer } from "@deck.gl/layers";
+import { GeoJsonLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import type { Color, LayersList } from "deck.gl";
 import type { GeoJSON } from "geojson";
 import type { Item } from "../data/item";
@@ -50,8 +50,8 @@ export default function generateLayer(
 		getLineWidth: (d) => d.properties.width,
 	});
 
-	const voxelPolygonLayer = new PolygonLayer({
-		id: "PolygonLayer",
+	const voxelPolygonLayer = new SolidPolygonLayer({
+		id: "SolidPolygonLayer",
 		data: generatePolygonLayer(
 			voxelItem,
 			compileMode,
@@ -59,16 +59,9 @@ export default function generateLayer(
 			voxelColorOverrides,
 		),
 		extruded: true,
-		wireframe: true,
-		filled: true,
 		getPolygon: (d) => d.points,
 		getElevation: (d) => d.elevation,
 		getFillColor: (d) => d.color,
-
-		getLineColor: [255, 255, 255, 125],
-		getLineWidth: 100,
-		lineWidthUnits: "pixels",
-		lineWidthScale: 1,
 		pickable: true,
 		autoHighlight: true,
 		highlightColor: [255, 255, 0, 200],

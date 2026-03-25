@@ -1,4 +1,5 @@
 import type { MapViewState } from "@deck.gl/core";
+import { useMemo } from "react";
 import DeckGL from "@deck.gl/react";
 import { Map as MapGL } from "react-map-gl/maplibre";
 import { useMap } from "../../context/map";
@@ -12,6 +13,15 @@ export default function MapViewer() {
 	const { voxelItems, tooltipMap, voxelColorOverrides } = useVoxel();
 	const { currentTime } = useTime();
 
+	const layers = useMemo(() => {
+		return generateLayer(
+			voxelItems,
+			compileMode,
+			currentTime,
+			voxelColorOverrides,
+		);
+	}, [voxelItems, compileMode, currentTime, voxelColorOverrides]);
+
 	return (
 		<div className={styles.mapContainer}>
 			<DeckGL
@@ -22,12 +32,7 @@ export default function MapViewer() {
 				controller={{ maxZoom: 25 } as Record<string, unknown>}
 				width="100%"
 				height="100%"
-				layers={generateLayer(
-					voxelItems,
-					compileMode,
-					currentTime,
-					voxelColorOverrides,
-				)}
+				layers={layers}
 				getTooltip={({ object }) => {
 					if (!object) return null;
 					const tip = tooltipMap.get(object.voxelID);
