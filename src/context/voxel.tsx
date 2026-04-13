@@ -115,7 +115,7 @@ export const VoxelProvider = ({
 
   useEffect(() => {
     focusOnVoxelDefs(hyperVoxelParse(DEFAULT_VOXEL_STRING));
-  }, []);
+  }, [focusOnVoxelDefs]);
 
   const focusVoxel = useCallback(
     (id: number) => {
