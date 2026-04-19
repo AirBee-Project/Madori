@@ -1,6 +1,0 @@
-# lefthook.yml
-pre-commit:
-  commands:
-    lint-and-format:
-      # ステージングされたファイルだけでなく、全体をチェックする
-      run: bun run ci

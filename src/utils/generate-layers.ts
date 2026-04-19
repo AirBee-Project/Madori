@@ -6,161 +6,161 @@ import expandVoxelRange from "./expand-voxel-range";
 import pvoxelToPolygon from "./voxel-to-polygon";
 
 export default function generateLayer(
-  item: Item[],
-  compileMode: boolean = true,
-  currentTime: number = 0,
-  voxelColorOverrides?: globalThis.Map<
-    string,
-    [number, number, number, number]
-  >,
+	item: Item[],
+	compileMode: boolean = true,
+	currentTime: number = 0,
+	voxelColorOverrides?: globalThis.Map<
+		string,
+		[number, number, number, number]
+	>,
 ): LayersList {
-  const pointItem: Item<"point">[] = item.filter(
-    (e): e is Item<"point"> =>
-      !e.isDeleted && !e.isVisible && e.type === "point",
-  );
-  const lineItem: Item<"line">[] = item.filter(
-    (e): e is Item<"line"> => !e.isDeleted && !e.isVisible && e.type === "line",
-  );
+	const pointItem: Item<"point">[] = item.filter(
+		(e): e is Item<"point"> =>
+			!e.isDeleted && !e.isVisible && e.type === "point",
+	);
+	const lineItem: Item<"line">[] = item.filter(
+		(e): e is Item<"line"> => !e.isDeleted && !e.isVisible && e.type === "line",
+	);
 
-  const voxelItem: Item<"voxel">[] = item.filter(
-    (e): e is Item<"voxel"> =>
-      !e.isDeleted && !e.isVisible && e.type === "voxel",
-  );
+	const voxelItem: Item<"voxel">[] = item.filter(
+		(e): e is Item<"voxel"> =>
+			!e.isDeleted && !e.isVisible && e.type === "voxel",
+	);
 
-  const pointGeoJsonLayer = new GeoJsonLayer({
-    id: "GeoJsonLayer",
-    data: generatePointGeoJson(pointItem),
-    pickable: true,
-    filled: true,
-    pointRadiusUnits: "pixels",
-    pointRadiusMinPixels: 1,
-    pointRadiusScale: 1,
-    getFillColor: (d) => d.properties.color,
-    getRadius: (d) => d.properties.radius,
-  });
+	const pointGeoJsonLayer = new GeoJsonLayer({
+		id: "GeoJsonLayer",
+		data: generatePointGeoJson(pointItem),
+		pickable: true,
+		filled: true,
+		pointRadiusUnits: "pixels",
+		pointRadiusMinPixels: 1,
+		pointRadiusScale: 1,
+		getFillColor: (d) => d.properties.color,
+		getRadius: (d) => d.properties.radius,
+	});
 
-  const lineGeoJsonLayer = new GeoJsonLayer({
-    id: "geojson-lines",
-    data: generateLineGeoJson(lineItem),
-    pickable: true,
-    stroked: true,
-    filled: false,
-    lineWidthUnits: "pixels",
-    getLineColor: (d) => d.properties.color as Color,
-    getLineWidth: (d) => d.properties.width,
-  });
+	const lineGeoJsonLayer = new GeoJsonLayer({
+		id: "geojson-lines",
+		data: generateLineGeoJson(lineItem),
+		pickable: true,
+		stroked: true,
+		filled: false,
+		lineWidthUnits: "pixels",
+		getLineColor: (d) => d.properties.color as Color,
+		getLineWidth: (d) => d.properties.width,
+	});
 
-  const voxelPolygonLayer = new SolidPolygonLayer({
-    id: "SolidPolygonLayer",
-    data: generatePolygonLayer(
-      voxelItem,
-      compileMode,
-      currentTime,
-      voxelColorOverrides,
-    ),
-    extruded: true,
-    getPolygon: (d) => d.points,
-    getElevation: (d) => d.elevation,
-    getFillColor: (d) => d.color,
-    pickable: true,
-    autoHighlight: true,
-    highlightColor: [255, 255, 0, 200],
-  });
+	const voxelPolygonLayer = new SolidPolygonLayer({
+		id: "SolidPolygonLayer",
+		data: generatePolygonLayer(
+			voxelItem,
+			compileMode,
+			currentTime,
+			voxelColorOverrides,
+		),
+		extruded: true,
+		getPolygon: (d) => d.points,
+		getElevation: (d) => d.elevation,
+		getFillColor: (d) => d.color,
+		pickable: true,
+		autoHighlight: true,
+		highlightColor: [255, 255, 0, 200],
+	});
 
-  const reuslt: LayersList = [
-    pointGeoJsonLayer,
-    lineGeoJsonLayer,
-    voxelPolygonLayer,
-  ];
-  return reuslt;
+	const reuslt: LayersList = [
+		pointGeoJsonLayer,
+		lineGeoJsonLayer,
+		voxelPolygonLayer,
+	];
+	return reuslt;
 }
 
 function generatePointGeoJson(point: Item<"point">[]): GeoJSON {
-  const result: GeoJSON = {
-    type: "FeatureCollection",
-    features: [],
-  };
+	const result: GeoJSON = {
+		type: "FeatureCollection",
+		features: [],
+	};
 
-  for (let i = 0; i < point.length; i++) {
-    result.features.push({
-      type: "Feature",
-      properties: {
-        color: point[i].data.color,
-        radius: point[i].data.size,
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [point[i].data.lon, point[i].data.lat],
-      },
-    });
-  }
+	for (let i = 0; i < point.length; i++) {
+		result.features.push({
+			type: "Feature",
+			properties: {
+				color: point[i].data.color,
+				radius: point[i].data.size,
+			},
+			geometry: {
+				type: "Point",
+				coordinates: [point[i].data.lon, point[i].data.lat],
+			},
+		});
+	}
 
-  return result;
+	return result;
 }
 
 function generateLineGeoJson(line: Item<"line">[]): GeoJSON {
-  const result: GeoJSON = {
-    type: "FeatureCollection",
-    features: [],
-  };
-  for (let i = 0; i < line.length; i++) {
-    result.features.push({
-      type: "Feature",
-      geometry: {
-        type: "LineString",
-        coordinates: [
-          [line[i].data.lon1, line[i].data.lat1],
-          [line[i].data.lon2, line[i].data.lat2],
-        ],
-      },
-      properties: {
-        color: line[i].data.color,
-        width: line[i].data.size,
-      },
-    });
-  }
-  return result;
+	const result: GeoJSON = {
+		type: "FeatureCollection",
+		features: [],
+	};
+	for (let i = 0; i < line.length; i++) {
+		result.features.push({
+			type: "Feature",
+			geometry: {
+				type: "LineString",
+				coordinates: [
+					[line[i].data.lon1, line[i].data.lat1],
+					[line[i].data.lon2, line[i].data.lat2],
+				],
+			},
+			properties: {
+				color: line[i].data.color,
+				width: line[i].data.size,
+			},
+		});
+	}
+	return result;
 }
 
 type Polygon = {
-  points: number[][];
-  elevation: number;
-  voxelID: string;
-  color: Color;
-  startTime: number | null;
-  endTime: number | null;
+	points: number[][];
+	elevation: number;
+	voxelID: string;
+	color: Color;
+	startTime: number | null;
+	endTime: number | null;
 };
 function generatePolygonLayer(
-  voxel: Item<"voxel">[],
-  compileMode: boolean,
-  currentTime: number,
-  voxelColorOverrides?: globalThis.Map<
-    string,
-    [number, number, number, number]
-  >,
+	voxel: Item<"voxel">[],
+	compileMode: boolean,
+	currentTime: number,
+	voxelColorOverrides?: globalThis.Map<
+		string,
+		[number, number, number, number]
+	>,
 ): Polygon[] {
-  const result: Polygon[] = [];
-  for (let i = 0; i < voxel.length; i++) {
-    const pureVoxel = expandVoxelRange(voxel[i].data.voxel, compileMode);
-    const polygon = pvoxelToPolygon(pureVoxel, voxel[i].data.color);
-    for (const p of polygon) {
-      if (voxelColorOverrides && voxelColorOverrides.size > 0) {
-        const override = voxelColorOverrides.get(p.voxelID);
-        if (override) {
-          p.color = override;
-        }
-      }
-      if (p.startTime === null && p.endTime === null) {
-        result.push(p);
-      } else if (
-        p.startTime !== null &&
-        p.endTime !== null &&
-        p.startTime <= currentTime &&
-        currentTime < p.endTime
-      ) {
-        result.push(p);
-      }
-    }
-  }
-  return result;
+	const result: Polygon[] = [];
+	for (let i = 0; i < voxel.length; i++) {
+		const pureVoxel = expandVoxelRange(voxel[i].data.voxel, compileMode);
+		const polygon = pvoxelToPolygon(pureVoxel, voxel[i].data.color);
+		for (const p of polygon) {
+			if (voxelColorOverrides && voxelColorOverrides.size > 0) {
+				const override = voxelColorOverrides.get(p.voxelID);
+				if (override) {
+					p.color = override;
+				}
+			}
+			if (p.startTime === null && p.endTime === null) {
+				result.push(p);
+			} else if (
+				p.startTime !== null &&
+				p.endTime !== null &&
+				p.startTime <= currentTime &&
+				currentTime < p.endTime
+			) {
+				result.push(p);
+			}
+		}
+	}
+	return result;
 }
