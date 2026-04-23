@@ -3,9 +3,11 @@ import {
 	IconPlayerPauseFilled,
 	IconPlayerPlayFilled,
 } from "@tabler/icons-react";
-import type React from "react";
 import styles from "./time-controls.module.scss";
 
+/**
+ * タイムコントロールパネル用プロパティ
+ */
 interface TimeControlsProps {
 	isPlaying: boolean;
 	onPlayPause: () => void;
@@ -13,21 +15,27 @@ interface TimeControlsProps {
 	onSpeedChange: (speed: number) => void;
 }
 
-const TimeControls: React.FC<TimeControlsProps> = ({
+/**
+ * 再生速度リスト
+ */
+const SPEEDS = [
+	{ label: "x1", value: 1 },
+	{ label: "x10", value: 10 },
+	{ label: "1min/s", value: 60 },
+	{ label: "1hr/s", value: 3600 },
+	{ label: "1day/s", value: 86400 },
+	{ label: "1mo/s", value: 2592000 },
+];
+
+/**
+ * 画面下部の時間操作コントロールパネル（再生/停止、再生速度の変更）
+ */
+export default function TimeControls({
 	isPlaying,
 	onPlayPause,
 	speed,
 	onSpeedChange,
-}) => {
-	const speeds = [
-		{ label: "x1", value: 1 },
-		{ label: "x10", value: 10 },
-		{ label: "1min/s", value: 60 },
-		{ label: "1hr/s", value: 3600 },
-		{ label: "1day/s", value: 86400 },
-		{ label: "1mo/s", value: 2592000 },
-	];
-
+}: TimeControlsProps) {
 	return (
 		<div className={styles.container}>
 			<button
@@ -42,14 +50,13 @@ const TimeControls: React.FC<TimeControlsProps> = ({
 					<IconPlayerPlayFilled size={24} className={styles.playIcon} />
 				)}
 			</button>
-
 			<div className={styles.speedWrapper}>
 				<select
 					value={speed}
 					onChange={(e) => onSpeedChange(Number(e.target.value))}
 					className={styles.speedSelect}
 				>
-					{speeds.map((s) => (
+					{SPEEDS.map((s) => (
 						<option key={s.value} value={s.value}>
 							{s.label}
 						</option>
@@ -61,6 +68,4 @@ const TimeControls: React.FC<TimeControlsProps> = ({
 			</div>
 		</div>
 	);
-};
-
-export default TimeControls;
+}

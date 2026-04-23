@@ -18,6 +18,9 @@ type TimeContextType = {
 
 const TimeContext = createContext<TimeContextType | undefined>(undefined);
 
+/**
+ * 現在時間の管理コンポーネント
+ */
 export const TimeProvider = ({ children }: { children: ReactNode }) => {
 	const [currentTime, setCurrentTime] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
@@ -27,6 +30,9 @@ export const TimeProvider = ({ children }: { children: ReactNode }) => {
 		let animationFrameId: number;
 		let lastTimestamp: number = 0;
 
+		/**
+		 * 再生中の時currentTimeを進め続ける
+		 */
 		const animate = (timestamp: number) => {
 			if (!lastTimestamp) lastTimestamp = timestamp;
 
@@ -68,6 +74,9 @@ export const TimeProvider = ({ children }: { children: ReactNode }) => {
 	);
 };
 
+/**
+ * 現在時間の管理コンポーネントのフック
+ */
 export const useTime = () => {
 	const context = useContext(TimeContext);
 	if (!context) throw new Error("useTime must be used within a TimeProvider");

@@ -8,6 +8,9 @@ import {
 	useState,
 } from "react";
 
+/**
+ * 初期視点位置
+ */
 const INITIAL_VIEW_STATE: MapViewState = {
 	longitude: 0,
 	latitude: 0,
@@ -29,10 +32,15 @@ type MapContextType = {
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
 export const MapProvider = ({ children }: { children: ReactNode }) => {
+	
 	const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
 	const [isMapVisible, setIsMapVisible] = useState(true);
 	const [compileMode, setCompileMode] = useState(true);
 
+
+	/**
+	 * 指定した座標へカメラを飛ばすアニメーション
+	 */
 	const flyTo = useCallback(
 		(lon: number, lat: number, zoom = 17, pitch = 45) => {
 			setViewState({

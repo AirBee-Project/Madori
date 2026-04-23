@@ -8,25 +8,11 @@ interface TimeAxisProps {
 	maxTime?: number;
 }
 
-const TimeAxis: React.FC<TimeAxisProps> = ({
-	currentTime,
-	onTimeChange,
-	minTime = 0,
-	maxTime = 1800000000,
-}) => {
-	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const containerRef = useRef<HTMLDivElement>(null);
-
-	const [viewDuration, setViewDuration] = useState(31536000 * 2);
-	const [viewCenter, setViewCenter] = useState(
-		currentTime > 0 ? currentTime : 1735689600,
-	);
+/**
+ * ブラウザの横幅を測るフック
+ */
+function useCanvasDimensions(containerRef: React.RefObject<HTMLDivElement>) {
 	const [dimensions, setDimensions] = useState({ width: 800, height: 50 });
-
-	const [isDragging, setIsDragging] = useState(false);
-	const dragStartX = useRef<number>(0);
-	const lastMouseX = useRef<number>(0);
-	const isClick = useRef<boolean>(true);
 
 	useEffect(() => {
 		if (!containerRef.current) return;
@@ -40,28 +26,50 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
 		});
 		resizeObserver.observe(containerRef.current);
 		return () => resizeObserver.disconnect();
-	}, []);
+	}, [containerRef]);
+
+	return dimensions;
+}
+
+/**
+ * 表示範囲を管理するフック
+ */
+function useTimeRange(currentTime: number) {
+	const [viewDuration, setViewDuration] = useState(31536000 * 2);
+	const [viewCenter, setViewCenter] = useState(
+		currentTime > 0 ? currentTime : 1735689600,
+	);
 
 	useEffect(() => {
 		const startTime = viewCenter - viewDuration / 2;
 		const endTime = viewCenter + viewDuration / 2;
-
 		const buffer = viewDuration * 0.05;
+
+		// 現在時間が画面外に出そうなら、中心を現在時間に変更する
 		if (currentTime < startTime - buffer || currentTime > endTime + buffer) {
 			setViewCenter(currentTime);
 		}
 	}, [currentTime, viewDuration, viewCenter]);
 
+	return { viewDuration, setViewDuration, viewCenter, setViewCenter };
+}
+
+/**
+ * 時間目盛りと現在時間の線を描画するフック
+ */
+function useDrawTimeline(
+	canvasRef: React.RefObject<HTMLCanvasElement>,
+	dimensions: { width: number; height: number },
+	viewCenter: number,
+	viewDuration: number,
+	currentTime: number,
+) {
 	useEffect(() => {
 		const canvas = canvasRef.current;
-		if (!canvas) return;
+		const ctx = canvas?.getContext("2d");
+		if (!canvas || !ctx) return;
 
-		const ctx = canvas.getContext("2d");
-		if (!ctx) return;
-
-		const width = dimensions.width;
-		const height = dimensions.height;
-
+		const { width, height } = dimensions;
 		canvas.width = width;
 		canvas.height = height;
 
@@ -74,7 +82,7 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
 		ctx.fillStyle = "#333";
 		ctx.textAlign = "center";
 		ctx.textBaseline = "top";
-		ctx.font = "10px 'Noto Sans JP";
+		ctx.font = "10px 'Noto Sans JP'";
 
 		let tickInterval = 3600;
 		if (viewDuration > 31536000 * 5) tickInterval = 31536000;
@@ -118,9 +126,33 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
 			ctx.moveTo(currentX, 0);
 			ctx.lineTo(currentX, height);
 			ctx.stroke();
-			ctx.lineWidth = 1;
+			ctx.lineWidth = 1; 
 		}
-	}, [viewCenter, viewDuration, currentTime, dimensions]);
+	}, [viewCenter, viewDuration, currentTime, dimensions, canvasRef]);
+}
+
+/**
+ * タイムラインコンポーネント
+ */
+export default function TimeAxis({
+	currentTime,
+	onTimeChange,
+	minTime = 0,
+	maxTime = 1800000000,
+}: TimeAxisProps) {
+	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	const dimensions = useCanvasDimensions(containerRef);
+	const { viewDuration, setViewDuration, viewCenter, setViewCenter } =
+		useTimeRange(currentTime);
+	
+	useDrawTimeline(canvasRef, dimensions, viewCenter, viewDuration, currentTime);
+
+	const [isDragging, setIsDragging] = useState(false);
+	const dragStartX = useRef<number>(0);
+	const lastMouseX = useRef<number>(0);
+	const isClick = useRef<boolean>(true);
 
 	const handleWheel = (e: React.WheelEvent) => {
 		e.stopPropagation();
@@ -221,12 +253,10 @@ const TimeAxis: React.FC<TimeAxisProps> = ({
 		>
 			<canvas
 				ref={canvasRef}
-				width={800}
-				height={50}
+				width={dimensions.width}
+				height={dimensions.height}
 				style={{ width: "100%", height: "100%" }}
 			/>
 		</div>
 	);
-};
-
-export default TimeAxis;
+}

@@ -12,6 +12,9 @@ import sharedStyles from "../../styles/panel.module.scss";
 import JsonColorPanel from "../json-color-panel/json-color-panel";
 import styles from "./json-panel.module.scss";
 
+/**
+ * JSONリストアイテムのデータ構造
+ */
 export interface JsonItem {
 	id: number;
 	fileName: string;
@@ -21,6 +24,65 @@ export interface JsonItem {
 	voxelItemIds?: number[];
 }
 
+/**
+ * リスト内のJSONボックスを描画するためのプロパティ
+ */
+interface JsonBoxProps {
+	item: JsonItem;
+	onDelete: (id: number) => void;
+	onFocus: (id: number) => void;
+	onColorClick: (id: number, e: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+/**
+ * リスト内のJSONボックス（ファイル名表示と操作ボタンのセット）を描画する部品
+ */
+function JsonBox({ item, onDelete, onFocus, onColorClick }: JsonBoxProps) {
+	return (
+		<div className={styles.itemRow}>
+			{/* 左側：ファイル名表示エリア */}
+			<div className={styles.fileName}>
+				<div className={styles.fileNameBox}>
+					<span className={styles.fileNameText} title={item.fileName}>
+						{item.description || item.fileName}
+					</span>
+				</div>
+			</div>
+
+			{/* 右側：操作ボタン群（削除、フォーカス、色編集） */}
+			<div className={styles.actionButtons}>
+				<button
+					type="button"
+					onClick={() => onDelete(item.id)}
+					className={`${sharedStyles.iconButton} ${sharedStyles.deleteButton}`}
+					title="Delete"
+				>
+					<IconTrash />
+				</button>
+				<button
+					type="button"
+					onClick={() => onFocus(item.id)}
+					className={sharedStyles.iconButton}
+					title="Focus"
+				>
+					<IconTarget />
+				</button>
+				<button
+					type="button"
+					onClick={(e) => onColorClick(item.id, e)}
+					className={sharedStyles.iconButton}
+					title="Edit Color"
+				>
+					<IconEdit />
+				</button>
+			</div>
+		</div>
+	);
+}
+
+/**
+ * JSONパネルが受け取るプロパティ
+ */
 interface JsonPanelProps {
 	jsonItems: JsonItem[];
 	onAdd: (file: File) => void;
@@ -28,21 +90,30 @@ interface JsonPanelProps {
 	onFocus: (id: number) => void;
 }
 
-const JsonPanel: React.FC<JsonPanelProps> = ({
+/**
+ * 画面上の「JSON」データを管理するパネル全体
+ */
+export default function JsonPanel({
 	jsonItems,
 	onAdd,
 	onDelete,
 	onFocus,
-}) => {
+}: JsonPanelProps) {
+	// ファイル入力用とパネル本体のレイアウト参照
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
-	const { setVoxelColorOverrides, valueColorMaps, setValueColorMaps } =
-		useVoxel();
+	
+	// ボクセルデータと色塗り設定を管理するコンテキスト
+	const { setVoxelColorOverrides, valueColorMaps, setValueColorMaps } = useVoxel();
 
+	// カラーパネル用の状態管理（どのIDを開いているか、ボタン座標、コンテナ座標）
 	const [openPickerId, setOpenPickerId] = useState<number | null>(null);
 	const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
 	const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
 
+	/**
+	 * 色編集ボタンがクリックされた時の処理（パネル開閉と表示位置の計算）
+	 */
 	const handleColorClick = (
 		id: number,
 		e: React.MouseEvent<HTMLButtonElement>,
@@ -56,6 +127,9 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
 		}
 	};
 
+	/**
+	 * ファイルがアップロードされた時の処理
+	 */
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
@@ -63,49 +137,30 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
 		}
 	};
 
+	/**
+	 * 現在パネルで選択されている要素を取得
+	 */
+	const targetJsonItem = openPickerId !== null ? jsonItems.find((i) => i.id === openPickerId) : null;
+
 	return (
 		<>
 			<div ref={containerRef} className={sharedStyles.panelContainer}>
+				{/* 上部：JSONアイテムのリスト表示エリア */}
 				<div className={sharedStyles.scrollArea}>
 					<div className={sharedStyles.itemList}>
 						{jsonItems.map((item) => (
-							<div key={item.id} className={styles.itemRow}>
-								<div className={styles.fileName}>
-									<div className={styles.fileNameBox}>
-										<span className={styles.fileNameText} title={item.fileName}>
-											{item.description || item.fileName}
-										</span>
-									</div>
-								</div>
-
-								<div className={styles.actionButtons}>
-									<button
-										type="button"
-										onClick={() => onDelete(item.id)}
-										className={`${sharedStyles.iconButton} ${sharedStyles.deleteButton}`}
-									>
-										<IconTrash />
-									</button>
-									<button
-										type="button"
-										onClick={() => onFocus(item.id)}
-										className={sharedStyles.iconButton}
-									>
-										<IconTarget />
-									</button>
-									<button
-										type="button"
-										onClick={(e) => handleColorClick(item.id, e)}
-										className={sharedStyles.iconButton}
-									>
-										<IconEdit />
-									</button>
-								</div>
-							</div>
+							<JsonBox 
+								key={item.id}
+								item={item}
+								onDelete={onDelete}
+								onFocus={onFocus}
+								onColorClick={handleColorClick}
+							/>
 						))}
 					</div>
 				</div>
 
+				{/* 下部：アップロード用のインプットとボタン */}
 				<div className={sharedStyles.footer}>
 					<input
 						ref={fileInputRef}
@@ -124,26 +179,18 @@ const JsonPanel: React.FC<JsonPanelProps> = ({
 				</div>
 			</div>
 
-			{openPickerId !== null &&
-				pickerRect &&
-				containerRect &&
-				(() => {
-					const target = jsonItems.find((i) => i.id === openPickerId);
-					if (!target) return null;
-					return (
-						<JsonColorPanel
-							content={target.content as KasaneJson}
-							triggerRect={pickerRect}
-							containerRight={containerRect.right}
-							valueColorMaps={valueColorMaps}
-							setValueColorMaps={setValueColorMaps}
-							onColorMapChange={setVoxelColorOverrides}
-							onClose={() => setOpenPickerId(null)}
-						/>
-					);
-				})()}
+			{/* ポップアップ式のJSONカラーパネル */}
+			{targetJsonItem && pickerRect && containerRect && (
+				<JsonColorPanel
+					content={targetJsonItem.content as KasaneJson}
+					triggerRect={pickerRect}
+					containerRight={containerRect.right}
+					valueColorMaps={valueColorMaps}
+					setValueColorMaps={setValueColorMaps}
+					onColorMapChange={setVoxelColorOverrides}
+					onClose={() => setOpenPickerId(null)}
+				/>
+			)}
 		</>
 	);
-};
-
-export default JsonPanel;
+}

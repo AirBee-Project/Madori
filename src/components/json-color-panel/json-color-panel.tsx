@@ -1,97 +1,28 @@
 import { IconChevronRight } from "@tabler/icons-react";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { preset_colors } from "../../data/colors";
 import type { KasaneJson } from "../../data/voxel-json";
 import { useClickOutside } from "../../hooks/useClickOutside";
+import {
+	buildInitialColorMap,
+	isPrimitiveArray,
+	uniqueValues,
+	voxelKey,
+} from "../../utils/json-color-utils";
 import ColorPicker from "../color-picker/color-picker";
 import styles from "./json-color-panel.module.scss";
 
-function isPrimitiveArray(values: unknown[]): boolean {
-	return values.every(
-		(v) =>
-			typeof v === "string" || typeof v === "number" || typeof v === "boolean",
-	);
-}
-
-function uniqueValues(values: unknown[]): string[] {
-	const seen = new Set<string>();
-	const result: string[] = [];
-	for (const v of values) {
-		const s = String(v);
-		if (!seen.has(s)) {
-			seen.add(s);
-			result.push(s);
-		}
-	}
-	return result;
-}
-
-function hexToRgba(
-	hex: string,
-	alpha: number,
-): [number, number, number, number] {
-	const r = Number.parseInt(hex.slice(1, 3), 16);
-	const g = Number.parseInt(hex.slice(3, 5), 16);
-	const b = Number.parseInt(hex.slice(5, 7), 16);
-	return [r, g, b, alpha];
-}
-
-function buildInitialColorMap(
-	values: string[],
-): Map<string, [number, number, number, number]> {
-	const map = new Map<string, [number, number, number, number]>();
-	for (let i = 0; i < values.length; i++) {
-		map.set(values[i], hexToRgba(preset_colors[i % preset_colors.length], 200));
-	}
-	return map;
-}
-
-function voxelKey(id: {
-	z: number;
-	f?: [number] | [number, number];
-	x?: [number] | [number, number];
-	y?: [number] | [number, number];
-	i?: number;
-	t?: [number] | [number, number];
-}): string {
-	const z = id.z;
-	const f = id.f
-		? id.f.length === 2
-			? `${id.f[0]}:${id.f[1]}`
-			: `${id.f[0]}`
-		: "-";
-	const x = id.x
-		? id.x.length === 2
-			? `${id.x[0]}:${id.x[1]}`
-			: `${id.x[0]}`
-		: "-";
-	const y = id.y
-		? id.y.length === 2
-			? `${id.y[0]}:${id.y[1]}`
-			: `${id.y[0]}`
-		: "-";
-	let t = "-";
-	if (id.t && id.i !== undefined) {
-		const interval = id.i;
-		if (id.t.length === 1) {
-			const start = interval * id.t[0];
-			const end = interval * (id.t[0] + 1);
-			t = `${start}:${end}`;
-		} else {
-			const start = interval * id.t[0];
-			const end = interval * (id.t[1] + 1);
-			t = `${start}:${end}`;
-		}
-	}
-	return `${z}/${f}/${x}/${y}/${t}`;
-}
-
+/**
+ * データの名前とそれに連なる一意な値のリストを持つエントリー型
+ */
 interface NameEntry {
 	name: string;
 	values: string[];
 }
 
+/**
+ * JSONカラーパネルが受け取るプロパティ
+ */
 interface JsonColorPanelProps {
 	content: KasaneJson;
 	triggerRect: DOMRect;
@@ -108,7 +39,104 @@ interface JsonColorPanelProps {
 	onClose: () => void;
 }
 
-const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
+/**
+ * 対象の項目一覧（トップレベル）を描画するサブコンポーネント
+ */
+function NameListView({
+	entries,
+	onSelect,
+}: {
+	entries: NameEntry[];
+	onSelect: (name: string) => void;
+}) {
+	return (
+		<div className={styles.nameList}>
+			{entries.length === 0 && (
+				<div className={styles.emptyText}>対象の項目がありません</div>
+			)}
+			{entries.map((entry) => (
+				<button
+					type="button"
+					key={entry.name}
+					className={styles.nameItem}
+					onClick={() => onSelect(entry.name)}
+				>
+					<span className={styles.nameText}>{entry.name}</span>
+					<IconChevronRight
+						size={18}
+						stroke={2.5}
+						className={styles.chevronIcon}
+					/>
+				</button>
+			))}
+		</div>
+	);
+}
+
+/**
+ * 色をRGBAのCSS形式へ変換するヘルパー
+ */
+const rgbaCss = (c: [number, number, number, number]) =>
+	`rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3] / 255})`;
+
+/**
+ * カラー設定を変更するための詳細一覧（第2レベル）を描画するサブコンポーネント
+ */
+function ValueListView({
+	selectedName,
+	selectedEntry,
+	currentColorMap,
+	onBack,
+	onSwatchClick,
+}: {
+	selectedName: string;
+	selectedEntry: NameEntry;
+	currentColorMap?: Map<string, [number, number, number, number]>;
+	onBack: () => void;
+	onSwatchClick: (value: string, e: React.MouseEvent<HTMLButtonElement>) => void;
+}) {
+	return (
+		<>
+			<button
+				type="button"
+				className={styles.selectedHeader}
+				onClick={onBack}
+			>
+				<span className={styles.nameText}>{selectedName}</span>
+				<IconChevronRight
+					size={18}
+					stroke={2.5}
+					className={styles.chevronIcon}
+				/>
+			</button>
+			<div className={styles.valueList}>
+				{selectedEntry.values.map((value) => {
+					// 色が未設定の場合はデフォルトで黒を適用
+					const color =
+						currentColorMap?.get(value) ??
+						([0, 0, 0, 200] as [number, number, number, number]);
+					return (
+						<div key={value} className={styles.valueItem}>
+							<span className={styles.valueText}>{value}</span>
+							<button
+								type="button"
+								className={styles.colorSwatch}
+								style={{ backgroundColor: rgbaCss(color) }}
+								onClick={(e) => onSwatchClick(value, e)}
+							/>
+						</div>
+					);
+				})}
+			</div>
+		</>
+	);
+}
+
+/**
+ * JSONカラーパネルコンポーネント全体
+ * 項目を選択し、さらに各値に対して色を割り当てるポップアップUI
+ */
+export default function JsonColorPanel({
 	content,
 	triggerRect,
 	containerRight,
@@ -116,15 +144,18 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 	setValueColorMaps,
 	onColorMapChange,
 	onClose,
-}) => {
+}: JsonColorPanelProps) {
 	const ref = useRef<HTMLDivElement>(null);
 	const pickerOpenRef = useRef(false);
+
+	// パネル外クリックで閉じる処理
 	useClickOutside(ref, () => {
 		if (!pickerOpenRef.current) {
 			onClose();
 		}
 	});
 
+	// JSONデータから設定可能な名前空間とその値のリストを抽出
 	const nameEntries: NameEntry[] = useMemo(() => {
 		return content.data
 			.filter((entry) => isPrimitiveArray(entry.value))
@@ -137,7 +168,12 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 	const [selectedName, setSelectedName] = useState<string | null>(
 		nameEntries.length > 0 ? nameEntries[0].name : null,
 	);
+	const [pickerTarget, setPickerTarget] = useState<{
+		value: string;
+		rect: DOMRect;
+	} | null>(null);
 
+	// 未設定の項目があれば、自動的に初期色マップを構築する
 	useEffect(() => {
 		let hasChanges = false;
 		const newMap = new Map(valueColorMaps);
@@ -154,16 +190,12 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 		}
 	}, [nameEntries, valueColorMaps, setValueColorMaps]);
 
-	const [pickerTarget, setPickerTarget] = useState<{
-		value: string;
-		rect: DOMRect;
-	} | null>(null);
-
 	const currentColorMap = selectedName
 		? valueColorMaps.get(selectedName)
 		: undefined;
 	const selectedEntry = nameEntries.find((e) => e.name === selectedName);
 
+	// 色の設定が変更されたり項目が切り替わったときに、親(マップ)の描画用カラーを更新する
 	useEffect(() => {
 		if (!selectedName || !currentColorMap) return;
 
@@ -203,9 +235,6 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 		});
 	};
 
-	const rgbaCss = (c: [number, number, number, number]) =>
-		`rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3] / 255})`;
-
 	const panelStyle: React.CSSProperties = {
 		position: "fixed",
 		top: triggerRect.bottom + 4,
@@ -215,70 +244,32 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 
 	return (
 		<div ref={ref} className={styles.panel} style={panelStyle}>
+			{/* 第1階層：項目リストの描画 */}
 			{!selectedName && (
-				<div className={styles.nameList}>
-					{nameEntries.length === 0 && (
-						<div className={styles.emptyText}>対象の項目がありません</div>
-					)}
-					{nameEntries.map((entry) => (
-						<button
-							type="button"
-							key={entry.name}
-							className={styles.nameItem}
-							onClick={() => {
-								setSelectedName(entry.name);
-								setPickerTarget(null);
-							}}
-						>
-							<span className={styles.nameText}>{entry.name}</span>
-							<IconChevronRight
-								size={18}
-								stroke={2.5}
-								className={styles.chevronIcon}
-							/>
-						</button>
-					))}
-				</div>
+				<NameListView
+					entries={nameEntries}
+					onSelect={(name) => {
+						setSelectedName(name);
+						setPickerTarget(null);
+					}}
+				/>
 			)}
 
+			{/* 第2階層：選択された項目の値リストの描画 */}
 			{selectedName && selectedEntry && (
-				<>
-					<button
-						type="button"
-						className={styles.selectedHeader}
-						onClick={() => {
-							setSelectedName(null);
-							setPickerTarget(null);
-						}}
-					>
-						<span className={styles.nameText}>{selectedName}</span>
-						<IconChevronRight
-							size={18}
-							stroke={2.5}
-							className={styles.chevronIcon}
-						/>
-					</button>
-					<div className={styles.valueList}>
-						{selectedEntry.values.map((value) => {
-							const color =
-								currentColorMap?.get(value) ??
-								([0, 0, 0, 200] as [number, number, number, number]);
-							return (
-								<div key={value} className={styles.valueItem}>
-									<span className={styles.valueText}>{value}</span>
-									<button
-										type="button"
-										className={styles.colorSwatch}
-										style={{ backgroundColor: rgbaCss(color) }}
-										onClick={(e) => handleSwatchClick(value, e)}
-									/>
-								</div>
-							);
-						})}
-					</div>
-				</>
+				<ValueListView
+					selectedName={selectedName}
+					selectedEntry={selectedEntry}
+					currentColorMap={currentColorMap}
+					onBack={() => {
+						setSelectedName(null);
+						setPickerTarget(null);
+					}}
+					onSwatchClick={handleSwatchClick}
+				/>
 			)}
 
+			{/* カラーピッカーポップアップの描画 */}
 			{pickerTarget && currentColorMap && (
 				<ColorPicker
 					triggerRect={pickerTarget.rect}
@@ -293,6 +284,4 @@ const JsonColorPanel: React.FC<JsonColorPanelProps> = ({
 			)}
 		</div>
 	);
-};
-
-export default JsonColorPanel;
+}

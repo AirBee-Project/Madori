@@ -27,16 +27,16 @@ type JsonProviderProps = {
 export const JsonProvider = ({ children }: JsonProviderProps) => {
 	const [jsonItems, setJsonItems] = useState<JsonItem[]>([]);
 	const [nextJsonId, setNextJsonId] = useState(1);
-	const { voxelItems, addVoxel, deleteVoxel, focusOnVoxelDefs, addTooltips } =
-		useVoxel();
+
+
+	const { voxelItems, addVoxel, deleteVoxel, focusOnVoxelDefs, addTooltips } = useVoxel();
 
 	const addJson = useCallback(
 		async (file: File) => {
 			try {
 				const text = await file.text();
 				const content = JSON.parse(text) as KasaneJson;
-				const { voxelDefs, tooltipMap: newTooltips } =
-					jsonToVoxelDefinition(content);
+				const { voxelDefs, tooltipMap: newTooltips } = jsonToVoxelDefinition(content);
 
 				const color: [number, number, number, number] = [0, 0, 255, 76];
 				const voxelId = addVoxel({
