@@ -2,8 +2,8 @@ import { GeoJsonLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import type { Color, LayersList } from "deck.gl";
 import type { GeoJSON } from "geojson";
 import type { Item } from "../data/item";
-import toResolvedIds from "./resolve-id-range";
 import toVoxelGeometry from "./id-to-voxel";
+import toResolvedIds from "./resolve-id-range";
 
 export default function generateLayer(
 	item: Item[],
