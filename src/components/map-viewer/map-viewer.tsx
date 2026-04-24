@@ -12,7 +12,7 @@ import styles from "./map-viewer.module.scss";
  * 地図のベースレイヤーと時空間IDの描画コンポーネント
  */
 export default function MapViewer() {
-	const { viewState, setViewState, isMapVisible, compileMode } = useMap();
+	const { viewState, setViewState, isMapVisible, rangeMode } = useMap();
 	const { voxelItems, tooltipMap, voxelColorOverrides } = useVoxel();
 	const { currentTime } = useTime();
 	
@@ -20,11 +20,11 @@ export default function MapViewer() {
 	const layers = useMemo(() => {
 		return generateLayer(
 			voxelItems,
-			compileMode,
+			rangeMode,
 			currentTime,
 			voxelColorOverrides,
 		);
-	}, [voxelItems, compileMode, currentTime, voxelColorOverrides]);
+	}, [voxelItems, rangeMode, currentTime, voxelColorOverrides]);
 
 	/**
 	 * 視点の更新

@@ -2,12 +2,12 @@ import { GeoJsonLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import type { Color, LayersList } from "deck.gl";
 import type { GeoJSON } from "geojson";
 import type { Item } from "../data/item";
-import expandVoxelRange from "./expand-voxel-range";
-import pvoxelToPolygon from "./voxel-to-polygon";
+import toResolvedIds from "./resolve-id-range";
+import toVoxelGeometry from "./id-to-voxel";
 
 export default function generateLayer(
 	item: Item[],
-	compileMode: boolean = true,
+	rangeMode: boolean = true,
 	currentTime: number = 0,
 	voxelColorOverrides?: globalThis.Map<
 		string,
@@ -54,7 +54,7 @@ export default function generateLayer(
 		id: "SolidPolygonLayer",
 		data: generatePolygonLayer(
 			voxelItem,
-			compileMode,
+			rangeMode,
 			currentTime,
 			voxelColorOverrides,
 		),
@@ -122,7 +122,7 @@ function generateLineGeoJson(line: Item<"line">[]): GeoJSON {
 	return result;
 }
 
-type Polygon = {
+type VoxelGeometry = {
 	points: number[][];
 	elevation: number;
 	voxelID: string;
@@ -132,18 +132,18 @@ type Polygon = {
 };
 function generatePolygonLayer(
 	voxel: Item<"voxel">[],
-	compileMode: boolean,
+	rangeMode: boolean,
 	currentTime: number,
 	voxelColorOverrides?: globalThis.Map<
 		string,
 		[number, number, number, number]
 	>,
-): Polygon[] {
-	const result: Polygon[] = [];
+): VoxelGeometry[] {
+	const result: VoxelGeometry[] = [];
 	for (let i = 0; i < voxel.length; i++) {
-		const pureVoxel = expandVoxelRange(voxel[i].data.voxel, compileMode);
-		const polygon = pvoxelToPolygon(pureVoxel, voxel[i].data.color);
-		for (const p of polygon) {
+		const resolvedIds = toResolvedIds(voxel[i].data.voxel, rangeMode);
+		const geometry = toVoxelGeometry(resolvedIds, voxel[i].data.color);
+		for (const p of geometry) {
 			if (voxelColorOverrides && voxelColorOverrides.size > 0) {
 				const override = voxelColorOverrides.get(p.voxelID);
 				if (override) {

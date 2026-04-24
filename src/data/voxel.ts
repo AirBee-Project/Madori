@@ -1,10 +1,10 @@
 import type { Color } from "deck.gl";
-import type { VoxelDefinition } from "./voxel-definition";
+import type { IdDefinition } from "./id-definition";
 
 export type Voxel = {
 	color: Color;
 	opacity: number;
-	voxel: VoxelDefinition[];
+	voxel: IdDefinition[];
 	voxelString?: string;
 	keys?: string[];
 };

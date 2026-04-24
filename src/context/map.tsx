@@ -24,8 +24,8 @@ type MapContextType = {
 	setViewState: (vs: MapViewState) => void;
 	isMapVisible: boolean;
 	setIsMapVisible: (v: boolean) => void;
-	compileMode: boolean;
-	setCompileMode: (v: boolean) => void;
+	rangeMode: boolean;
+	setRangeMode: (v: boolean) => void;
 	flyTo: (lon: number, lat: number, zoom?: number, pitch?: number) => void;
 };
 
@@ -35,7 +35,7 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
 	
 	const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
 	const [isMapVisible, setIsMapVisible] = useState(true);
-	const [compileMode, setCompileMode] = useState(true);
+	const [rangeMode, setRangeMode] = useState(true);
 
 
 	/**
@@ -62,11 +62,11 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
 			setViewState,
 			isMapVisible,
 			setIsMapVisible,
-			compileMode,
-			setCompileMode,
+			rangeMode,
+			setRangeMode,
 			flyTo,
 		}),
-		[viewState, isMapVisible, compileMode, flyTo],
+		[viewState, isMapVisible, rangeMode, flyTo],
 	);
 
 	return (

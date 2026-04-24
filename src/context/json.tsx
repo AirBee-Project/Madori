@@ -8,7 +8,7 @@ import {
 } from "react";
 import type { JsonItem } from "../components/json-panel/json-panel";
 import type { KasaneJson } from "../data/voxel-json";
-import jsonToVoxelDefinition from "../utils/parse-voxel-json";
+import jsonToIdDefinition from "../utils/parse-voxel-json";
 import { useVoxel } from "./voxel";
 
 type JsonContextType = {
@@ -36,7 +36,7 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 			try {
 				const text = await file.text();
 				const content = JSON.parse(text) as KasaneJson;
-				const { voxelDefs, tooltipMap: newTooltips } = jsonToVoxelDefinition(content);
+				const { voxelDefs, tooltipMap: newTooltips } = jsonToIdDefinition(content);
 
 				const color: [number, number, number, number] = [0, 0, 255, 76];
 				const voxelId = addVoxel({

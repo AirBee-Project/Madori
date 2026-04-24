@@ -1,4 +1,4 @@
-export type VoxelDefinition = {
+export type IdDefinition = {
 	Z: number;
 	X: [number, number] | number;
 	Y: [number, number] | number;

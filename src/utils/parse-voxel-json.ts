@@ -1,8 +1,8 @@
-import type { VoxelDefinition } from "../data/voxel-definition";
+import type { IdDefinition } from "../data/id-definition";
 import type { KasaneId, KasaneJson } from "../data/voxel-json";
 
 export type JsonVoxelResult = {
-	voxelDefs: VoxelDefinition[];
+	voxelDefs: IdDefinition[];
 	tooltipMap: Map<string, string>;
 };
 
@@ -69,10 +69,10 @@ function formatValue(value: unknown): string {
 	return String(value);
 }
 
-export default function jsonToVoxelDefinition(
+export default function jsonToIdDefinition(
 	json: KasaneJson,
 ): JsonVoxelResult {
-	const voxelDefs: VoxelDefinition[] = [];
+	const voxelDefs: IdDefinition[] = [];
 	const tooltipMap = new Map<string, string>();
 	const seenKeys = new Set<string>();
 

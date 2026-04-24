@@ -1,7 +1,7 @@
 import type { Color } from "deck.gl";
-import type { PureVoxel } from "../data/expanded-voxel";
+import type { ResolvedId } from "../data/resolved-id";
 
-type Polygon = {
+type VoxelGeometry = {
 	points: number[][];
 	elevation: number;
 	voxelID: string;
@@ -17,12 +17,12 @@ type PvoxelCoordinates = {
 	minLat: number;
 };
 
-export default function pvoxelToPolygon(
-	pvoxels: PureVoxel[],
+export default function toVoxelGeometry(
+	pvoxels: ResolvedId[],
 	color: Color,
-): Polygon[] {
+): VoxelGeometry[] {
 	return pvoxels.map((voxel) => {
-		const coordinates = pvoxelToCoordinates(voxel);
+		const coordinates = idToCoordinates(voxel);
 		const altitude = getAltitude(voxel);
 		const points = generateRectanglePoints(coordinates, altitude);
 
@@ -37,7 +37,7 @@ export default function pvoxelToPolygon(
 	});
 }
 
-function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
+function idToCoordinates(voxel: ResolvedId): PvoxelCoordinates {
 	const n = 2 ** voxel.Z;
 	const lonPerTile = 360 / n;
 
@@ -54,7 +54,7 @@ function pvoxelToCoordinates(voxel: PureVoxel): PvoxelCoordinates {
 	return { maxLon, minLon, maxLat, minLat };
 }
 
-function getAltitude(voxel: PureVoxel): number {
+function getAltitude(voxel: ResolvedId): number {
 	return (33554432 / 2 ** voxel.Z) * voxel.F;
 }
 
@@ -73,7 +73,7 @@ function generateRectanglePoints(
 	];
 }
 
-function calculateElevation(voxel: PureVoxel): number {
+function calculateElevation(voxel: ResolvedId): number {
 	const fCount = voxel.F2 - voxel.F + 1;
 	return (33554432 / 2 ** voxel.Z) * fCount;
 }

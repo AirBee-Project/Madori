@@ -80,7 +80,7 @@ export default function UpperControls() {
 		updateVoxelString,
 		updateVoxelColor,
 	} = useVoxel();
-	const { compileMode, setCompileMode, isMapVisible, setIsMapVisible } = useMap();
+	const { rangeMode, setRangeMode, isMapVisible, setIsMapVisible } = useMap();
 	const { jsonItems, addJson, deleteJson, focusJson } = useJson();
 
 	const toggleIdPanel = () => {
@@ -136,7 +136,7 @@ export default function UpperControls() {
 			<div className={styles.rightControls}>
 				<RightControlButton
 					icon={IconRefresh}
-					onClick={() => setCompileMode(!compileMode)}
+					onClick={() => setRangeMode(!rangeMode)}
 					title="Toggle Compile Mode"
 				/>
 				<RightControlButton icon={IconClock} />

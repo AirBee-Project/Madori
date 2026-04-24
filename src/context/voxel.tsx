@@ -8,8 +8,8 @@ import {
   useState,
 } from "react";
 import type { Item } from "../data/item";
-import type { VoxelDefinition } from "../data/voxel-definition";
-import hyperVoxelParse from "../utils/parse-spatiotemporal-id";
+import type { IdDefinition } from "../data/id-definition";
+import parseSpatiotemporalId from "../utils/parse-spatiotemporal-id";
 
 // ==========================================
 // 1. 型定義（倉庫の中身のルールと初期値）
@@ -22,7 +22,7 @@ type VoxelContextType = {
   addVoxel: (data?: {
     color: RGBA;
     opacity: number;
-    voxel: VoxelDefinition[];
+    voxel: IdDefinition[];
     source?: "manual" | "json";
     keys?: string[];
   }) => number;
@@ -30,7 +30,7 @@ type VoxelContextType = {
   updateVoxelString: (id: number, newVoxelString: string) => void;
   updateVoxelColor: (id: number, color: RGBA) => void;
   focusVoxel: (id: number) => void;
-  focusOnVoxelDefs: (voxelDefs: VoxelDefinition[]) => void;
+  focusOnVoxelDefs: (voxelDefs: IdDefinition[]) => void;
   addTooltips: (newTooltips: Map<string, string>) => void;
   voxelColorOverrides: globalThis.Map<string, RGBA>;
   setVoxelColorOverrides: React.Dispatch<
@@ -80,7 +80,7 @@ export const VoxelProvider = ({
       data: {
         color: [0, 0, 255, 76],
         opacity: 30,
-        voxel: hyperVoxelParse(DEFAULT_VOXEL_STRING),
+        voxel: parseSpatiotemporalId(DEFAULT_VOXEL_STRING),
         voxelString: DEFAULT_VOXEL_STRING,
       },
     },
@@ -102,7 +102,7 @@ export const VoxelProvider = ({
     (data?: {
       color: RGBA;
       opacity: number;
-      voxel: VoxelDefinition[];
+      voxel: IdDefinition[];
       source?: "manual" | "json";
       keys?: string[];
     }): number => {
@@ -172,7 +172,7 @@ export const VoxelProvider = ({
         prevItems.map((item) => {
           if (item.id === id) {
             try {
-              const newVoxelData = hyperVoxelParse(newVoxelString);
+              const newVoxelData = parseSpatiotemporalId(newVoxelString);
               return { ...item, data: { ...item.data, voxelString: newVoxelString, voxel: newVoxelData } };
             } catch (_e) {
               return { ...item, data: { ...item.data, voxelString: newVoxelString, voxel: [] } };
@@ -216,7 +216,7 @@ export const VoxelProvider = ({
    * カメラ操作：指定したボクセル群が画面中心に来るようにカメラを飛ばす
    */
   const focusOnVoxelDefs = useCallback(
-    (voxelDefs: VoxelDefinition[]) => {
+    (voxelDefs: IdDefinition[]) => {
       if (voxelDefs.length === 0) return;
 
       const v = voxelDefs[0];
@@ -260,7 +260,7 @@ export const VoxelProvider = ({
 
   // 初回起動時に、一番最初のサンプルボクセルにカメラをフォーカスさせる
   useEffect(() => {
-    focusOnVoxelDefs(hyperVoxelParse(DEFAULT_VOXEL_STRING));
+    focusOnVoxelDefs(parseSpatiotemporalId(DEFAULT_VOXEL_STRING));
   }, []);
 
 

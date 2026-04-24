@@ -1,40 +1,51 @@
-import type { PureVoxel } from "../data/expanded-voxel";
-import type { VoxelDefinition } from "../data/voxel-definition";
+import type { ResolvedId } from "../data/resolved-id";
+import type { IdDefinition } from "../data/id-definition";
 
+/**
+ * 数値の場合範囲に変換する関数
+ */
 function toRange(item: [number, number] | number): [number, number] {
 	if (typeof item === "number") return [item, item];
 	return item;
 }
-
-function formatDim(item: [number, number] | number): string {
+/**
+ * X,Y,Fの範囲表記を文字列に変換する関数
+ */
+function axisRangeToString(item: [number, number] | number): string {
 	if (typeof item === "number") return String(item);
 	return `${item[0]}:${item[1]}`;
 }
-
-function formatTime(startTime: number | null, endTime: number | null): string {
+/**
+ * 時間範囲を文字列に変換する関数
+ */
+function timeRangeToString(startTime: number | null, endTime: number | null): string {
 	if (startTime !== null && endTime !== null) return `${startTime}:${endTime}`;
 	return "-";
 }
-
-export default function hyperVoxelToPureVoxel(
-	Voxels: VoxelDefinition[],
-	compileMode: boolean = true,
-): PureVoxel[] {
-	if (compileMode) {
-		return compileModeParse(Voxels);
+/**
+ * IdDefinition型からResolvedId型に変換する関数
+ */
+export default function toResolvedIds(
+	Voxels: IdDefinition[],
+	rangeMode: boolean = true,
+): ResolvedId[] {
+	if (rangeMode) {
+		return rangeModeParse(Voxels);
 	} else {
 		return expandModeParse(Voxels);
 	}
 }
-
-function compileModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
-	const result: PureVoxel[] = [];
+/**
+ * 範囲表記のままResolvedId型に変換する関数
+ */
+function rangeModeParse(Voxels: IdDefinition[]): ResolvedId[] {
+	const result: ResolvedId[] = [];
 
 	for (let i = 0; i < Voxels.length; i++) {
 		const v = Voxels[i];
 		const [fMin, fMax] = toRange(v.F);
 		const [yMin, yMax] = toRange(v.Y);
-		const originalId = `${v.Z}/${formatDim(v.F)}/${formatDim(v.X)}/${formatDim(v.Y)}/${formatTime(v.startTime, v.endTime)}`;
+		const originalId = `${v.Z}/${axisRangeToString(v.F)}/${axisRangeToString(v.X)}/${axisRangeToString(v.Y)}/${timeRangeToString(v.startTime, v.endTime)}`;
 
 		if (typeof v.X === "number") {
 			result.push({
@@ -96,9 +107,11 @@ function compileModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
 
 	return result;
 }
-
-function expandModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
-	const result: PureVoxel[] = [];
+/**
+ * 範囲表記のIDを全て展開してResolvedId型に変換する関数
+ */
+function expandModeParse(Voxels: IdDefinition[]): ResolvedId[] {
+	const result: ResolvedId[] = [];
 
 	for (let i = 0; i < Voxels.length; i++) {
 		const v = Voxels[i];
@@ -117,7 +130,7 @@ function expandModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
 						Y2: y,
 						F: f,
 						F2: f,
-						originalId: `${v.Z}/${f}/${x}/${y}/${formatTime(v.startTime, v.endTime)}`,
+						originalId: `${v.Z}/${f}/${x}/${y}/${timeRangeToString(v.startTime, v.endTime)}`,
 						startTime: v.startTime,
 						endTime: v.endTime,
 					});
@@ -128,13 +141,17 @@ function expandModeParse(Voxels: VoxelDefinition[]): PureVoxel[] {
 
 	return result;
 }
-
+/**
+ * Y,Fの範囲表記を全て展開する関数
+ */
 function enumerateRange(item: [number, number] | number): number[] {
 	if (typeof item === "number") return [item];
 	const [start, end] = [...item].sort((a, b) => a - b);
 	return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
-
+/**
+ * Xの範囲表記を全て展開する関数
+ */
 function enumerateXRange(
 	item: [number, number] | number,
 	zoomLevel: number,

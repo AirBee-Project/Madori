@@ -7,7 +7,9 @@ type ItemMap = {
 	line: Line;
 	voxel: Voxel;
 };
-
+/**
+ * 型を統一したアイテム
+ */
 export type Item<T extends keyof ItemMap = keyof ItemMap> = {
 	[K in T]: {
 		id: number;
