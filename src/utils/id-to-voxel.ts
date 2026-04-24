@@ -10,25 +10,28 @@ type VoxelGeometry = {
 	endTime: number | null;
 };
 
-type PvoxelCoordinates = {
+type VoxelBounds = {
 	maxLon: number;
 	minLon: number;
 	maxLat: number;
 	minLat: number;
 };
-
+/**
+ * ResolvedId型からVoxelGeometry型に変換する関数
+ * （IDからDeck.glに渡す用の座標変換を行う関数）
+ */
 export default function toVoxelGeometry(
-	pvoxels: ResolvedId[],
+	ids: ResolvedId[],
 	color: Color,
 ): VoxelGeometry[] {
-	return pvoxels.map((voxel) => {
+	return ids.map((voxel) => {
 		const coordinates = idToCoordinates(voxel);
-		const altitude = getAltitude(voxel);
+		const altitude = idToAltitude(voxel);
 		const points = generateRectanglePoints(coordinates, altitude);
 
 		return {
 			points,
-			elevation: calculateElevation(voxel),
+			elevation: idToElevation(voxel),
 			voxelID: voxel.originalId,
 			color: color,
 			startTime: voxel.startTime,
@@ -37,7 +40,10 @@ export default function toVoxelGeometry(
 	});
 }
 
-function idToCoordinates(voxel: ResolvedId): PvoxelCoordinates {
+/**
+ * IDから緯度経度に変換する関数
+ */
+function idToCoordinates(voxel: ResolvedId): VoxelBounds {
 	const n = 2 ** voxel.Z;
 	const lonPerTile = 360 / n;
 
@@ -54,12 +60,18 @@ function idToCoordinates(voxel: ResolvedId): PvoxelCoordinates {
 	return { maxLon, minLon, maxLat, minLat };
 }
 
-function getAltitude(voxel: ResolvedId): number {
+/**
+ * IDから高度に変換する関数
+ */
+function idToAltitude(voxel: ResolvedId): number {
 	return (33554432 / 2 ** voxel.Z) * voxel.F;
 }
 
+/**
+ * 緯度経度からボクセルの底面を生成する関数
+ */
 function generateRectanglePoints(
-	coord: PvoxelCoordinates,
+	coord: VoxelBounds,
 	altitude: number,
 ): number[][] {
 	const { maxLon, minLon, maxLat, minLat } = coord;
@@ -73,7 +85,10 @@ function generateRectanglePoints(
 	];
 }
 
-function calculateElevation(voxel: ResolvedId): number {
+/**
+ * IDから底面からの高さを計算する関数
+ */
+function idToElevation(voxel: ResolvedId): number {
 	const fCount = voxel.F2 - voxel.F + 1;
 	return (33554432 / 2 ** voxel.Z) * fCount;
 }

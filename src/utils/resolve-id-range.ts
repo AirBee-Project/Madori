@@ -2,7 +2,7 @@ import type { ResolvedId } from "../data/resolved-id";
 import type { IdDefinition } from "../data/id-definition";
 
 /**
- * 数値の場合範囲に変換する関数
+ * 数値の場合に範囲に変換する関数
  */
 function toRange(item: [number, number] | number): [number, number] {
 	if (typeof item === "number") return [item, item];
