@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 
+/**
+ * 指定した要素の外側をクリックしたとき用のフック
+ */
 export function useClickOutside<T extends HTMLElement>(
 	ref: React.RefObject<T | null>,
 	handler: () => void,
