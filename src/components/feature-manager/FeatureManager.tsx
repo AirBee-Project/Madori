@@ -7,10 +7,9 @@ import FeatureButton from "./FeatureButton";
 export default function FeatureManager() {
   return (
     <div>
+      <FeatureButton name={"空間ID"} icon={IconTableMinus} isActive={false} />
       <FeatureButton name={"点"} icon={IconTableMinus} isActive={false} />
-      <FeatureButton name={"点"} icon={IconTableMinus} isActive={false} />
-      <FeatureButton name={"点"} icon={IconTableMinus} isActive={false} />
-      <FeatureButton name={"点"} icon={IconTableMinus} isActive={false} />
+      <FeatureButton name={"線"} icon={IconTableMinus} isActive={false} />
     </div>
   );
 }
