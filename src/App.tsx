@@ -1,47 +1,26 @@
+import DeckGL from "@deck.gl/react";
+import { Map as MapGL } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import FooterControls from "./components/footer-controls/footer-controls";
-import MapViewer from "./components/map-viewer/map-viewer";
-import UpperControls from "./components/upper-controls/upper-controls";
-import { JsonProvider } from "./context/json";
-import { MapProvider, useMap } from "./context/map";
-import { TimeProvider, useTime } from "./context/time";
-import { VoxelProvider } from "./context/voxel";
-import styles from "./styles/app.module.scss";
-
-function AppContent() {
-  return (
-    <JsonProvider>
-      <div className={styles.appRoot}>
-        <img
-          src={`${import.meta.env.BASE_URL}logo.png`}
-          className={styles.logo}
-          alt="AirBee Logo"
-        />
-        <MapViewer />
-        <UpperControls />
-        <FooterControls />
-      </div>
-    </JsonProvider>
-  );
-}
-
-function AppWithVoxel() {
-  const { flyTo } = useMap();
-  const { setCurrentTime } = useTime();
-
-  return (
-    <VoxelProvider onFlyTo={flyTo} onTimeJump={setCurrentTime}>
-      <AppContent />
-    </VoxelProvider>
-  );
-}
+import { FeatureManager } from "./components/feature-manager";
 
 export default function App() {
   return (
-    <MapProvider>
-      <TimeProvider>
-        <AppWithVoxel />
-      </TimeProvider>
-    </MapProvider>
+    <div>
+      <div style={{ position: "absolute", zIndex: 50 }}>
+        <FeatureManager />
+      </div>
+
+      <DeckGL
+        initialViewState={{
+          longitude: 139.767,
+          latitude: 35.681,
+          zoom: 10,
+        }}
+        controller={true}
+        style={{ width: "100vw", height: "100vh" }}
+      >
+        <MapGL mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json" />
+      </DeckGL>
+    </div>
   );
 }
