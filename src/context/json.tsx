@@ -31,6 +31,9 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 
 	const { voxelItems, addVoxel, deleteVoxel, focusOnVoxelDefs, addTooltips } = useVoxel();
 
+	/**
+	 * JSONファイルをaddVoxelに渡し、jsonItemに追加する関数
+	 */
 	const addJson = useCallback(
 		async (file: File) => {
 			try {
@@ -66,6 +69,10 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 		[addVoxel, addTooltips, nextJsonId],
 	);
 
+	/**
+	 * JSONデータを削除する関数
+	 */
+
 	const deleteJson = useCallback(
 		(id: number) => {
 			const target = jsonItems.find((i) => i.id === id);
@@ -79,6 +86,9 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 		[jsonItems, deleteVoxel],
 	);
 
+	/**
+	 * JSONデータにフォーカスする関数
+	 */
 	const focusJson = useCallback(
 		(id: number) => {
 			const target = jsonItems.find((i) => i.id === id);
@@ -93,7 +103,7 @@ export const JsonProvider = ({ children }: JsonProviderProps) => {
 		},
 		[jsonItems, voxelItems, focusOnVoxelDefs],
 	);
-
+	
 	const contextValue = useMemo(
 		() => ({
 			jsonItems,

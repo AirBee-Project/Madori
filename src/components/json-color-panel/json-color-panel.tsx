@@ -7,14 +7,13 @@ import {
 	buildInitialColorMap,
 	isPrimitiveArray,
 	uniqueValues,
-	voxelKey,
 } from "../../utils/json-color-utils";
+import { toIdString } from "../../utils/id-utils";
 import ColorPicker from "../color-picker/color-picker";
 import styles from "./json-color-panel.module.scss";
 
-/**
- * データの名前とそれに連なる一意な値のリストを持つエントリー型
- */
+//むずすぎる
+
 interface NameEntry {
 	name: string;
 	values: string[];
@@ -40,7 +39,7 @@ interface JsonColorPanelProps {
 }
 
 /**
- * 対象の項目一覧（トップレベル）を描画するサブコンポーネント
+ * 項目一覧を描画するコンポーネント
  */
 function NameListView({
 	entries,
@@ -80,7 +79,7 @@ const rgbaCss = (c: [number, number, number, number]) =>
 	`rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3] / 255})`;
 
 /**
- * カラー設定を変更するための詳細一覧（第2レベル）を描画するサブコンポーネント
+ * カラー設定を変更するための詳細を描画するコンポーネント
  */
 function ValueListView({
 	selectedName,
@@ -148,7 +147,7 @@ export default function JsonColorPanel({
 	const ref = useRef<HTMLDivElement>(null);
 	const pickerOpenRef = useRef(false);
 
-	// パネル外クリックで閉じる処理
+	// パネル外クリックで閉じる
 	useClickOutside(ref, () => {
 		if (!pickerOpenRef.current) {
 			onClose();
@@ -195,19 +194,21 @@ export default function JsonColorPanel({
 		: undefined;
 	const selectedEntry = nameEntries.find((e) => e.name === selectedName);
 
-	// 色の設定が変更されたり項目が切り替わったときに、親(マップ)の描画用カラーを更新する
+	// 色の設定が変更されたり項目が切り替わったときに、マップの描画用カラーを更新する
 	useEffect(() => {
 		if (!selectedName || !currentColorMap) return;
 
 		const dataEntry = content.data.find((e) => e.name === selectedName);
 		if (!dataEntry) return;
+		const targetEntry = content.data.find((e) => e.name === selectedName);
+		if (!targetEntry) return;
 
 		const overrides = new Map<string, [number, number, number, number]>();
-		for (const id of dataEntry.ids) {
-			const valueStr = String(dataEntry.value[id.ref]);
+		for (const id of targetEntry.ids) {
+			const valueStr = String(targetEntry.value[id.ref]);
 			const color = currentColorMap.get(valueStr);
 			if (color) {
-				overrides.set(voxelKey(id), color);
+				overrides.set(toIdString(id), color);
 			}
 		}
 		onColorMapChange(overrides);
@@ -244,7 +245,6 @@ export default function JsonColorPanel({
 
 	return (
 		<div ref={ref} className={styles.panel} style={panelStyle}>
-			{/* 第1階層：項目リストの描画 */}
 			{!selectedName && (
 				<NameListView
 					entries={nameEntries}
@@ -254,8 +254,6 @@ export default function JsonColorPanel({
 					}}
 				/>
 			)}
-
-			{/* 第2階層：選択された項目の値リストの描画 */}
 			{selectedName && selectedEntry && (
 				<ValueListView
 					selectedName={selectedName}
@@ -268,8 +266,6 @@ export default function JsonColorPanel({
 					onSwatchClick={handleSwatchClick}
 				/>
 			)}
-
-			{/* カラーピッカーポップアップの描画 */}
 			{pickerTarget && currentColorMap && (
 				<ColorPicker
 					triggerRect={pickerTarget.rect}

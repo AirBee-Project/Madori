@@ -1,7 +1,7 @@
 import { preset_colors } from "../data/colors";
 
 /**
- * 配列の中身がすべてプリミティブな値（文字列、数値、真偽値）かどうかを判定します。
+ * 配列の中身のプリミティブ値判定関数
  */
 export function isPrimitiveArray(values: unknown[]): boolean {
 	return values.every(
@@ -11,7 +11,7 @@ export function isPrimitiveArray(values: unknown[]): boolean {
 }
 
 /**
- * 配列の中から重複を排除し、文字列の配列として返します。
+ * 配列の中から重複を消す関数、
  */
 export function uniqueValues(values: unknown[]): string[] {
 	const seen = new Set<string>();
@@ -27,7 +27,7 @@ export function uniqueValues(values: unknown[]): string[] {
 }
 
 /**
- * 16進数のカラーコード（Hex）をRGBA形式の配列に変換します。
+ * 16進数のカラーコードをRGBA形式の配列に変換する関数
  */
 export function hexToRgba(
 	hex: string,
@@ -40,7 +40,7 @@ export function hexToRgba(
 }
 
 /**
- * 事前に定義されたカラーパレットを使って、値と色の初期マッピングを構築します。
+ * valueに対して初期の色を割り振る関数
  */
 export function buildInitialColorMap(
 	values: string[],
@@ -52,45 +52,4 @@ export function buildInitialColorMap(
 	return map;
 }
 
-/**
- * 各ボクセル情報から、一意なID（文字列表現）を生成します。
- */
-export function voxelKey(id: {
-	z: number;
-	f?: [number] | [number, number];
-	x?: [number] | [number, number];
-	y?: [number] | [number, number];
-	i?: number;
-	t?: [number] | [number, number];
-}): string {
-	const z = id.z;
-	const f = id.f
-		? id.f.length === 2
-			? `${id.f[0]}:${id.f[1]}`
-			: `${id.f[0]}`
-		: "-";
-	const x = id.x
-		? id.x.length === 2
-			? `${id.x[0]}:${id.x[1]}`
-			: `${id.x[0]}`
-		: "-";
-	const y = id.y
-		? id.y.length === 2
-			? `${id.y[0]}:${id.y[1]}`
-			: `${id.y[0]}`
-		: "-";
-	let t = "-";
-	if (id.t && id.i !== undefined) {
-		const interval = id.i;
-		if (id.t.length === 1) {
-			const start = interval * id.t[0];
-			const end = interval * (id.t[0] + 1);
-			t = `${start}:${end}`;
-		} else {
-			const start = interval * id.t[0];
-			const end = interval * (id.t[1] + 1);
-			t = `${start}:${end}`;
-		}
-	}
-	return `${z}/${f}/${x}/${y}/${t}`;
-}
+

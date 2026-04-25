@@ -13,7 +13,7 @@ import JsonColorPanel from "../json-color-panel/json-color-panel";
 import styles from "./json-panel.module.scss";
 
 /**
- * JSONリストアイテムのデータ構造
+ * JSONファイルのプロパティ
  */
 export interface JsonItem {
 	id: number;
@@ -23,9 +23,8 @@ export interface JsonItem {
 	color: [number, number, number, number];
 	voxelItemIds?: number[];
 }
-
 /**
- * リスト内のJSONボックスを描画するためのプロパティ
+ * JSONボックスのプロパティ
  */
 interface JsonBoxProps {
 	item: JsonItem;
@@ -35,12 +34,11 @@ interface JsonBoxProps {
 }
 
 /**
- * リスト内のJSONボックス（ファイル名表示と操作ボタンのセット）を描画する部品
+ * JSONボックスの描画部品
  */
 function JsonBox({ item, onDelete, onFocus, onColorClick }: JsonBoxProps) {
 	return (
 		<div className={styles.itemRow}>
-			{/* 左側：ファイル名表示エリア */}
 			<div className={styles.fileName}>
 				<div className={styles.fileNameBox}>
 					<span className={styles.fileNameText} title={item.fileName}>
@@ -48,8 +46,6 @@ function JsonBox({ item, onDelete, onFocus, onColorClick }: JsonBoxProps) {
 					</span>
 				</div>
 			</div>
-
-			{/* 右側：操作ボタン群（削除、フォーカス、色編集） */}
 			<div className={styles.actionButtons}>
 				<button
 					type="button"
@@ -81,7 +77,7 @@ function JsonBox({ item, onDelete, onFocus, onColorClick }: JsonBoxProps) {
 }
 
 /**
- * JSONパネルが受け取るプロパティ
+ * 複数のJSONボックスが入るパネル全体のプロパティ
  */
 interface JsonPanelProps {
 	jsonItems: JsonItem[];
@@ -91,7 +87,7 @@ interface JsonPanelProps {
 }
 
 /**
- * 画面上の「JSON」データを管理するパネル全体
+ * 画面上のJSONデータを管理するパネル全体
  */
 export default function JsonPanel({
 	jsonItems,
@@ -99,14 +95,13 @@ export default function JsonPanel({
 	onDelete,
 	onFocus,
 }: JsonPanelProps) {
-	// ファイル入力用とパネル本体のレイアウト参照
+
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	
-	// ボクセルデータと色塗り設定を管理するコンテキスト
+
 	const { setVoxelColorOverrides, valueColorMaps, setValueColorMaps } = useVoxel();
 
-	// カラーパネル用の状態管理（どのIDを開いているか、ボタン座標、コンテナ座標）
 	const [openPickerId, setOpenPickerId] = useState<number | null>(null);
 	const [pickerRect, setPickerRect] = useState<DOMRect | null>(null);
 	const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
@@ -138,14 +133,13 @@ export default function JsonPanel({
 	};
 
 	/**
-	 * 現在パネルで選択されている要素を取得
+	 * カラーピッカーで開いているJSONファイルの取得
 	 */
 	const targetJsonItem = openPickerId !== null ? jsonItems.find((i) => i.id === openPickerId) : null;
 
 	return (
 		<>
 			<div ref={containerRef} className={sharedStyles.panelContainer}>
-				{/* 上部：JSONアイテムのリスト表示エリア */}
 				<div className={sharedStyles.scrollArea}>
 					<div className={sharedStyles.itemList}>
 						{jsonItems.map((item) => (
@@ -160,7 +154,6 @@ export default function JsonPanel({
 					</div>
 				</div>
 
-				{/* 下部：アップロード用のインプットとボタン */}
 				<div className={sharedStyles.footer}>
 					<input
 						ref={fileInputRef}
@@ -179,7 +172,6 @@ export default function JsonPanel({
 				</div>
 			</div>
 
-			{/* ポップアップ式のJSONカラーパネル */}
 			{targetJsonItem && pickerRect && containerRect && (
 				<JsonColorPanel
 					content={targetJsonItem.content as KasaneJson}

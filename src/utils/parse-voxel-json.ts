@@ -1,34 +1,15 @@
 import type { IdDefinition } from "../data/id-definition";
 import type { KasaneId, KasaneJson } from "../data/voxel-json";
+import { parseTime, toIdString } from "./id-utils";
 
 export type JsonVoxelResult = {
 	voxelDefs: IdDefinition[];
 	tooltipMap: Map<string, string>;
 };
 
-function voxelKey(id: KasaneId): string {
-	const z = id.z;
-	const f = id.f
-		? id.f.length === 2
-			? `${id.f[0]}:${id.f[1]}`
-			: `${id.f[0]}`
-		: "-";
-	const x = id.x
-		? id.x.length === 2
-			? `${id.x[0]}:${id.x[1]}`
-			: `${id.x[0]}`
-		: "-";
-	const y = id.y
-		? id.y.length === 2
-			? `${id.y[0]}:${id.y[1]}`
-			: `${id.y[0]}`
-		: "-";
-	const { startTime, endTime } = parseTime(id);
-	const t =
-		startTime !== null && endTime !== null ? `${startTime}:${endTime}` : "-";
-	return `${z}/${f}/${x}/${y}/${t}`;
-}
-
+/**
+ * 範囲表記を補完する関数
+ */
 function parseDim(
 	dim: [number] | [number, number] | undefined,
 	zoomLevel: number,
@@ -47,20 +28,7 @@ function parseDim(
 	return [dim[0], dim[1]];
 }
 
-function parseTime(id: KasaneId): {
-	startTime: number | null;
-	endTime: number | null;
-} {
-	if (id.i === undefined || id.t === undefined) {
-		return { startTime: null, endTime: null };
-	}
-	const interval = id.i;
-	if (id.t.length === 1) {
-		return { startTime: interval * id.t[0], endTime: interval * (id.t[0] + 1) };
-	}
-	const [t1, t2] = id.t;
-	return { startTime: interval * t1, endTime: interval * (t2 + 1) };
-}
+
 
 function formatValue(value: unknown): string {
 	if (typeof value === "object" && value !== null) {
@@ -69,6 +37,9 @@ function formatValue(value: unknown): string {
 	return String(value);
 }
 
+/**
+ * JsonファイルをIdDefinitionに変換する関数
+ */
 export default function jsonToIdDefinition(
 	json: KasaneJson,
 ): JsonVoxelResult {
@@ -84,7 +55,7 @@ export default function jsonToIdDefinition(
 			const Y = parseDim(id.y, z, false);
 			const { startTime, endTime } = parseTime(id);
 
-			const key = voxelKey(id);
+			const key = toIdString(id);
 			if (!seenKeys.has(key)) {
 				voxelDefs.push({ Z: z, F, X, Y, startTime, endTime });
 				seenKeys.add(key);

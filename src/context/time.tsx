@@ -75,7 +75,7 @@ export const TimeProvider = ({ children }: { children: ReactNode }) => {
 };
 
 /**
- * 現在時間の管理コンポーネントのフック
+ * 現在時間の管理コンテキストのフック
  */
 export const useTime = () => {
 	const context = useContext(TimeContext);

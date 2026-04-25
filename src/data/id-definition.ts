@@ -1,3 +1,6 @@
+/**
+ * 時空間IDパース直後の定義
+ */
 export type IdDefinition = {
 	Z: number;
 	X: [number, number] | number;

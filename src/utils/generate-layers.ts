@@ -4,7 +4,12 @@ import type { GeoJSON } from "geojson";
 import type { Item } from "../data/item";
 import toVoxelGeometry from "./id-to-voxel";
 import toResolvedIds from "./resolve-id-range";
+import type { VoxelGeometry } from "../data/voxel-geometry";
 
+/**
+ * Itemから描画用レイヤーを生成する関数
+ * (Deck.glに渡して描画)
+ */
 export default function generateLayer(
 	item: Item[],
 	rangeMode: boolean = true,
@@ -26,7 +31,9 @@ export default function generateLayer(
 		(e): e is Item<"voxel"> =>
 			!e.isDeleted && !e.isVisible && e.type === "voxel",
 	);
-
+	/**
+	 * 点レイヤーオブジェクト
+	 */
 	const pointGeoJsonLayer = new GeoJsonLayer({
 		id: "GeoJsonLayer",
 		data: generatePointGeoJson(pointItem),
@@ -39,6 +46,9 @@ export default function generateLayer(
 		getRadius: (d) => d.properties.radius,
 	});
 
+	/**
+	 * 線レイヤーオブジェクト
+	 */
 	const lineGeoJsonLayer = new GeoJsonLayer({
 		id: "geojson-lines",
 		data: generateLineGeoJson(lineItem),
@@ -50,6 +60,9 @@ export default function generateLayer(
 		getLineWidth: (d) => d.properties.width,
 	});
 
+	/**
+	 * ボクセルレイヤーオブジェクト
+	 */
 	const voxelPolygonLayer = new SolidPolygonLayer({
 		id: "SolidPolygonLayer",
 		data: generatePolygonLayer(
@@ -67,14 +80,19 @@ export default function generateLayer(
 		highlightColor: [255, 255, 0, 200],
 	});
 
-	const reuslt: LayersList = [
+	/**
+	 * 描画するレイヤーリスト
+	 */
+	const result: LayersList = [
 		pointGeoJsonLayer,
 		lineGeoJsonLayer,
 		voxelPolygonLayer,
 	];
-	return reuslt;
+	return result;
 }
-
+/**
+ * 点のGeoJSONを生成する関数
+ */
 function generatePointGeoJson(point: Item<"point">[]): GeoJSON {
 	const result: GeoJSON = {
 		type: "FeatureCollection",
@@ -97,7 +115,9 @@ function generatePointGeoJson(point: Item<"point">[]): GeoJSON {
 
 	return result;
 }
-
+/**
+ * 線のGeoJSONを生成する関数
+ */
 function generateLineGeoJson(line: Item<"line">[]): GeoJSON {
 	const result: GeoJSON = {
 		type: "FeatureCollection",
@@ -122,14 +142,9 @@ function generateLineGeoJson(line: Item<"line">[]): GeoJSON {
 	return result;
 }
 
-type VoxelGeometry = {
-	points: number[][];
-	elevation: number;
-	voxelID: string;
-	color: Color;
-	startTime: number | null;
-	endTime: number | null;
-};
+/**
+ * ボクセルの描画用オブジェクトを生成する関数
+ */
 function generatePolygonLayer(
 	voxel: Item<"voxel">[],
 	rangeMode: boolean,

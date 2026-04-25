@@ -1,5 +1,8 @@
 import type { Color } from "deck.gl";
 
+/**
+ * 線データ
+ */
 export type Line = {
 	color: Color;
 	opacity: number;

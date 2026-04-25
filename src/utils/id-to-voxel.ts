@@ -1,14 +1,6 @@
 import type { Color } from "deck.gl";
 import type { ResolvedId } from "../data/resolved-id";
-
-type VoxelGeometry = {
-	points: number[][];
-	elevation: number;
-	voxelID: string;
-	color: Color;
-	startTime: number | null;
-	endTime: number | null;
-};
+import type { VoxelGeometry } from "../data/voxel-geometry";
 
 type VoxelBounds = {
 	maxLon: number;
