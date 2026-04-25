@@ -1,5 +1,5 @@
 import type { IdDefinition } from "../data/id-definition";
-import type { KasaneId, KasaneJson } from "../data/voxel-json";
+import type { KasaneJson } from "../data/voxel-json";
 import { parseTime, toIdString } from "./id-utils";
 
 export type JsonVoxelResult = {
