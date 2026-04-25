@@ -65,7 +65,6 @@ export const VoxelProvider = ({
   onFlyTo,
   onTimeJump,
 }: VoxelProviderProps) => {
-
   const [voxelItems, setVoxelItems] = useState<Item<"voxel">[]>([
     {
       id: 1000,
@@ -83,9 +82,15 @@ export const VoxelProvider = ({
   ]);
   const [nextVoxelId, setNextVoxelId] = useState(1001);
 
-  const [voxelColorOverrides, setVoxelColorOverrides] = useState<globalThis.Map<string, RGBA>>(new globalThis.Map());
-  const [valueColorMaps, setValueColorMaps] = useState<globalThis.Map<string, globalThis.Map<string, RGBA>>>(new globalThis.Map());
-  const [tooltipMap, setTooltipMap] = useState<globalThis.Map<string, string>>(new globalThis.Map());
+  const [voxelColorOverrides, setVoxelColorOverrides] = useState<
+    globalThis.Map<string, RGBA>
+  >(new globalThis.Map());
+  const [valueColorMaps, setValueColorMaps] = useState<
+    globalThis.Map<string, globalThis.Map<string, RGBA>>
+  >(new globalThis.Map());
+  const [tooltipMap, setTooltipMap] = useState<globalThis.Map<string, string>>(
+    new globalThis.Map(),
+  );
 
   /**
    * 新しいボクセルをリストに追加する関数
@@ -163,9 +168,19 @@ export const VoxelProvider = ({
           if (item.id === id) {
             try {
               const newVoxelData = parseSpatiotemporalId(newVoxelString);
-              return { ...item, data: { ...item.data, voxelString: newVoxelString, voxel: newVoxelData } };
+              return {
+                ...item,
+                data: {
+                  ...item.data,
+                  voxelString: newVoxelString,
+                  voxel: newVoxelData,
+                },
+              };
             } catch (_e) {
-              return { ...item, data: { ...item.data, voxelString: newVoxelString, voxel: [] } };
+              return {
+                ...item,
+                data: { ...item.data, voxelString: newVoxelString, voxel: [] },
+              };
             }
           }
           return item;
@@ -250,7 +265,6 @@ export const VoxelProvider = ({
   useEffect(() => {
     focusOnVoxelDefs(parseSpatiotemporalId(DEFAULT_VOXEL_STRING));
   }, [focusOnVoxelDefs]);
-
 
   const contextValue = useMemo(
     () => ({

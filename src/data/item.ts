@@ -3,20 +3,20 @@ import type { Point } from "./point";
 import type { Voxel } from "./voxel";
 
 type ItemMap = {
-	point: Point;
-	line: Line;
-	voxel: Voxel;
+  point: Point;
+  line: Line;
+  voxel: Voxel;
 };
 /**
  * 型を統一したアイテム
  */
 export type Item<T extends keyof ItemMap = keyof ItemMap> = {
-	[K in T]: {
-		id: number;
-		type: K;
-		source?: "json" | "manual";
-		isDeleted: boolean;
-		isVisible: boolean;
-		data: ItemMap[K];
-	};
+  [K in T]: {
+    id: number;
+    type: K;
+    source?: "json" | "manual";
+    isDeleted: boolean;
+    isVisible: boolean;
+    data: ItemMap[K];
+  };
 }[T];
