@@ -1,12 +1,7 @@
 import type { Icon, IconProps } from "@tabler/icons-react";
-import styles from "./FeatureButton.module.css";
+import styles from "./DrowModeButton.module.css";
 
-type FeatureButtonProps = {
-
-  /** Featureの名前
-   * @example "点"
-   */
-  name: string;
+type DrowmodeButtonProps = {
 
   /** アイコン */
   icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
@@ -21,24 +16,22 @@ type FeatureButtonProps = {
 };
 
 /**
- * @description FeatureManagerの個別のボタンを作成するためのコンポーネント。
+ * @description DrowmodeManagerの個別のボタンを作成するためのコンポーネント。
  */
-export default function FeatureButton({
-  name,
+export default function DrowModeButton({
   icon: Icon,
   isActive,
   onClick, 
-}: FeatureButtonProps) {
+}: DrowmodeButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`${styles.toolbarButton} ${
-        isActive ? styles.toolbarButtonActive : ""
+      className={`${styles.circleButton} ${
+        isActive ? styles.circleButtonActive : ""
       }`}
     >
-      <Icon size={16}/>
-      {name}
+      <Icon size={18}/>
     </button>
   );
 }
