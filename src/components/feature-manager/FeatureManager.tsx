@@ -1,10 +1,7 @@
-import { IconTableMinus,
+import {
   IconCube,
-  IconFileText,
   IconLine,
-  IconMap,
-  IconPoint,
-  IconRefresh,} from "@tabler/icons-react";
+  IconPoint,} from "@tabler/icons-react";
 import FeatureButton from "./FeatureButton";
 import styles from "./FeatureButton.module.css";
 
