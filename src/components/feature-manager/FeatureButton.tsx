@@ -2,7 +2,6 @@ import type { Icon, IconProps } from "@tabler/icons-react";
 import styles from "./FeatureButton.module.css";
 
 type FeatureButtonProps = {
-
   /** Featureの名前
    * @example "点"
    */
@@ -27,7 +26,7 @@ export default function FeatureButton({
   name,
   icon: Icon,
   isActive,
-  onClick, 
+  onClick,
 }: FeatureButtonProps) {
   return (
     <button
@@ -37,7 +36,7 @@ export default function FeatureButton({
         isActive ? styles.toolbarButtonActive : ""
       }`}
     >
-      <Icon size={16}/>
+      <Icon size={16} />
       {name}
     </button>
   );

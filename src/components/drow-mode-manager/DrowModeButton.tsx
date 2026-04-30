@@ -2,7 +2,6 @@ import type { Icon, IconProps } from "@tabler/icons-react";
 import styles from "./DrowModeButton.module.css";
 
 type DrowmodeButtonProps = {
-
   /** アイコン */
   icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
 
@@ -21,7 +20,7 @@ type DrowmodeButtonProps = {
 export default function DrowModeButton({
   icon: Icon,
   isActive,
-  onClick, 
+  onClick,
 }: DrowmodeButtonProps) {
   return (
     <button
@@ -31,7 +30,7 @@ export default function DrowModeButton({
         isActive ? styles.circleButtonActive : ""
       }`}
     >
-      <Icon size={18}/>
+      <Icon size={18} />
     </button>
   );
 }

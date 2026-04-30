@@ -1,8 +1,6 @@
-import { IconTableMinus,
-  IconMap,
-  IconRefresh,} from "@tabler/icons-react";
-import styles from "./DrowModeButton.module.css";
+import { IconMap, IconRefresh, IconTableMinus } from "@tabler/icons-react";
 import DrowModeButton from "./DrowModeButton";
+import styles from "./DrowModeButton.module.css";
 
 /**
  * @description 範囲表記と個別表記のモード切り替えや、地図の切り替え、タイムゾーンを変更するためのUI。画面右下に表示される。

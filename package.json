@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "lint": "biome lint ."
   },
   "dependencies": {
     "@deck.gl/core": "^9.1.11",
