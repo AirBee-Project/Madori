@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const ColorSchema = z.object({
+export const RGBAColorSchema = z.object({
   r: z
     .number()
     .int("redは整数で入力してください")
@@ -18,11 +18,11 @@ export const ColorSchema = z.object({
     .max(255, "blueは0から255の間で入力してください"),
   a: z
     .number()
-    .int("透明度は整数で入力してください")
-    .min(0, "透明度は0から255の間で入力してください")
-    .max(255, "透明度は0から255の間で入力してください"),
+    .int("不透明度は整数で入力してください")
+    .min(0, "不透明度は0から255の間で入力してください")
+    .max(255, "不透明度は0から255の間で入力してください"),
 });
 /**
- * zodによる色の型定義
+ * RGBA形式の色の型定義
  */
-export type Color = z.infer<typeof ColorSchema>;
+export type RGBAColor = z.infer<typeof RGBAColorSchema>;
