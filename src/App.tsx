@@ -1,8 +1,8 @@
 import DeckGL from "@deck.gl/react";
 import { Map as MapGL } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { FeatureManager } from "./components/feature-manager";
 import { DrowmodeManager } from "./components/drow-mode-manager";
+import { FeatureManager } from "./components/feature-manager";
 
 export default function App() {
   return (
@@ -10,7 +10,14 @@ export default function App() {
       <div style={{ position: "absolute", zIndex: 50 }}>
         <FeatureManager />
       </div>
-      <div style={{ position: "absolute", zIndex: 50, bottom: "6rem", right: "1rem" }}>
+      <div
+        style={{
+          position: "absolute",
+          zIndex: 50,
+          bottom: "6rem",
+          right: "1rem",
+        }}
+      >
         <DrowmodeManager />
       </div>
       <DeckGL

@@ -18,3 +18,26 @@
 - 点の描画
 - 線の描画
 - 地図の切り替え
+
+### セットアップ
+```bash
+bun install
+```
+
+### 開発サーバーの起動
+```bash
+bun run dev
+```
+
+### ビルド
+```bash
+bun run build
+```
+
+### Biome
+
+| コマンド | 内容 |
+| :--- | :--- |
+| `bun run check` | コードの整形、インポート整理、自動修正 |
+| `bun run format` | コードの自動整形 |
+| `bun run lint` | ルール違反のチェック |
