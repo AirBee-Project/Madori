@@ -12,6 +12,6 @@ export const PointSchema = z.object({
   altitude: z.number().min(0, "高度は0以上で入力してください").default(0),
 });
 /**
- * zodによる点の型定義
+ * 点の型定義
  */
 export type Point = z.infer<typeof PointSchema>;
