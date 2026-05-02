@@ -24,16 +24,24 @@ export const usePointStore = create<PointState & PointAction>()(
        * 配列に点を追加する関数
        */
       addPoint: (point) =>
-        set((state) => {
-          state.points.push(point);
-        }),
+        set(
+          (state) => {
+            state.points.push(point);
+          },
+          false,
+          "addPoint",
+        ),
       /**
        * 配列から点を削除する関数
        */
       removePoint: (index) =>
-        set((state) => {
-          state.points.splice(index, 1);
-        }),
+        set(
+          (state) => {
+            state.points.splice(index, 1);
+          },
+          false,
+          "removePoint",
+        ),
     })),
   ),
 );
