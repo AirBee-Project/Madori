@@ -2,6 +2,7 @@ import { z } from "zod";
 import { RGBAColorSchema } from "./color";
 
 export const PointSchema = z.object({
+  id: z.string(),
   latitude: z
     .number()
     .min(-85.0511, "緯度は-85.0511から85.0511の間で入力してください")

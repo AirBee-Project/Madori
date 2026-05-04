@@ -10,12 +10,26 @@
   },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space"
+    "indentStyle": "space",
+    "lineWidth": 80
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "a11y": {
+        "useAltText": "error",
+        "useKeyWithClickEvents": "error"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "error"
+      },
+      "style": {
+        "noUselessElse": "error"
+      },
+      "suspicious": {
+        "noVar": "error"
+      }
     }
   },
   "javascript": {

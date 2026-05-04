@@ -9,7 +9,8 @@ interface PointState {
 
 interface PointAction {
   addPoint: (point: Point) => void;
-  removePoint: (index: number) => void;
+  removePoint: (id: string) => void;
+  editPoint: (id: string, newPoint: Partial<Point>) => void;
 }
 
 /**
@@ -34,13 +35,26 @@ export const usePointStore = create<PointState & PointAction>()(
       /**
        * 配列から点を削除する関数
        */
-      removePoint: (index) =>
+      removePoint: (id) =>
         set(
           (state) => {
-            state.points.splice(index, 1);
+            state.points = state.points.filter((point) => point.id !== id);
           },
           false,
           "removePoint",
+        ),
+      /**
+       * 配列中の点を編集する関数
+       */
+      editPoint: (id, newPoint) =>
+        set(
+          (state) => {
+            state.points = state.points.map((point) =>
+              point.id === id ? { ...point, ...newPoint } : point,
+            );
+          },
+          false,
+          "editPoint",
         ),
     })),
   ),
