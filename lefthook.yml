@@ -1,0 +1,7 @@
+# Lefthook configuration
+# https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+pre-commit:
+  commands:
+    lint-and-format:
+      # ステージングされたファイルだけでなく、全体をチェックする
+      run: bun run ci
