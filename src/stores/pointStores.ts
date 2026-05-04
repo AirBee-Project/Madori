@@ -8,9 +8,9 @@ interface PointState {
 }
 
 interface PointAction {
-  addPoint: (point: Point) => void;
+  addPoint: (point: Omit<Point, "id">) => void;
   removePoint: (id: string) => void;
-  editPoint: (id: string, newPoint: Partial<Point>) => void;
+  editPoint: (id: string, updates: Partial<Point>) => void;
 }
 
 /**
@@ -19,21 +19,21 @@ interface PointAction {
 export const usePointStore = create<PointState & PointAction>()(
   devtools(
     immer((set) => ({
-      //初期状態は空の配列
+      //初期状態
       points: [],
       /**
-       * 配列に点を追加する関数
+       * 点を追加する
        */
       addPoint: (point) =>
         set(
           (state) => {
-            state.points.push(point);
+            state.points.push({ ...point, id: crypto.randomUUID() });
           },
           false,
           "addPoint",
         ),
       /**
-       * 配列から点を削除する関数
+       * 点を削除する
        */
       removePoint: (id) =>
         set(
@@ -44,13 +44,13 @@ export const usePointStore = create<PointState & PointAction>()(
           "removePoint",
         ),
       /**
-       * 配列中の点を編集する関数
+       * 点を編集する
        */
-      editPoint: (id, newPoint) =>
+      editPoint: (id, updates) =>
         set(
           (state) => {
             state.points = state.points.map((point) =>
-              point.id === id ? { ...point, ...newPoint } : point,
+              point.id === id ? { ...point, ...updates } : point,
             );
           },
           false,
