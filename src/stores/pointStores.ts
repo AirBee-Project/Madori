@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { Point } from "../types/point";
-import { PointSchema, PointWithoutIdSchema } from "../types/point";
+import { PointPartialSchema, PointWithoutIdSchema } from "../types/point";
 
 interface PointState {
   points: Map<string, Point>;
@@ -13,7 +13,10 @@ interface PointAction {
     point: Omit<Point, "id">,
   ) => ReturnType<typeof PointWithoutIdSchema.safeParse>;
   removePoint: (id: string) => void;
-  editPoint: (id: string, updates: Partial<Point>) => void;
+  editPoint: (
+    id: string,
+    updates: Partial<Point>,
+  ) => ReturnType<typeof PointPartialSchema.safeParse>;
 }
 
 /**
@@ -38,8 +41,6 @@ export const usePointStore = create<PointState & PointAction>()(
             false,
             "addPoint",
           );
-        } else {
-          console.error(result.error);
         }
         return result;
       },
@@ -58,17 +59,22 @@ export const usePointStore = create<PointState & PointAction>()(
       /**
        * 点を編集する
        */
-      editPoint: (id, updates) =>
-        set(
-          (state) => {
-            const targetPoint = state.points.get(id);
-            if (targetPoint) {
-              state.points.set(id, { ...targetPoint, ...updates });
-            }
-          },
-          false,
-          "editPoint",
-        ),
+      editPoint: (id, updates) => {
+        const result = PointPartialSchema.safeParse(updates);
+        if (result.success) {
+          set(
+            (state) => {
+              const targetPoint = state.points.get(id);
+              if (targetPoint) {
+                state.points.set(id, { ...targetPoint, ...result.data });
+              }
+            },
+            false,
+            "editPoint",
+          );
+        }
+        return result;
+      },
     })),
   ),
 );
