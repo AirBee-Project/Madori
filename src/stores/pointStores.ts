@@ -2,13 +2,16 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { Point } from "../types/point";
+import { PointSchema, PointWithoutIdSchema } from "../types/point";
 
 interface PointState {
   points: Map<string, Point>;
 }
 
 interface PointAction {
-  addPoint: (point: Omit<Point, "id">) => void;
+  addPoint: (
+    point: Omit<Point, "id">,
+  ) => ReturnType<typeof PointWithoutIdSchema.safeParse>;
   removePoint: (id: string) => void;
   editPoint: (id: string, updates: Partial<Point>) => void;
 }
@@ -24,15 +27,23 @@ export const usePointStore = create<PointState & PointAction>()(
       /**
        * 点を追加する
        */
-      addPoint: (point) =>
-        set(
-          (state) => {
-            const newId = crypto.randomUUID();
-            state.points.set(newId, { ...point, id: newId });
-          },
-          false,
-          "addPoint",
-        ),
+      addPoint: (point) => {
+        const result = PointWithoutIdSchema.safeParse(point);
+        if (result.success) {
+          set(
+            (state) => {
+              const newId = crypto.randomUUID();
+              state.points.set(newId, { ...result.data, id: newId });
+            },
+            false,
+            "addPoint",
+          );
+        } else {
+          console.error(result.error);
+        }
+        return result;
+      },
+
       /**
        * 点を削除する
        */

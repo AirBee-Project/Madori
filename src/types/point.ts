@@ -24,3 +24,13 @@ export const PointSchema = z.object({
  * 点の型定義
  */
 export type Point = z.infer<typeof PointSchema>;
+
+/**
+ * idを除いた点のスキーマ
+ */
+export const PointWithoutIdSchema = PointSchema.omit({ id: true });
+
+/**
+ * idを除いた点の型定義
+ */
+export type PointWithoutId = z.infer<typeof PointWithoutIdSchema>;
