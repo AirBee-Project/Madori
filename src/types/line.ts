@@ -1,0 +1,17 @@
+import { z } from "zod";
+import { RGBAColorSchema } from "./color";
+import { PointSchema } from "./point";
+
+export const LineSchema = z.object({
+  id: z.string(),
+  start: PointSchema.omit({ id: true }),
+  end: PointSchema.omit({ id: true }),
+  // 繋ぐ線
+  color: RGBAColorSchema.optional(),
+  width: z.number().min(0.1, "太さは0.1以上で指定してください").default(2),
+});
+
+/**
+ * 線の型定義
+ */
+export type Line = z.infer<typeof LineSchema>;
