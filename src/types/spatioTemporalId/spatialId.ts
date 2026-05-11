@@ -40,6 +40,11 @@ export const SpatialIdSchema = z
   });
 
 /**
+ * 空間IDの型定義
+ */
+export type SpatialId = z.infer<typeof SpatialIdSchema>;
+
+/**
  * 空間IDの各次元のインデックス値を検証する関数
  */
 function validateIndexRange(

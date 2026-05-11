@@ -10,7 +10,8 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "lint": "biome lint .",
-    "ci": "bun run format && biome lint . && bun run test",
+    "typecheck": "tsc --noEmit",
+    "ci": "bun run format && biome lint . && bun run typecheck && bun run test",
     "test": "vitest run"
   },
   "dependencies": {

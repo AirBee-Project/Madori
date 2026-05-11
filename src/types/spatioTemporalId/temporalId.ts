@@ -38,3 +38,8 @@ export const TemporalIdSchema = z.object({
     .min(1, "インターバルは1以上で指定してください。"),
   t: TemporalIndexSchema,
 });
+
+/**
+ * 時間IDの型定義
+ */
+export type TemporalId = z.infer<typeof TemporalIdSchema>;
