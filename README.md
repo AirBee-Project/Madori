@@ -34,10 +34,20 @@ bun run dev
 bun run build
 ```
 
-### Biome
+### プレビュー
+```bash
+bun run preview
+```
+
+### 各種コマンド
 
 | コマンド | 内容 |
 | :--- | :--- |
-| `bun run check` | コードの整形、インポート整理、自動修正 |
-| `bun run format` | コードの自動整形 |
-| `bun run lint` | ルール違反のチェック |
+| `bun run check` | Biome によるコードチェックと自動修正 |
+| `bun run format` | コードの整形 |
+| `bun run lint` | Biome によるルール違反の確認 |
+| `bun run test` | Vitest によるテストの実行 |
+| `bun run typecheck` | TypeScript の型チェック |
+| `bun run ci` | コミット前の総合チェック |
+
+

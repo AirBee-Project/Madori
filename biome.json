@@ -10,6 +10,7 @@
   },
   "formatter": {
     "enabled": true,
+    "lineEnding": "lf",
     "indentStyle": "space",
     "lineWidth": 80
   },
