@@ -18,28 +18,30 @@ export default function PointBox({ point, onUpdate, onDelete }: PointBoxProps) {
   const [altText, setAltText] = useState(point.altitude.toString());
 
   useEffect(() => {
+    point.id;
     setLatText(point.latitude.toString());
     setLngText(point.longitude.toString());
     setAltText(point.altitude.toString());
-  }, [point.latitude, point.longitude, point.altitude]);
+  }, [point.id, point.latitude, point.longitude, point.altitude]);
+
+  const color = point.color ?? { r: 15, g: 118, b: 110, a: 255 };
 
   return (
     <div className={styles.itemBox}>
       <div className={styles.inputBox}>
         <div className={styles.inputElement}>
-          <span className={styles.inputLabel}>緯度</span>
+          <label htmlFor={`lat-input-${point.id}`} className={styles.inputLabel}>
+            緯度
+          </label>
           <input
+            id={`lat-input-${point.id}`}
             type="number"
             className={styles.inputField}
             value={latText}
-            onChange={(e) => {
-              const val = e.target.value;
-              setLatText(val);
-              const num = parseFloat(val);
-              if (!Number.isNaN(num)) {
-                onUpdate(point.id, { latitude: num });
-              }
-            }}
+            step="any"
+            min={-90}
+            max={90}
+            onChange={(e) => setLatText(e.target.value)}
             onBlur={() => {
               const num = parseFloat(latText) || 0;
               setLatText(num.toString());
@@ -49,19 +51,18 @@ export default function PointBox({ point, onUpdate, onDelete }: PointBoxProps) {
         </div>
 
         <div className={styles.inputElement}>
-          <span className={styles.inputLabel}>経度</span>
+          <label htmlFor={`lng-input-${point.id}`} className={styles.inputLabel}>
+            経度
+          </label>
           <input
+            id={`lng-input-${point.id}`}
             type="number"
             className={styles.inputField}
             value={lngText}
-            onChange={(e) => {
-              const val = e.target.value;
-              setLngText(val);
-              const num = parseFloat(val);
-              if (!Number.isNaN(num)) {
-                onUpdate(point.id, { longitude: num });
-              }
-            }}
+            step="any"
+            min={-180}
+            max={180}
+            onChange={(e) => setLngText(e.target.value)}
             onBlur={() => {
               const num = parseFloat(lngText) || 0;
               setLngText(num.toString());
@@ -71,19 +72,17 @@ export default function PointBox({ point, onUpdate, onDelete }: PointBoxProps) {
         </div>
 
         <div className={styles.inputElement}>
-          <span className={styles.inputLabel}>高度</span>
+          <label htmlFor={`alt-input-${point.id}`} className={styles.inputLabel}>
+            高度
+          </label>
           <input
+            id={`alt-input-${point.id}`}
             type="number"
             className={styles.inputField}
             value={altText}
-            onChange={(e) => {
-              const val = e.target.value;
-              setAltText(val);
-              const num = parseFloat(val);
-              if (!Number.isNaN(num) && num >= 0) {
-                onUpdate(point.id, { altitude: num });
-              }
-            }}
+            step="any"
+            min={0}
+            onChange={(e) => setAltText(e.target.value)}
             onBlur={() => {
               const num = Math.max(0, parseFloat(altText) || 0);
               setAltText(num.toString());
@@ -114,7 +113,7 @@ export default function PointBox({ point, onUpdate, onDelete }: PointBoxProps) {
         <div
           className={styles.colorSwatch}
           style={{
-            backgroundColor: `rgba(${point.color?.r}, ${point.color?.g}, ${point.color?.b}, ${(point.color?.a ?? 255) / 255})`,
+            backgroundColor: `rgba(${color.r}, ${color.g}, ${color.b}, ${(color.a ?? 255) / 255})`,
           }}
         />
       </div>
