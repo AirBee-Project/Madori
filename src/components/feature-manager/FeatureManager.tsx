@@ -1,16 +1,17 @@
-import { IconCube, IconLine, IconPoint } from "@tabler/icons-react";
-import FeatureButton from "./FeatureButton";
-import styles from "./FeatureButton.module.css";
+import FeatureToolbar from "./FeatureToolbar";
+import { useFeatureManagerStore } from "./featureManagerStores";
+import { PointPanel } from "./point";
 
 /**
- * @description 地図上に点、線、空間IDなどを追加するためのUI。画面左上に表示される。
+ * 左上のツールバーと、その下で切り替わるパネルを管理する
  */
 export default function FeatureManager() {
+  const activeMode = useFeatureManagerStore((state) => state.activeMode);
+
   return (
-    <div className={styles.toolbar}>
-      <FeatureButton name={"空間ID"} icon={IconCube} isActive={false} />
-      <FeatureButton name={"点"} icon={IconPoint} isActive={false} />
-      <FeatureButton name={"線"} icon={IconLine} isActive={false} />
+    <div>
+      <FeatureToolbar />
+      {activeMode === "point" && <PointPanel />}
     </div>
   );
 }
