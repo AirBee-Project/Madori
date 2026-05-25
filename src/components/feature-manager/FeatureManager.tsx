@@ -1,4 +1,6 @@
-import FeatureToolbar from "./FeatureToolbar";
+import { IconCube, IconLine, IconPoint } from "@tabler/icons-react";
+import FeatureButton from "./FeatureButton";
+import toolbarStyles from "./FeatureToolbar.module.scss";
 import { useFeatureManagerStore } from "./featureManagerStore";
 import { PointPanel } from "./point";
 
@@ -7,10 +9,30 @@ import { PointPanel } from "./point";
  */
 export default function FeatureManager() {
   const activeMode = useFeatureManagerStore((state) => state.activeMode);
+  const toggleMode = useFeatureManagerStore((state) => state.toggleMode);
 
   return (
     <div>
-      <FeatureToolbar />
+      <div className={toolbarStyles.toolbar}>
+        <FeatureButton
+          name={"空間ID"}
+          icon={IconCube}
+          isActive={activeMode === "spatial"}
+          onClick={() => toggleMode("spatial")}
+        />
+        <FeatureButton
+          name={"点"}
+          icon={IconPoint}
+          isActive={activeMode === "point"}
+          onClick={() => toggleMode("point")}
+        />
+        <FeatureButton
+          name={"線"}
+          icon={IconLine}
+          isActive={activeMode === "line"}
+          onClick={() => toggleMode("line")}
+        />
+      </div>
       {activeMode === "point" && <PointPanel />}
     </div>
   );
