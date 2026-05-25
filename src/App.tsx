@@ -12,7 +12,7 @@ export default function App() {
         <FeatureManager />
       </div>
 
-      {/* drowmodemanager */}
+      {/* drawmodemanager */}
       <div
         style={{
           position: "absolute",
