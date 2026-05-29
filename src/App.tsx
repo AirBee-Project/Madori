@@ -3,8 +3,15 @@ import { Map as MapGL } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { DrawModeToolbar } from "./components/draw-mode-manager";
 import { FeatureManager } from "./components/feature-manager";
+import { usePointStore } from "./stores/pointStores";
+import { generateMapLayers } from "./utils/layerGenerator";
 
 export default function App() {
+  const pointsMap = usePointStore((state) => state.points);
+  const pointsList = Array.from(pointsMap.values());
+
+  const layers = generateMapLayers(pointsList);
+
   return (
     <div>
       {/* featuremanager */}
@@ -32,9 +39,11 @@ export default function App() {
         }}
         controller={true}
         style={{ width: "100vw", height: "100vh" }}
+        layers={layers}
       >
         <MapGL mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json" />
       </DeckGL>
     </div>
   );
 }
+
