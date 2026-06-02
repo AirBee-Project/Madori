@@ -3,6 +3,7 @@ import { Map as MapGL } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { DrawModeToolbar } from "./components/draw-mode-manager";
 import { FeatureManager } from "./components/feature-manager";
+import { useLineStore } from "./stores/lineStores";
 import { usePointStore } from "./stores/pointStores";
 import { generateMapLayers } from "./utils/layerGenerator";
 
@@ -10,7 +11,10 @@ export default function App() {
   const pointsMap = usePointStore((state) => state.points);
   const pointsList = Array.from(pointsMap.values());
 
-  const layers = generateMapLayers(pointsList);
+  const linesMap = useLineStore((state) => state.lines);
+  const linesList = Array.from(linesMap.values());
+
+  const layers = generateMapLayers(pointsList, linesList);
 
   return (
     <div>
@@ -46,4 +50,3 @@ export default function App() {
     </div>
   );
 }
-
