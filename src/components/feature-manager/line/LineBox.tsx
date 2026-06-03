@@ -13,7 +13,7 @@ type LineBoxProps = {
 };
 
 /**
- * 起点・終点の緯度・経度・高度の入力欄と、削除・フォーカス・カラーの操作ボタンを持つボックス一つのセット
+ * 始点・終点の緯度・経度・高度の入力欄と、削除・フォーカス・カラーの操作ボタンを持つボックス一つのセット
  */
 export default function LineBox({ line, onUpdate, onDelete }: LineBoxProps) {
   const color = line.color ?? { r: 15, g: 118, b: 110, a: 255 };
