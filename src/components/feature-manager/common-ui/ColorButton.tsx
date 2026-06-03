@@ -11,6 +11,9 @@ type ColorButtonProps = {
   onClick?: () => void;
 };
 
+/**
+ * 色を表示する小さなボタン。クリックすると色の変更操作ができるようになる。
+ */
 export default function ColorButton({
   color,
   ariaLabel,

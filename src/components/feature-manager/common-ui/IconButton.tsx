@@ -7,6 +7,10 @@ type IconButtonProps = {
   variant?: "default" | "danger";
 };
 
+/**
+ * パネルのアイコンボタンコンポーネント
+ * ボックスの右側に配置する、アイコンのみの小さなボタン。削除などの操作に使う。
+ */
 export default function IconButton({
   children,
   ariaLabel,

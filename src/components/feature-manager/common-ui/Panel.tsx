@@ -7,6 +7,7 @@ type CommonPanelProps = {
 
 /**
  * 各featureで使用するパネル
+ * スクロール可能なエリアと、フッターの操作ボタンエリアを持つ共通コンポーネント。featureごとのパネルはこれをベースに作る。
  */
 export default function CommonPanel({
   children,

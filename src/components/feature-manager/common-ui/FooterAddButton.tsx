@@ -7,7 +7,7 @@ type FooterAddButtonProps = {
 };
 
 /**
- * パネルのフッターボタンコンポーネント
+ * パネルのフッターの追加ボタンコンポーネント
  */
 export default function FooterAddButton({
   onClick,
