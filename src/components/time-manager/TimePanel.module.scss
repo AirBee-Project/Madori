@@ -19,7 +19,6 @@
   padding: 0 0.5rem;
 }
 
-/* ── 現在時間の表示ラベル ── */
 .timestamp {
   font-size: 0.8125rem;
   font-weight: 600;
@@ -39,6 +38,7 @@
 .controlsCenter {
   position: absolute;
   left: 50%;
+  transform: translateX(-50%);
   pointer-events: auto;
 }
 
