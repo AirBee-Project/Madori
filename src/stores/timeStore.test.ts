@@ -7,8 +7,8 @@ describe("useTimeStore", () => {
       currentTime: 1735689600,
       isPlaying: false,
       playbackSpeed: 1,
-      minTime: 1735689600 - 86400 * 7,
-      maxTime: 1735689600 + 86400 * 7,
+      minTime: 0,
+      maxTime: 1893456000,
     });
   });
 
@@ -17,8 +17,8 @@ describe("useTimeStore", () => {
     expect(state.currentTime).toBe(1735689600);
     expect(state.isPlaying).toBe(false);
     expect(state.playbackSpeed).toBe(1);
-    expect(state.minTime).toBe(1735689600 - 86400 * 7);
-    expect(state.maxTime).toBe(1735689600 + 86400 * 7);
+    expect(state.minTime).toBe(0);
+    expect(state.maxTime).toBe(1893456000);
   });
 
   describe("setCurrentTime", () => {
@@ -32,6 +32,18 @@ describe("useTimeStore", () => {
       const { setCurrentTime } = useTimeStore.getState();
       setCurrentTime((prev) => prev + 3600); // 1時間進める
       expect(useTimeStore.getState().currentTime).toBe(1735689600 + 3600);
+    });
+
+    it("現在時間が minTime 未満の値に設定された場合は minTime にクランプされること", () => {
+      const { setCurrentTime, minTime } = useTimeStore.getState();
+      setCurrentTime(minTime - 100);
+      expect(useTimeStore.getState().currentTime).toBe(minTime);
+    });
+
+    it("現在時間が maxTime を超える値に設定された場合は maxTime にクランプされること", () => {
+      const { setCurrentTime, maxTime } = useTimeStore.getState();
+      setCurrentTime(maxTime + 100);
+      expect(useTimeStore.getState().currentTime).toBe(maxTime);
     });
   });
 
@@ -51,17 +63,6 @@ describe("useTimeStore", () => {
       const { setPlaybackSpeed } = useTimeStore.getState();
       setPlaybackSpeed(60);
       expect(useTimeStore.getState().playbackSpeed).toBe(60);
-    });
-  });
-
-  describe("setTimeRange", () => {
-    it("タイムラインの表示可能範囲を変更できること", () => {
-      const { setTimeRange } = useTimeStore.getState();
-      const min = 1700000000;
-      const max = 1800000000;
-      setTimeRange(min, max);
-      expect(useTimeStore.getState().minTime).toBe(min);
-      expect(useTimeStore.getState().maxTime).toBe(max);
     });
   });
 });
