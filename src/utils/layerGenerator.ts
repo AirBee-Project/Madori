@@ -48,9 +48,6 @@ function generateLineLayer(lines: Line[]): LineLayer<Line> {
   });
 }
 
-export function generateMapLayers(
-  points: Point[],
-  lines: Line[],
-): LayersList {
+export function generateMapLayers(points: Point[], lines: Line[]): LayersList {
   return [generatePointLayer(points), generateLineLayer(lines)];
 }

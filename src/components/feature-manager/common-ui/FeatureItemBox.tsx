@@ -10,7 +10,10 @@ type FeatureItemBoxProps = {
  * feature（point や line など）の一項目の外枠・レイアウトコンポーネント
  * 左側に入力欄（children）、右側に操作ボタン群（actions）を配置する
  */
-export default function FeatureItemBox({ children, actions }: FeatureItemBoxProps) {
+export default function FeatureItemBox({
+  children,
+  actions,
+}: FeatureItemBoxProps) {
   return (
     <div className={styles.itemBox}>
       {children}
