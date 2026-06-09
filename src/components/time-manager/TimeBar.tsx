@@ -83,7 +83,6 @@ function useDrawTimeline(
   dimensions: { width: number; height: number },
   viewCenter: number,
   viewDuration: number,
-  currentTime: number,
 ) {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -92,14 +91,18 @@ function useDrawTimeline(
 
     const { width, height } = dimensions;
     const dpr = window.devicePixelRatio || 1;
+    const targetWidth = Math.floor(width * dpr);
+    const targetHeight = Math.floor(height * dpr);
 
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+    }
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
 
     const startTime = viewCenter - viewDuration / 2;
     const endTime = viewCenter + viewDuration / 2;
@@ -126,18 +129,7 @@ function useDrawTimeline(
       const label = formatTickLabel(t, tickInterval);
       ctx.fillText(label, x, height - 26);
     }
-
-    const currentX = (currentTime - startTime) / timePerPixel;
-    if (currentX >= -10 && currentX <= width + 10) {
-      ctx.strokeStyle = "#0f766e";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(currentX, 0);
-      ctx.lineTo(currentX, height);
-      ctx.stroke();
-      ctx.lineWidth = 1;
-    }
-  }, [viewCenter, viewDuration, currentTime, dimensions, canvasRef]);
+  }, [viewCenter, viewDuration, dimensions, canvasRef]);
 }
 
 /**
@@ -156,7 +148,7 @@ export default function TimeBar() {
   const { viewDuration, setViewDuration, viewCenter, setViewCenter } =
     useTimeRange(currentTime);
 
-  useDrawTimeline(canvasRef, dimensions, viewCenter, viewDuration, currentTime);
+  useDrawTimeline(canvasRef, dimensions, viewCenter, viewDuration);
 
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef<number>(0);
@@ -284,6 +276,10 @@ export default function TimeBar() {
     },
   );
 
+  const startTime = viewCenter - viewDuration / 2;
+  const timePerPixel = viewDuration / dimensions.width;
+  const currentX = (currentTime - startTime) / timePerPixel;
+
   return (
     <div
       ref={containerRef}
@@ -295,6 +291,7 @@ export default function TimeBar() {
       aria-valuetext={formattedValueText}
       tabIndex={0}
       style={{
+        position: "relative",
         width: "100%",
         height: "100%",
         background: "transparent",
@@ -315,6 +312,20 @@ export default function TimeBar() {
           display: "block",
         }}
       />
+      {currentX >= 0 && currentX <= dimensions.width && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: "2px",
+            backgroundColor: "#0f766e",
+            pointerEvents: "none",
+            transform: `translateX(${currentX}px)`,
+          }}
+        />
+      )}
     </div>
   );
 }
