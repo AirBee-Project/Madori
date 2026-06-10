@@ -4,6 +4,7 @@ import toolbarStyles from "./FeatureToolbar.module.scss";
 import { useFeatureManagerStore } from "./featureManagerStore";
 import { LinePanel } from "./line";
 import { PointPanel } from "./point";
+import { SpatialIdPanel } from "./spatial-id";
 
 /**
  * 左上のツールバーと、その下で切り替わるパネルを管理する
@@ -34,6 +35,7 @@ export default function FeatureManager() {
           onClick={() => toggleMode("line")}
         />
       </div>
+      {activeMode === "spatial" && <SpatialIdPanel />}
       {activeMode === "point" && <PointPanel />}
       {activeMode === "line" && <LinePanel />}
     </div>
