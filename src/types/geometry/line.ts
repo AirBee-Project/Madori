@@ -29,7 +29,9 @@ export type LineWithoutId = z.infer<typeof LineWithoutIdSchema>;
 /**
  * 部分更新用のスキーマ
  */
-export const LinePartialSchema = LineSchema.partial();
+export const LinePartialSchema = LineSchema.extend({
+  width: z.number().min(0.1, "太さは0.1以上で指定してください").optional(),
+}).partial();
 
 /**
  * 部分更新用の型定義

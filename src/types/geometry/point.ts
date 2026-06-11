@@ -33,7 +33,9 @@ export type PointWithoutId = z.infer<typeof PointWithoutIdSchema>;
 /**
  * 部分更新用のスキーマ
  */
-export const PointPartialSchema = PointSchema.partial();
+export const PointPartialSchema = PointSchema.extend({
+  altitude: z.number().min(0, "高度は0以上で入力してください").optional(),
+}).partial();
 
 /**
  * 部分更新用の型定義
