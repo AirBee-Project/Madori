@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import DeckGL from "@deck.gl/react";
 import { Map as MapGL } from "react-map-gl/maplibre";
+import type { MapViewState } from "@deck.gl/core";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { DrawModeToolbar } from "./components/draw-mode-manager";
 import { FeatureManager } from "./components/feature-manager";
@@ -8,6 +9,7 @@ import { TimePanel } from "./components/time-manager";
 import { useLineStore } from "./stores/lineStores";
 import { usePointStore } from "./stores/pointStores";
 import { useSpatialIdGroupStore } from "./stores/spatialIdGroupStores";
+import { useMapStore } from "./stores/mapStore";
 import { generateMapLayers, generateVoxelLayer } from "./utils/layerGenerator";
 import { spatialIdGroupToGeometries } from "./utils/parser/voxelToGeometry";
 
@@ -18,6 +20,8 @@ export default function App() {
     (state) => state.spatialIdGroups,
   );
   const rangeMode = useSpatialIdGroupStore((state) => state.rangeMode);
+  const viewState = useMapStore((state) => state.viewState);
+  const setViewState = useMapStore((state) => state.setViewState);
 
   const baseLayers = useMemo(() => {
     const pointsList = Array.from(pointsMap.values());
@@ -58,13 +62,11 @@ export default function App() {
       >
         <DrawModeToolbar />
       </div>
+
       {/* map */}
       <DeckGL
-        initialViewState={{
-          longitude: 139.767,
-          latitude: 35.681,
-          zoom: 10,
-        }}
+        viewState={viewState}
+        onViewStateChange={(e) => setViewState(e.viewState as MapViewState)}
         controller={true}
         style={{ width: "100vw", height: "100vh" }}
         layers={layers}

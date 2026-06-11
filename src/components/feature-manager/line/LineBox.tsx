@@ -1,5 +1,8 @@
 import { IconTarget, IconTrash } from "@tabler/icons-react";
+import { useLineStore } from "../../../stores/lineStores";
+import { useMapStore } from "../../../stores/mapStore";
 import type { Line } from "../../../types/geometry/line";
+import { calculateLineFocus } from "../../../utils/focusHelper";
 import ColorButton from "../common-ui/ColorButton";
 import FeatureItemBox from "../common-ui/FeatureItemBox";
 import IconButton from "../common-ui/IconButton";
@@ -16,8 +19,15 @@ type LineBoxProps = {
  * 始点・終点の緯度・経度・高度の入力欄と、削除・フォーカス・カラーの操作ボタンを持つボックス一つのセット
  */
 export default function LineBox({ line, onUpdate, onDelete }: LineBoxProps) {
+  const flyTo = useMapStore((state) => state.flyTo);
   const color = line.color ?? { r: 15, g: 118, b: 110, a: 255 };
   const dotColor = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a / 255})`;
+
+  const handleFocusClick = () => {
+    const latestLine = useLineStore.getState().lines.get(line.id) ?? line;
+    const target = calculateLineFocus(latestLine);
+    flyTo(target.longitude, target.latitude, target.zoom);
+  };
 
   return (
     <FeatureItemBox
@@ -31,22 +41,11 @@ export default function LineBox({ line, onUpdate, onDelete }: LineBoxProps) {
             <IconTrash />
           </IconButton>
 
-          <IconButton
-            onClick={() => {
-              // todo
-            }}
-            ariaLabel="線に移動"
-          >
+          <IconButton onClick={handleFocusClick} ariaLabel="線に移動">
             <IconTarget />
           </IconButton>
 
-          <ColorButton
-            color={color}
-            ariaLabel="色を変更"
-            onClick={() => {
-              // todo
-            }}
-          />
+          <ColorButton color={color} ariaLabel="色を変更" onClick={() => {}} />
         </>
       }
     >
