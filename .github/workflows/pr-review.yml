@@ -1,4 +1,4 @@
-name: 'Gemini PR Review'
+name: 'AI Code Review'
 
 on:
   pull_request:
@@ -7,6 +7,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   review:
@@ -16,12 +17,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Gemini AI Code Review
-        uses: petarzarkov/gemini-code-review-action@latest
+      - name: Multi-AI Code Quality Analyzer
+        uses: newlc/ai-code-reviewer@main
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
           model: gemini-2.5-flash
-          exclude: "*.md,*.json,package-lock.json,bun.lockb,*.yml,*.yaml"
-          language: Japanese
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          language: ja
+          config-path: .github/ai-review-config.yml
