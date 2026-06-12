@@ -22,4 +22,4 @@ jobs:
           TERM: xterm-256color
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          script -e -c "~/.local/bin/agy review --pr \"${{ github.event.pull_request.number }}\"" /dev/null
+          script -e -c "~/.local/bin/agy --dangerously-skip-permissions review --pr \"${{ github.event.pull_request.number }}\"" /dev/null
