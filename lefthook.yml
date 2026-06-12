@@ -5,4 +5,3 @@ pre-commit:
     lint-and-format:
       # ステージングされたファイルだけでなく、全体をチェックする
       run: bun run ci
-      stage_fixed: true

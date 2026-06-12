@@ -1,26 +1,25 @@
-name: 'Antigravity PR Review'
+name: 'Gemini PR Review'
+
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   review:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
-      - name: リポジトリのチェックアウト
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Antigravity CLI のインストール
-        run: curl -fsSL https://antigravity.google/cli/install.sh | bash
-
-      - name: コードレビューの実行
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          ANTIGRAVITY_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          TERM: xterm-256color
+      - name: Gemini AI Code Review
+        uses: truongnh1992/gemini-ai-code-reviewer@main
+        with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          script -e -c "~/.local/bin/agy --dangerously-skip-permissions --log-file=/dev/stderr review --pr \"${{ github.event.pull_request.number }}\"" /dev/null
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-2.5-pro
+          EXCLUDE: "*.md,*.txt,package-lock.json,bun.lockb,*.yml,*.yaml"

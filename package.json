@@ -11,7 +11,7 @@
     "check": "biome check --write .",
     "lint": "biome lint .",
     "typecheck": "tsc --noEmit",
-    "ci": "bun run format && biome lint . && bun run typecheck && bun run test",
+    "ci": "biome ci . && bun run typecheck && bun run test",
     "test": "vitest run"
   },
   "dependencies": {
