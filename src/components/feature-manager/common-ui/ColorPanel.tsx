@@ -142,6 +142,18 @@ export default function ColorPanel({
     onClose();
   };
 
+  useEffect(() => {
+    const handleScrollOrResize = () => {
+      onClose();
+    };
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [onClose]);
+
   useClickOutside(pickerRef, handleConfirmAndClose, ignoreRef);
 
   const handleChange = (newColor: ColorResult) => {

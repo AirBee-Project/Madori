@@ -39,17 +39,22 @@ export default function SpatialIdBox({
 }: SpatialIdBoxProps) {
   const [text, setText] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showPicker, setShowPicker] = useState(false);
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const isTypingRef = useRef(false);
 
   useEffect(() => {
+    if (isTypingRef.current) {
+      isTypingRef.current = false;
+      return;
+    }
     const joined = group.spatialIds.map(spatialIdToString).join(", ");
     setText(joined);
     setErrorMsg(null);
   }, [group.spatialIds]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    isTypingRef.current = true;
     const val = e.target.value;
     setText(val);
 
@@ -69,8 +74,11 @@ export default function SpatialIdBox({
   };
 
   const handleColorClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setTriggerRect(e.currentTarget.getBoundingClientRect());
-    setShowPicker((prev) => !prev);
+    if (triggerRect) {
+      setTriggerRect(null);
+    } else {
+      setTriggerRect(e.currentTarget.getBoundingClientRect());
+    }
   };
 
   const color = group.color ?? { r: 15, g: 118, b: 110, a: 255 };
@@ -114,11 +122,11 @@ export default function SpatialIdBox({
           </div>
         )}
       </div>
-      {showPicker && triggerRect && (
+      {triggerRect && (
         <ColorPanel
           color={color}
           onChange={(newColor) => onUpdate(group.id, { color: newColor })}
-          onClose={() => setShowPicker(false)}
+          onClose={() => setTriggerRect(null)}
           triggerRect={triggerRect}
           ignoreRef={buttonRef}
         />
