@@ -62,7 +62,9 @@ export function generateVoxelLayer(
   return new SolidPolygonLayer<VoxelGeometry>({
     id: `voxel-layer-${id}`,
     data: geometries,
-    pickable: false,
+    pickable: true,
+    autoHighlight: true,
+    highlightColor: [255, 255, 255, 150],
     extruded: true,
     wireframe: true,
     getPolygon: (d) => d.points,
