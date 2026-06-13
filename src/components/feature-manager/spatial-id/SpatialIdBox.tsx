@@ -1,9 +1,14 @@
 import { IconTarget, IconTrash } from "@tabler/icons-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useMapStore } from "../../../stores/mapStore";
+import { useSpatialIdGroupStore } from "../../../stores/spatialIdGroupStores";
+import { useTimeStore } from "../../../stores/timeStore";
 import type { SpatialId } from "../../../types/geometry/spatioTemporalId";
 import type { SpatialIdGroup } from "../../../types/geometry/spatioTemporalId/spatialIdGroup";
+import { calculateVoxelFocus } from "../../../utils/focusHelper";
 import { stringToSpatialIds } from "../../../utils/parser/stringToSpatialIds";
+import { spatialIdGroupToGeometries } from "../../../utils/parser/voxelToGeometry";
 import ColorButton from "../common-ui/ColorButton";
 import ColorPanel from "../common-ui/ColorPanel";
 import FeatureItemBox from "../common-ui/FeatureItemBox";
@@ -42,6 +47,9 @@ export default function SpatialIdBox({
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const isTypingRef = useRef(false);
+
+  const flyTo = useMapStore((state) => state.flyTo);
+  const setCurrentTime = useTimeStore((state) => state.setCurrentTime);
 
   useEffect(() => {
     if (isTypingRef.current) {
@@ -94,6 +102,18 @@ export default function SpatialIdBox({
     setTriggerRect(null);
   }, []);
 
+  const handleFocusClick = () => {
+    const latestGroup =
+      useSpatialIdGroupStore.getState().spatialIdGroups.get(group.id) ?? group;
+    const geometries = spatialIdGroupToGeometries(latestGroup);
+    if (geometries.length === 0) return;
+    const target = calculateVoxelFocus(geometries);
+    flyTo(target.longitude, target.latitude, target.zoom);
+    if (target.minStartTime !== null) {
+      setCurrentTime(target.minStartTime);
+    }
+  };
+
   return (
     <FeatureItemBox
       actions={
@@ -106,7 +126,7 @@ export default function SpatialIdBox({
             <IconTrash />
           </IconButton>
 
-          <IconButton onClick={() => {}} ariaLabel="空間IDに移動">
+          <IconButton onClick={handleFocusClick} ariaLabel="空間IDに移動">
             <IconTarget />
           </IconButton>
 
