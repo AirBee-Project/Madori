@@ -10,6 +10,8 @@ interface MapStore {
     zoom?: number,
     pitch?: number,
   ) => void;
+  is3DTerrainEnabled: boolean;
+  toggle3DTerrain: () => void;
 }
 
 export const useMapStore = create<MapStore>((set) => ({
@@ -34,4 +36,7 @@ export const useMapStore = create<MapStore>((set) => ({
         transitionInterpolator: new FlyToInterpolator(),
       },
     })),
+  is3DTerrainEnabled: false,
+  toggle3DTerrain: () =>
+    set((state) => ({ is3DTerrainEnabled: !state.is3DTerrainEnabled })),
 }));

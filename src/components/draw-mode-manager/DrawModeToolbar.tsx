@@ -1,4 +1,10 @@
-import { IconMap, IconRefresh, IconTableMinus } from "@tabler/icons-react";
+import {
+  IconMap,
+  IconMountain,
+  IconRefresh,
+  IconTableMinus,
+} from "@tabler/icons-react";
+import { useMapStore } from "../../stores/mapStore";
 import { useSpatialIdGroupStore } from "../../stores/spatialIdGroupStores";
 import DrawModeButton from "./DrawModeButton";
 import styles from "./DrawModeToolbar.module.scss";
@@ -10,6 +16,8 @@ export default function DrawModeToolbar() {
   const toggleRangeMode = useSpatialIdGroupStore(
     (state) => state.toggleRangeMode,
   );
+  const is3DTerrainEnabled = useMapStore((state) => state.is3DTerrainEnabled);
+  const toggle3DTerrain = useMapStore((state) => state.toggle3DTerrain);
 
   return (
     <div className={styles.rightControls}>
@@ -17,9 +25,24 @@ export default function DrawModeToolbar() {
         icon={IconRefresh}
         isActive={false}
         onClick={toggleRangeMode}
+        title="Toggle range mode"
       />
-      <DrawModeButton icon={IconMap} isActive={false} />
-      <DrawModeButton icon={IconTableMinus} isActive={false} />
+      <DrawModeButton
+        icon={IconMountain}
+        isActive={is3DTerrainEnabled}
+        onClick={toggle3DTerrain}
+        title={is3DTerrainEnabled ? "Disable 3D terrain" : "Enable 3D terrain"}
+      />
+      <DrawModeButton
+        icon={IconMap}
+        isActive={false}
+        title="Toggle map style"
+      />
+      <DrawModeButton
+        icon={IconTableMinus}
+        isActive={false}
+        title="Clear data"
+      />
     </div>
   );
 }

@@ -12,6 +12,9 @@ type DrawModeButtonProps = {
 
   /** クリック時に呼ばれる関数 */
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+
+  /** ボタンのツールチップテキスト */
+  title?: string;
 };
 
 /**
@@ -21,11 +24,13 @@ export default function DrawModeButton({
   icon: Icon,
   isActive,
   onClick,
+  title,
 }: DrawModeButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
+      title={title}
       className={`${styles.circleButton} ${
         isActive ? styles.circleButtonActive : ""
       }`}
