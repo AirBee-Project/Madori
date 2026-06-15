@@ -77,6 +77,32 @@ export function generateVoxelLayer(
   });
 }
 
+export function generateJsonVoxelLayer(
+  id: string,
+  geometries: VoxelGeometry[],
+  opacity: number,
+): SolidPolygonLayer<VoxelGeometry> {
+  return new SolidPolygonLayer<VoxelGeometry>({
+    id: `json-voxel-layer-${id}`,
+    data: geometries,
+    pickable: true,
+    autoHighlight: true,
+    highlightColor: [255, 255, 255, 150],
+    extruded: true,
+    wireframe: true,
+    getPolygon: (d) => d.points,
+    getElevation: (d) => d.elevation,
+    getFillColor: (d) => {
+      const c = d.color ?? { r: 100, g: 100, b: 100, a: 255 };
+      return [c.r, c.g, c.b, opacity];
+    },
+    getLineColor: [0, 0, 0, 255],
+    updateTriggers: {
+      getFillColor: [opacity],
+    },
+  });
+}
+
 export function generateMapLayers(points: Point[], lines: Line[]): LayersList {
   return [generatePointLayer(points), generateLineLayer(lines)];
 }

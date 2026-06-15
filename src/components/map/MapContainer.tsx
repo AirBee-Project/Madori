@@ -3,15 +3,18 @@ import DeckGL from "@deck.gl/react";
 import { useEffect, useMemo, useRef } from "react";
 import { Map as MapGL } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useJsonLayerStore } from "../../stores/jsonLayerStore";
 import { useLineStore } from "../../stores/lineStores";
 import { useMapStore } from "../../stores/mapStore";
 import { usePointStore } from "../../stores/pointStores";
 import { useSpatialIdGroupStore } from "../../stores/spatialIdGroupStores";
 import { useTimeStore } from "../../stores/timeStore";
 import {
+  generateJsonVoxelLayer,
   generateMapLayers,
   generateVoxelLayer,
 } from "../../utils/layerGenerator";
+import { jsonToGeometry } from "../../utils/parser/jsonToGeometry";
 import { spatialIdGroupToGeometries } from "../../utils/parser/voxelToGeometry";
 
 export default function MapContainer() {
@@ -25,6 +28,12 @@ export default function MapContainer() {
   );
   const rangeMode = useSpatialIdGroupStore((state) => state.rangeMode);
   const currentTime = useTimeStore((state) => state.currentTime);
+
+  const {
+    data: jsonData,
+    visible: jsonVisible,
+    opacity: jsonOpacity,
+  } = useJsonLayerStore();
 
   // useRefを使用して再描画を防ぐ
   const hoveredVoxelIdRef = useRef<string | null>(null);
@@ -73,9 +82,31 @@ export default function MapContainer() {
     });
   }, [allGeometriesMap, currentTime]);
 
+  const jsonGeometries = useMemo(() => {
+    if (!jsonData || !jsonVisible) return [];
+    return jsonToGeometry(jsonData, rangeMode);
+  }, [jsonData, jsonVisible, rangeMode]);
+
+  const jsonLayer = useMemo(() => {
+    if (!jsonData || !jsonVisible || jsonGeometries.length === 0) return null;
+    const filteredJsonGeometries = jsonGeometries.filter((geom) => {
+      if (geom.startTime === null || geom.endTime === null) return true;
+      return geom.startTime <= currentTime && currentTime <= geom.endTime;
+    });
+    return generateJsonVoxelLayer(
+      "json-layer",
+      filteredJsonGeometries,
+      jsonOpacity,
+    );
+  }, [jsonData, jsonVisible, jsonGeometries, currentTime, jsonOpacity]);
+
   const layers: LayersList = useMemo(() => {
-    return [...baseLayers, ...voxelLayers];
-  }, [baseLayers, voxelLayers]);
+    const list = [...baseLayers, ...voxelLayers];
+    if (jsonLayer) {
+      list.push(jsonLayer);
+    }
+    return list;
+  }, [baseLayers, voxelLayers, jsonLayer]);
 
   return (
     <DeckGL
@@ -87,9 +118,13 @@ export default function MapContainer() {
       onHover={({ object }) => {
         hoveredVoxelIdRef.current = object?.voxelId || null;
       }}
-      getTooltip={({ object }) =>
-        object?.voxelId ? `${object.voxelId}` : null
-      }
+      getTooltip={({ object }) => {
+        if (!object?.voxelId) return null;
+        if (object.value !== undefined) {
+          return `${object.voxelId} | ${object.value}`;
+        }
+        return `${object.voxelId}`;
+      }}
     >
       <MapGL mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json" />
     </DeckGL>
