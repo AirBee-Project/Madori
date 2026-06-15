@@ -4,8 +4,8 @@ import type { SpatialId } from "../types/geometry/spatioTemporalId";
 
 export interface JsonSpatialId extends SpatialId {
   ref: number;
-  color?: RGBAColor;
-  value?: number;
+  color: RGBAColor;
+  value: number;
 }
 
 export interface JsonMetaData {
