@@ -40,6 +40,11 @@ export function jsonToSpatialIds(jsonString: string): JsonLayerData {
       temporalId,
     };
 
+    if (idObj.ref < 0 || idObj.ref >= firstData.value.length) {
+      throw new Error(
+        `参照ID (ref: ${idObj.ref}) が values 配列の範囲外です。`,
+      );
+    }
     const refValue = firstData.value[idObj.ref];
     const color = colorScale(refValue);
 
