@@ -70,6 +70,8 @@ export function generateVoxelLayer(
     extruded: true,
     // ライティング計算を無効化して描画を軽量化
     material: false,
+    // 裏面の描画を省いて軽量化（面の向きに依存）
+    parameters: { cullMode: "back" },
     wireframe: showBorder,
     getPolygon: (d) => d.points,
     getElevation: (d) => d.elevation,
@@ -97,6 +99,8 @@ export function generateJsonVoxelLayer(
     extruded: true,
     // ライティング計算を無効化して描画を軽量化
     material: false,
+    // 裏面の描画を省いて軽量化（面の向きに依存）
+    parameters: { cullMode: "back" },
     wireframe: showBorder,
     getPolygon: (d) => d.points,
     getElevation: (d) => d.elevation,
