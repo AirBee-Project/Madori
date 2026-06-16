@@ -1,7 +1,8 @@
-import { IconTarget, IconTrash } from "@tabler/icons-react";
+import { IconRefresh, IconTarget, IconTrash } from "@tabler/icons-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMapStore } from "../../../stores/mapStore";
+import { getGroupFile } from "../../../stores/spatialIdGroupFiles";
 import { useSpatialIdGroupStore } from "../../../stores/spatialIdGroupStores";
 import { useTimeStore } from "../../../stores/timeStore";
 import type { SpatialId } from "../../../types/geometry/spatioTemporalId";
@@ -48,10 +49,19 @@ export default function SpatialIdBox({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const isTypingRef = useRef(false);
 
+  // .txtファイル再読み込み用
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  // 元ファイルのハンドルを持つグループは.txt由来。
+  // ファイルで読み込んでいるのか、テキスト直打ちなのかのフラグ
+  const fileHandle = getGroupFile(group.id);
+  const isFileGroup = fileHandle != null;
+
   const flyTo = useMapStore((state) => state.flyTo);
   const setCurrentTime = useTimeStore((state) => state.setCurrentTime);
 
   useEffect(() => {
+    if (isFileGroup) return;
     if (isTypingRef.current) {
       isTypingRef.current = false;
       return;
@@ -59,7 +69,7 @@ export default function SpatialIdBox({
     const joined = group.spatialIds.map(spatialIdToString).join(", ");
     setText(joined);
     setErrorMsg(null);
-  }, [group.spatialIds]);
+  }, [group.spatialIds, isFileGroup]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     isTypingRef.current = true;
@@ -79,6 +89,40 @@ export default function SpatialIdBox({
       setErrorMsg(null);
       onUpdate(group.id, { spatialIds: parsed.success });
     }
+  };
+
+  // 保持しているファイルハンドルから同じファイルを再読み込みし、パース結果でグループの空間IDを全置換（全削除＋全挿入）する
+  const handleReloadClick = async () => {
+    const handle = getGroupFile(group.id);
+    if (!handle) {
+      setFileError(
+        "再読み込み元のファイルが見つかりません。再度追加してください。",
+      );
+      return;
+    }
+
+    let content: string;
+    try {
+      const file = await handle.getFile();
+      content = await file.text();
+    } catch {
+      setFileError("ファイルの再読み込みに失敗しました。");
+      return;
+    }
+
+    if (content.trim() === "") {
+      onUpdate(group.id, { spatialIds: [] });
+      setFileError(null);
+      return;
+    }
+
+    const parsed = stringToSpatialIds(content);
+    if (parsed.errors.length > 0) {
+      setFileError(`${parsed.errors[0].content}: ${parsed.errors[0].message}`);
+      return;
+    }
+    setFileError(null);
+    onUpdate(group.id, { spatialIds: parsed.success });
   };
 
   const handleColorClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -139,20 +183,41 @@ export default function SpatialIdBox({
         </>
       }
     >
-      <div className={styles.textareaWrapper}>
-        <textarea
-          id={`spatial-id-input-${group.id}`}
-          className={`${styles.textarea} ${errorMsg ? styles.textareaError : ""}`}
-          value={text}
-          onChange={handleChange}
-          rows={3}
-        />
-        {errorMsg && (
-          <div className={styles.errorMessage} role="alert">
-            {errorMsg}
+      {isFileGroup ? (
+        <div className={styles.textareaWrapper}>
+          <div className={styles.fileRow}>
+            <span className={styles.fileName}>{fileHandle?.name}</span>
+            <button
+              type="button"
+              className={styles.reloadButton}
+              onClick={handleReloadClick}
+              aria-label="txtファイルを再読み込み"
+            >
+              <IconRefresh size={16} />
+            </button>
           </div>
-        )}
-      </div>
+          {fileError && (
+            <div className={styles.errorMessage} role="alert">
+              {fileError}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className={styles.textareaWrapper}>
+          <textarea
+            id={`spatial-id-input-${group.id}`}
+            className={`${styles.textarea} ${errorMsg ? styles.textareaError : ""}`}
+            value={text}
+            onChange={handleChange}
+            rows={3}
+          />
+          {errorMsg && (
+            <div className={styles.errorMessage} role="alert">
+              {errorMsg}
+            </div>
+          )}
+        </div>
+      )}
       {triggerRect && (
         <ColorPanel
           color={color}
