@@ -30,21 +30,17 @@ export const useMapStore = create<MapStore>((set, get) => ({
   mapInstance: null,
   setMapInstance: (mapInstance) => set({ mapInstance }),
   flyTo: (longitude, latitude, zoom = 15, pitch = 45) => {
-    // カメラ権限は MapLibre 側にあるため、MapLibre のネイティブ flyTo で移動する
+    // カメラ権限は MapLibre 側にあるため、MapLibre のネイティブ flyTo で移動する。
+    // viewState は MapGL の onMove が同期するため、ここでは更新しない。
     const map = get().mapInstance;
-    if (map) {
-      map.flyTo({ center: [longitude, latitude], zoom, pitch, duration: 500 });
-    }
-    set((state) => ({
-      viewState: {
-        ...state.viewState,
-        longitude,
-        latitude,
-        zoom,
-        pitch,
-        bearing: 0,
-      },
-    }));
+    if (!map) return;
+    map.flyTo({
+      center: [longitude, latitude],
+      zoom,
+      pitch,
+      bearing: 0, // フォーカス移動時は北向きに戻す
+      duration: 500,
+    });
   },
   is3DTerrainEnabled: false,
   toggle3DTerrain: () =>
