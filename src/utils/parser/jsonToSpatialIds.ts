@@ -4,6 +4,17 @@ import { createHeatmapColorScale } from "../color/heatmap";
 
 //アップロードされたJSONファイルをJsonLayerData型に変換
 
+/**
+ * JSONの 1〜2 要素配列を SpatialId が扱う number | [number, number] に変換する
+ * [n]      → n
+ * [s, e]   → [s, e]
+ */
+function toIndexValue(arr: number[] | undefined): number | [number, number] {
+  if (!arr || arr.length === 0) return 0;
+  if (arr.length === 1) return arr[0];
+  return [arr[0], arr[1]];
+}
+
 export function jsonToSpatialIds(jsonString: string): JsonLayerData {
   const parsed = JSON.parse(jsonString);
   const validated = JsonFileSchema.parse(parsed);
@@ -17,9 +28,9 @@ export function jsonToSpatialIds(jsonString: string): JsonLayerData {
   const colorScale = createHeatmapColorScale(firstData.value);
 
   const jsonSpatialIds: JsonSpatialId[] = firstData.ids.map((idObj) => {
-    const f = idObj.f ?? 0;
-    const x = idObj.x ?? 0;
-    const y = idObj.y ?? 0;
+    const f = toIndexValue(idObj.f);
+    const x = toIndexValue(idObj.x);
+    const y = toIndexValue(idObj.y);
 
     let temporalId:
       | {
@@ -28,7 +39,7 @@ export function jsonToSpatialIds(jsonString: string): JsonLayerData {
         }
       | undefined;
     if (idObj.i !== undefined && idObj.t !== undefined) {
-      temporalId = { i: idObj.i, t: idObj.t };
+      temporalId = { i: idObj.i, t: toIndexValue(idObj.t) };
     }
 
     // SpatialIdの形式に変換

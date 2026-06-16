@@ -9,7 +9,7 @@ export interface JsonSpatialId extends SpatialId {
 }
 
 export interface JsonMetaData {
-  kasaneSchemaVersion: string;
+  version: string;
   description?: string;
 }
 
