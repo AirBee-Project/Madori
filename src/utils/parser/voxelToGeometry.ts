@@ -128,7 +128,9 @@ export function spatialIdGroupToGeometries(
     );
 
     geometryCache.set(key, geometries);
-    result.push(...geometries);
+    for (const geom of geometries) {
+      result.push(geom);
+    }
   }
   return result;
 }

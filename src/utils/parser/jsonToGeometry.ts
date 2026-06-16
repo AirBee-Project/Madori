@@ -24,7 +24,9 @@ export function jsonToGeometry(
       return geom;
     });
 
-    result.push(...geometries);
+    for (const geom of geometries) {
+      result.push(geom);
+    }
   }
 
   return result;
