@@ -1,9 +1,9 @@
 import type { LayersList, MapViewState } from "@deck.gl/core";
-import DeckGL from "@deck.gl/react";
+import { MapboxOverlay } from "@deck.gl/mapbox";
 import type { Map as MapLibreGLMap } from "maplibre-gl";
 import * as maplibregl from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
-import { Map as MapGL } from "react-map-gl/maplibre";
+import { Map as MapGL, useControl } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { DrawModeToolbar } from "./components/draw-mode-manager";
 import { FeatureManager } from "./components/feature-manager";
@@ -171,9 +171,19 @@ function removeTerrain(map: MapLibreGLMap): void {
   }
 }
 
+// deck.gl を MapLibre の WebGL コンテキストに interleaved で重ねるオーバーレイ。
+type DeckGLOverlayProps = ConstructorParameters<typeof MapboxOverlay>[0];
+
+function DeckGLOverlay(props: DeckGLOverlayProps) {
+  const overlay = useControl(() => new MapboxOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
+
 const MapContainer = () => {
   const viewState = useMapStore((state) => state.viewState);
   const setViewState = useMapStore((state) => state.setViewState);
+  const setMapInstance = useMapStore((state) => state.setMapInstance);
   const is3DTerrainEnabled = useMapStore((state) => state.is3DTerrainEnabled);
 
   const pointsMap = usePointStore((state) => state.points);
@@ -248,27 +258,33 @@ const MapContainer = () => {
   }, [baseLayers, voxelLayers]);
 
   return (
-    <DeckGL
-      viewState={viewState}
-      onViewStateChange={(e) => setViewState(e.viewState as MapViewState)}
-      controller={true}
-      style={{ width: "100vw", height: "100vh" }}
-      layers={layers}
-      onHover={({ object }) => {
-        hoveredVoxelIdRef.current = object?.voxelId || null;
+    <MapGL
+      initialViewState={{
+        longitude: viewState.longitude,
+        latitude: viewState.latitude,
+        zoom: viewState.zoom,
+        pitch: viewState.pitch,
+        bearing: viewState.bearing,
       }}
-      getTooltip={({ object }) =>
-        object?.voxelId ? `${object.voxelId}` : null
-      }
+      mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+      style={{ width: "100vw", height: "100vh" }}
+      onMove={(e) => setViewState(e.viewState as MapViewState)}
+      onLoad={(event: { target: MapLibreGLMap }) => {
+        mapRef.current = event.target;
+        setMapInstance(event.target);
+      }}
     >
-      <MapGL
-        mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
-        onLoad={(event: { target: MapLibreGLMap }) => {
-          // react-map-gl から maplibre-gl インスタンスにアクセス
-          mapRef.current = event.target;
+      <DeckGLOverlay
+        interleaved
+        layers={layers}
+        onHover={({ object }) => {
+          hoveredVoxelIdRef.current = object?.voxelId || null;
         }}
+        getTooltip={({ object }) =>
+          object?.voxelId ? `${object.voxelId}` : null
+        }
       />
-    </DeckGL>
+    </MapGL>
   );
 };
 

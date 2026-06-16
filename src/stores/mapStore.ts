@@ -1,9 +1,13 @@
-import { FlyToInterpolator, type MapViewState } from "@deck.gl/core";
+import type { MapViewState } from "@deck.gl/core";
+import type { Map as MapLibreGLMap } from "maplibre-gl";
 import { create } from "zustand";
 
 interface MapStore {
   viewState: MapViewState;
   setViewState: (viewState: MapViewState) => void;
+  /** MapLibre のカメラ権限を持つため、地図インスタンスを保持する */
+  mapInstance: MapLibreGLMap | null;
+  setMapInstance: (map: MapLibreGLMap | null) => void;
   flyTo: (
     longitude: number,
     latitude: number,
@@ -14,7 +18,7 @@ interface MapStore {
   toggle3DTerrain: () => void;
 }
 
-export const useMapStore = create<MapStore>((set) => ({
+export const useMapStore = create<MapStore>((set, get) => ({
   viewState: {
     longitude: 139.767,
     latitude: 35.681,
@@ -23,7 +27,14 @@ export const useMapStore = create<MapStore>((set) => ({
     bearing: 0,
   },
   setViewState: (viewState) => set({ viewState }),
-  flyTo: (longitude, latitude, zoom = 15, pitch = 45) =>
+  mapInstance: null,
+  setMapInstance: (mapInstance) => set({ mapInstance }),
+  flyTo: (longitude, latitude, zoom = 15, pitch = 45) => {
+    // カメラ権限は MapLibre 側にあるため、MapLibre のネイティブ flyTo で移動する
+    const map = get().mapInstance;
+    if (map) {
+      map.flyTo({ center: [longitude, latitude], zoom, pitch, duration: 500 });
+    }
     set((state) => ({
       viewState: {
         ...state.viewState,
@@ -32,10 +43,9 @@ export const useMapStore = create<MapStore>((set) => ({
         zoom,
         pitch,
         bearing: 0,
-        transitionDuration: 500,
-        transitionInterpolator: new FlyToInterpolator(),
       },
-    })),
+    }));
+  },
   is3DTerrainEnabled: false,
   toggle3DTerrain: () =>
     set((state) => ({ is3DTerrainEnabled: !state.is3DTerrainEnabled })),
