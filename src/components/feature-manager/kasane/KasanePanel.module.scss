@@ -1,0 +1,58 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+.select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+
+  &:focus {
+    border-color: #0f766e;
+  }
+
+  &:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+  }
+}
+
+.message {
+  font-size: 0.8125rem;
+  color: #475569;
+  padding: 0.75rem 1rem;
+}
+
+.notice {
+  font-size: 0.75rem;
+  color: #b45309;
+}
+
+.error {
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: #64748b;
+}

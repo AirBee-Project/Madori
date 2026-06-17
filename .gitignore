@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Env (Kasane API credentials etc.)
+.env
+.env*.local
+
 # Editor directories and files
 .idea
 .DS_Store

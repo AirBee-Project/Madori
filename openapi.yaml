@@ -1,0 +1,811 @@
+openapi: 3.1.0
+info:
+  title: kasane
+  description: ''
+  license:
+    name: ''
+  version: 0.1.0
+paths:
+  /auth/login:
+    post:
+      tags:
+      - Auth
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Unauthorized
+  /databases:
+    get:
+      tags:
+      - databases
+      operationId: database_list
+      responses:
+        '200':
+          description: List databases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DatabaseInfoResponse'
+      security:
+      - bearer_auth: []
+    post:
+      tags:
+      - databases
+      operationId: database_create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDatabaseRequest'
+        required: true
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseInfoResponse'
+      security:
+      - bearer_auth: []
+  /databases/{db_name}/tables:
+    get:
+      tags:
+      - tables
+      operationId: table_list
+      parameters:
+      - name: db_name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of tables
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableListResponse'
+      security:
+      - bearer_auth: []
+    post:
+      tags:
+      - tables
+      operationId: table_create
+      parameters:
+      - name: db_name
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTableRequest'
+        required: true
+      responses:
+        '201':
+          description: Table created
+        '400':
+          description: Invalid request
+        '409':
+          description: Table already exists
+      security:
+      - bearer_auth: []
+  /databases/{db_name}/tables/{table_name}:
+    get:
+      tags:
+      - tables
+      operationId: table_info
+      parameters:
+      - name: db_name
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: table_name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Table info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableInfoResponse'
+        '404':
+          description: Table not found
+      security:
+      - bearer_auth: []
+    delete:
+      tags:
+      - tables
+      operationId: remove_table
+      parameters:
+      - name: db_name
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: table_name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Table removed
+        '404':
+          description: Table not found
+      security:
+      - bearer_auth: []
+  /databases/{db_name}/tables/{table_name}/data:
+    put:
+      tags:
+      - data
+      operationId: data_insert
+      parameters:
+      - name: db_name
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: table_name
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsertDataRequest'
+        required: true
+      responses:
+        '200':
+          description: Data inserted
+        '404':
+          description: Table not found
+      security:
+      - bearer_auth: []
+    delete:
+      tags:
+      - data
+      operationId: data_remove
+      parameters:
+      - name: db_name
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: table_name
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveDataRequest'
+        required: true
+      responses:
+        '204':
+          description: Data removed
+        '404':
+          description: Table not found
+      security:
+      - bearer_auth: []
+    patch:
+      tags:
+      - data
+      operationId: data_upsert
+      parameters:
+      - name: db_name
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: table_name
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsertDataRequest'
+        required: true
+      responses:
+        '204':
+          description: Data upserted
+        '404':
+          description: Table not found
+      security:
+      - bearer_auth: []
+  /databases/{db_name}/tables/{table_name}/data/search:
+    post:
+      tags:
+      - data
+      operationId: data_get
+      parameters:
+      - name: db_name
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: table_name
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetDataRequest'
+        required: true
+      responses:
+        '200':
+          description: Data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDataResponse'
+        '404':
+          description: Table not found
+      security:
+      - bearer_auth: []
+  /databases/{name}:
+    get:
+      tags:
+      - databases
+      operationId: database_info
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Get database info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseInfoResponse'
+      security:
+      - bearer_auth: []
+    delete:
+      tags:
+      - databases
+      operationId: remove_database
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Removed successfully
+      security:
+      - bearer_auth: []
+  /users:
+    get:
+      tags:
+      - Users
+      operationId: list_users
+      responses:
+        '200':
+          description: List users successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserInfoResponse'
+      security:
+      - bearer_auth: []
+    post:
+      tags:
+      - Users
+      operationId: create_user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+        required: true
+      responses:
+        '201':
+          description: User created successfully
+        '409':
+          description: User already exists
+      security:
+      - bearer_auth: []
+  /users/{username}:
+    delete:
+      tags:
+      - Users
+      operationId: delete_user
+      parameters:
+      - name: username
+        in: path
+        description: Username
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+      security:
+      - bearer_auth: []
+  /users/{username}/admin:
+    put:
+      tags:
+      - Users
+      operationId: set_admin
+      parameters:
+      - name: username
+        in: path
+        description: Username
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAdminRequest'
+        required: true
+      responses:
+        '204':
+          description: Admin status updated successfully
+        '403':
+          description: Cannot modify root admin status
+        '404':
+          description: User not found
+      security:
+      - bearer_auth: []
+  /users/{username}/password:
+    put:
+      tags:
+      - Users
+      operationId: update_password
+      parameters:
+      - name: username
+        in: path
+        description: Username
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordRequest'
+        required: true
+      responses:
+        '204':
+          description: Password updated successfully
+        '404':
+          description: User not found
+      security:
+      - bearer_auth: []
+  /users/{username}/privileges:
+    get:
+      tags:
+      - Users
+      operationId: get_privileges
+      parameters:
+      - name: username
+        in: path
+        description: Username
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Get privileges successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrivilegeInfoResponse'
+        '404':
+          description: User not found
+      security:
+      - bearer_auth: []
+  /users/{username}/privileges/{db_name}:
+    put:
+      tags:
+      - Users
+      operationId: set_privilege
+      parameters:
+      - name: username
+        in: path
+        description: Username
+        required: true
+        schema:
+          type: string
+      - name: db_name
+        in: path
+        description: Database name
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePrivilegeRequest'
+        required: true
+      responses:
+        '204':
+          description: Privilege updated successfully
+        '404':
+          description: User or database not found
+      security:
+      - bearer_auth: []
+    delete:
+      tags:
+      - Users
+      operationId: delete_privilege
+      parameters:
+      - name: username
+        in: path
+        description: Username
+        required: true
+        schema:
+          type: string
+      - name: db_name
+        in: path
+        description: Database name
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Privilege deleted successfully
+        '404':
+          description: User or database not found
+      security:
+      - bearer_auth: []
+components:
+  schemas:
+    CreateDatabaseRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+    CreateTableRequest:
+      type: object
+      description: 時空間IDと値が対応するTableを作成する
+      required:
+      - name
+      - data_type
+      - max_zoom_level
+      properties:
+        name:
+          type: string
+          example: example_table
+        data_type:
+          $ref: '#/components/schemas/TableDataType'
+        max_zoom_level:
+          type: integer
+          format: int32
+          example: 25
+          maximum: 30
+          minimum: 0
+    CreateUserRequest:
+      type: object
+      required:
+      - username
+      - password
+      - is_global_admin
+      properties:
+        username:
+          type: string
+          example: alice
+        password:
+          type: string
+          example: secret123
+        is_global_admin:
+          type: boolean
+          example: false
+    DatabaseInfoResponse:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+    GetDataRequest:
+      type: object
+      description: 空間IDの配列を指定して値を取得する
+      required:
+      - spatial_ids
+      properties:
+        spatial_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpatialId'
+        zoom_level_policy:
+          $ref: '#/components/schemas/ZoomLevelPolicy'
+    GetDataResponse:
+      type: object
+      required:
+      - ids
+      properties:
+        ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpatialData'
+    InsertDataRequest:
+      type: object
+      description: 空間IDの配列を指定して値を挿入する
+      required:
+      - value
+      - spatial_ids
+      properties:
+        value: {}
+        spatial_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpatialId'
+        zoom_level_policy:
+          $ref: '#/components/schemas/ZoomLevelPolicy'
+    LoginRequest:
+      type: object
+      required:
+      - username
+      - password
+      properties:
+        username:
+          type: string
+          example: root
+        password:
+          type: string
+          example: password
+    LoginResponse:
+      type: object
+      required:
+      - token
+      properties:
+        token:
+          type: string
+    PrivilegeInfoResponse:
+      type: object
+      required:
+      - db_name
+      - role
+      properties:
+        db_name:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+    RangeId:
+      type: object
+      required:
+      - z
+      - f
+      - x
+      - y
+      properties:
+        z:
+          type: integer
+          format: int32
+          example: 20
+          maximum: 30
+          minimum: 0
+        f:
+          type: array
+          items:
+            type: integer
+            format: int32
+          example:
+          - 0
+          - 0
+        x:
+          type: array
+          items:
+            type: integer
+            format: int32
+            minimum: 0
+          example:
+          - 931388
+          - 931390
+        y:
+          type: array
+          items:
+            type: integer
+            format: int32
+            minimum: 0
+          example:
+          - 412900
+          - 412907
+    RemoveDataRequest:
+      type: object
+      description: 空間IDの配列を指定して値を削除する
+      required:
+      - spatial_ids
+      properties:
+        spatial_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpatialId'
+        zoom_level_policy:
+          $ref: '#/components/schemas/ZoomLevelPolicy'
+    SingleId:
+      type: object
+      required:
+      - z
+      - f
+      - x
+      - y
+      properties:
+        z:
+          type: integer
+          format: int32
+          example: 20
+          maximum: 30
+          minimum: 0
+        f:
+          type: integer
+          format: int32
+          example: 0
+        x:
+          type: integer
+          format: int32
+          example: 931386
+          minimum: 0
+        y:
+          type: integer
+          format: int32
+          example: 412905
+          minimum: 0
+    SpatialData:
+      type: object
+      required:
+      - id
+      - data
+      properties:
+        id:
+          $ref: '#/components/schemas/SingleId'
+        data: {}
+    SpatialId:
+      oneOf:
+      - allOf:
+        - $ref: '#/components/schemas/SingleId'
+        - type: object
+          required:
+          - type
+          properties:
+            type:
+              type: string
+              enum:
+              - singleId
+      - allOf:
+        - $ref: '#/components/schemas/RangeId'
+        - type: object
+          required:
+          - type
+          properties:
+            type:
+              type: string
+              enum:
+              - rangeId
+    TableDataType:
+      type: string
+      description: Table内の時空間IDに付与する値の型。
+      enum:
+      - Text
+      - Int
+      - Float
+      - Boolean
+    TableInfoResponse:
+      type: object
+      required:
+      - name
+      - data_type
+      - max_zoom_level
+      properties:
+        name:
+          type: string
+          example: example_table
+        data_type:
+          $ref: '#/components/schemas/TableDataType'
+        max_zoom_level:
+          type: integer
+          format: int32
+          example: 25
+          minimum: 0
+    TableListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/TableInfoResponse'
+    UpdateAdminRequest:
+      type: object
+      required:
+      - is_global_admin
+      properties:
+        is_global_admin:
+          type: boolean
+          example: false
+    UpdatePasswordRequest:
+      type: object
+      required:
+      - password
+      properties:
+        password:
+          type: string
+          example: newsecret123
+    UpdatePrivilegeRequest:
+      type: object
+      required:
+      - role
+      properties:
+        role:
+          $ref: '#/components/schemas/UserRole'
+    UserInfoResponse:
+      type: object
+      required:
+      - username
+      - is_global_admin
+      properties:
+        username:
+          type: string
+        is_global_admin:
+          type: boolean
+    UserRole:
+      type: string
+      enum:
+      - Read
+      - Write
+      - Manage
+    ZoomLevelPolicy:
+      type: string
+      description: 各Tableのmax_zoom_levelよりも小さなIDが入力された場合の挙動を設定できる
+      enum:
+      - Error
+      - Ignore
+      - Normalize
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+tags:
+- name: Auth
+  description: Authentication endpoints
+- name: Users
+  description: User management operations
+- name: databases
+  description: Database operations
+- name: tables
+  description: Table operations
+- name: data
+  description: Data manipulation operations

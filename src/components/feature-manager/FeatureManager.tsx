@@ -1,5 +1,6 @@
 import {
   IconCube,
+  IconDatabase,
   IconFileDescription,
   IconLine,
   IconPoint,
@@ -8,6 +9,7 @@ import FeatureButton from "./FeatureButton";
 import toolbarStyles from "./FeatureToolbar.module.scss";
 import { useFeatureManagerStore } from "./featureManagerStore";
 import { JsonPanel } from "./json";
+import { KasanePanel } from "./kasane";
 import { LinePanel } from "./line";
 import { PointPanel } from "./point";
 import { SpatialIdPanel } from "./spatial-id";
@@ -35,6 +37,12 @@ export default function FeatureManager() {
           onClick={() => toggleMode("json")}
         />
         <FeatureButton
+          name={"Kasane"}
+          icon={IconDatabase}
+          isActive={activeMode === "kasane"}
+          onClick={() => toggleMode("kasane")}
+        />
+        <FeatureButton
           name={"点"}
           icon={IconPoint}
           isActive={activeMode === "point"}
@@ -49,6 +57,7 @@ export default function FeatureManager() {
       </div>
       {activeMode === "spatial" && <SpatialIdPanel />}
       {activeMode === "json" && <JsonPanel />}
+      {activeMode === "kasane" && <KasanePanel />}
       {activeMode === "point" && <PointPanel />}
       {activeMode === "line" && <LinePanel />}
     </div>
