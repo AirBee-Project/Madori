@@ -3,8 +3,9 @@ import {
   IconMap,
   IconPointer,
   IconRefresh,
-  IconTableMinus,
+  IconView360Number,
 } from "@tabler/icons-react";
+import { useMapStore } from "../../stores/mapStore";
 import { useSpatialIdGroupStore } from "../../stores/spatialIdGroupStores";
 import DrawModeButton from "./DrawModeButton";
 import styles from "./DrawModeToolbar.module.scss";
@@ -20,6 +21,9 @@ export default function DrawModeToolbar() {
   const toggleBorder = useSpatialIdGroupStore((state) => state.toggleBorder);
   const pickable = useSpatialIdGroupStore((state) => state.pickable);
   const togglePicking = useSpatialIdGroupStore((state) => state.togglePicking);
+
+  const isAutoRotating = useMapStore((state) => state.isAutoRotating);
+  const toggleAutoRotation = useMapStore((state) => state.toggleAutoRotation);
 
   return (
     <div className={styles.rightControls}>
@@ -39,7 +43,11 @@ export default function DrawModeToolbar() {
         onClick={togglePicking}
       />
       <DrawModeButton icon={IconMap} isActive={false} />
-      <DrawModeButton icon={IconTableMinus} isActive={false} />
+      <DrawModeButton
+        icon={IconView360Number}
+        isActive={isAutoRotating}
+        onClick={toggleAutoRotation}
+      />
     </div>
   );
 }

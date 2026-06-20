@@ -20,6 +20,7 @@ import { spatialIdGroupToGeometries } from "../../utils/parser/voxelToGeometry";
 export default function MapContainer() {
   const viewState = useMapStore((state) => state.viewState);
   const setViewState = useMapStore((state) => state.setViewState);
+  const isAutoRotating = useMapStore((state) => state.isAutoRotating);
 
   const pointsMap = usePointStore((state) => state.points);
   const linesMap = useLineStore((state) => state.lines);
@@ -57,6 +58,35 @@ export default function MapContainer() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  useEffect(() => {
+    if (!isAutoRotating) return;
+
+    let animationFrameId: number;
+    let lastTime = performance.now();
+
+    const rotate = (time: number) => {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+
+      // 回転度
+      const degreesPerMs = 30 / 1000;
+      const rotationAmount = deltaTime * degreesPerMs;
+
+      const currentViewState = useMapStore.getState().viewState;
+      setViewState({
+        ...currentViewState,
+        bearing: ((currentViewState.bearing || 0) + rotationAmount) % 360,
+        transitionDuration: 0,
+      });
+
+      animationFrameId = requestAnimationFrame(rotate);
+    };
+
+    animationFrameId = requestAnimationFrame(rotate);
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isAutoRotating, setViewState]);
 
   const baseLayers = useMemo(() => {
     const pointsList = Array.from(pointsMap.values());
