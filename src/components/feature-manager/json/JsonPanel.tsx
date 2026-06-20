@@ -11,28 +11,39 @@ import {
   pickJsonFile,
 } from "../../../stores/spatialIdGroupFiles";
 import { jsonToSpatialIds } from "../../../utils/parser/jsonToSpatialIds";
+import FeatureItemBox from "../common-ui/FeatureItemBox";
 import FooterAddButton from "../common-ui/FooterAddButton";
 import CommonPanel from "../common-ui/Panel";
 import JsonBox from "./JsonBox";
+import styles from "./JsonBox.module.scss";
 
 export default function JsonPanel() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
 
   const { data, opacity, setData, setOpacity, clearData } = useJsonLayerStore();
 
   const addJsonFromHandle = async (handle: FileHandleLike) => {
-    try {
-      const file = await handle.getFile();
-      const content = await file.text();
-      const parsedData = jsonToSpatialIds(content);
-      setData(parsedData);
-      setJsonFileHandle(handle);
-      setError(null);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setError(errorMessage || "JSONのパースに失敗しました。");
-    }
+    setIsInitialLoading(true);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
+        try {
+          const file = await handle.getFile();
+          const content = await file.text();
+          const parsedData = jsonToSpatialIds(content);
+          setData(parsedData);
+          setJsonFileHandle(handle);
+          setError(null);
+        } catch (err: unknown) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          setError(errorMessage || "JSONのパースに失敗しました。");
+        } finally {
+          setIsInitialLoading(false);
+        }
+      });
+    });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +97,15 @@ export default function JsonPanel() {
         </div>
       )}
 
-      {data && (
+      {isInitialLoading && (
+        <FeatureItemBox horizontal={true} actions={null}>
+          <div className={styles.dataSection}>
+            <span className={styles.metaValue}>読み込み中...</span>
+          </div>
+        </FeatureItemBox>
+      )}
+
+      {data && !isInitialLoading && (
         <JsonBox
           data={data}
           opacity={opacity}
