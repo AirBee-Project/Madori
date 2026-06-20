@@ -160,8 +160,18 @@ export default function SpatialIdBox({
 
   return (
     <FeatureItemBox
+      horizontal={isFileGroup}
       actions={
         <>
+          {isFileGroup && (
+            <IconButton
+              onClick={handleReloadClick}
+              ariaLabel="txtファイルを再読み込み"
+            >
+              <IconRefresh />
+            </IconButton>
+          )}
+
           <IconButton
             onClick={() => onDelete(group.id)}
             ariaLabel="空間IDグループを削除"
@@ -184,18 +194,8 @@ export default function SpatialIdBox({
       }
     >
       {isFileGroup ? (
-        <div className={styles.textareaWrapper}>
-          <div className={styles.fileRow}>
-            <span className={styles.fileName}>{fileHandle?.name}</span>
-            <button
-              type="button"
-              className={styles.reloadButton}
-              onClick={handleReloadClick}
-              aria-label="txtファイルを再読み込み"
-            >
-              <IconRefresh size={16} />
-            </button>
-          </div>
+        <div className={styles.fileWrapper}>
+          <span className={styles.fileName}>{fileHandle?.name}</span>
           {fileError && (
             <div className={styles.errorMessage} role="alert">
               {fileError}
