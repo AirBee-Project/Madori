@@ -1,3 +1,4 @@
+import madoriLogo from "/Madori_logo.png";
 import { DrawModeToolbar } from "./components/draw-mode-manager";
 import { FeatureManager } from "./components/feature-manager";
 import MapContainer from "./components/map/MapContainer";
@@ -10,6 +11,20 @@ export default function App() {
       <div style={{ position: "absolute", zIndex: 50 }}>
         <FeatureManager />
       </div>
+
+      {/* logo */}
+      <img
+        src={madoriLogo}
+        alt="Madori Logo"
+        style={{
+          position: "absolute",
+          top: "1rem",
+          right: "1rem",
+          zIndex: 50,
+          height: "40px", // adjust height as needed
+          pointerEvents: "none",
+        }}
+      />
 
       {/* timebar */}
       <TimePanel />
