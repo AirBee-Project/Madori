@@ -1,0 +1,71 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.fieldLabel {
+  font-size: 0.65rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-align: left;
+}
+
+.select {
+  width: 100%;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  font-size: 0.8125rem;
+  color: #0f172a;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &:focus {
+    border-color: #0f766e;
+  }
+
+  &:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+  }
+}
+
+.message {
+  font-size: 0.8125rem;
+  color: #475569;
+  padding: 0.75rem 1rem;
+}
+
+.statusContainer {
+  min-height: 1.5rem;
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+  padding-bottom: 0.5rem; /* 下は文字が入るように少し余白多め */
+}
+
+.statusMessage {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+.notice {
+  font-size: 0.75rem;
+  color: #b45309;
+}
+
+.error {
+  font-size: 0.75rem;
+  color: #dc2626;
+}
