@@ -1,0 +1,51 @@
+.dataSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.metaValue {
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 12rem;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 0 16px;
+}
+
+.errorMessage {
+  font-size: 0.75rem;
+  color: #ef4444;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg) translateZ(0);
+  }
+  to {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+.iconWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}

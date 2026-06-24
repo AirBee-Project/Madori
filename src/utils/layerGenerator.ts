@@ -58,21 +58,59 @@ export function generateVoxelLayer(
   id: string,
   geometries: VoxelGeometry[],
   color: RGBAColor,
+  showBorder = true,
+  pickable = true,
 ): SolidPolygonLayer<VoxelGeometry> {
   return new SolidPolygonLayer<VoxelGeometry>({
     id: `voxel-layer-${id}`,
     data: geometries,
-    pickable: true,
+    pickable,
     autoHighlight: true,
     highlightColor: [255, 255, 255, 150],
     extruded: true,
-    wireframe: true,
+    // ライティング計算を無効化して描画を軽量化
+    material: false,
+    // 裏面の描画を省いて軽量化（面の向きに依存）
+    parameters: { cullMode: "back" },
+    wireframe: showBorder,
     getPolygon: (d) => d.points,
     getElevation: (d) => d.elevation,
     getFillColor: [color.r, color.g, color.b, color.a],
     getLineColor: [0, 0, 0, 255],
     updateTriggers: {
       getFillColor: [color],
+    },
+  });
+}
+
+export function generateJsonVoxelLayer(
+  id: string,
+  geometries: VoxelGeometry[],
+  opacity: number,
+  showBorder = true,
+  pickable = true,
+): SolidPolygonLayer<VoxelGeometry> {
+  return new SolidPolygonLayer<VoxelGeometry>({
+    id: `json-voxel-layer-${id}`,
+    data: geometries,
+    pickable,
+    autoHighlight: true,
+    highlightColor: [255, 255, 255, 150],
+    extruded: true,
+    // ライティング計算を無効化して描画を軽量化
+    material: false,
+    // 裏面の描画を省いて軽量化（面の向きに依存）
+    parameters: { cullMode: "back" },
+    wireframe: showBorder,
+    getPolygon: (d) => d.points,
+    getElevation: (d) => d.elevation,
+    getFillColor: (d) => {
+      const c = d.color ?? { r: 100, g: 100, b: 100, a: 255 };
+      return [c.r, c.g, c.b, opacity];
+    },
+    getLineColor: [0, 0, 0, 255],
+    updateTriggers: {
+      getFillColor: [opacity],
     },
   });
 }

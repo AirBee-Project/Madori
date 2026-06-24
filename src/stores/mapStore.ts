@@ -10,6 +10,8 @@ interface MapStore {
     zoom?: number,
     pitch?: number,
   ) => void;
+  isAutoRotating: boolean;
+  toggleAutoRotation: () => void;
 }
 
 export const useMapStore = create<MapStore>((set) => ({
@@ -30,8 +32,11 @@ export const useMapStore = create<MapStore>((set) => ({
         zoom,
         pitch,
         bearing: 0,
-        transitionDuration: 500,
+        transitionDuration: 1000,
         transitionInterpolator: new FlyToInterpolator(),
       },
     })),
+  isAutoRotating: false,
+  toggleAutoRotation: () =>
+    set((state) => ({ isAutoRotating: !state.isAutoRotating })),
 }));

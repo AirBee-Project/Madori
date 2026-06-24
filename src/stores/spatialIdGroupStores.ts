@@ -13,6 +13,8 @@ enableMapSet();
 interface SpatialIdGroupState {
   spatialIdGroups: Map<string, SpatialIdGroup>;
   rangeMode: boolean;
+  showBorder: boolean;
+  pickable: boolean;
 }
 
 interface SpatialIdGroupAction {
@@ -25,6 +27,8 @@ interface SpatialIdGroupAction {
     updates: Partial<SpatialIdGroup>,
   ) => ReturnType<typeof SpatialIdGroupPartialSchema.safeParse>;
   toggleRangeMode: () => void;
+  toggleBorder: () => void;
+  togglePicking: () => void;
 }
 
 /**
@@ -38,6 +42,8 @@ export const useSpatialIdGroupStore = create<
       // 初期状態
       spatialIdGroups: new Map(),
       rangeMode: true,
+      showBorder: false,
+      pickable: false,
 
       /**
        * 空間IDグループを追加する
@@ -108,6 +114,31 @@ export const useSpatialIdGroupStore = create<
           },
           false,
           "toggleRangeMode",
+        ),
+
+      /**
+       * 空間IDの枠線表示をトグルする
+       */
+      toggleBorder: () =>
+        set(
+          (state) => {
+            state.showBorder = !state.showBorder;
+          },
+          false,
+          "toggleBorder",
+        ),
+
+      /**
+       * ボクセルのpicking（ホバー判定・ツールチップ等）をトグルする
+       * 大量描画時にOFFにすると軽量化できる
+       */
+      togglePicking: () =>
+        set(
+          (state) => {
+            state.pickable = !state.pickable;
+          },
+          false,
+          "togglePicking",
         ),
     })),
   ),

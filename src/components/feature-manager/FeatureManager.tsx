@@ -1,7 +1,13 @@
-import { IconCube, IconLine, IconPoint } from "@tabler/icons-react";
+import {
+  IconCube,
+  IconFileDescription,
+  IconLine,
+  IconPoint,
+} from "@tabler/icons-react";
 import FeatureButton from "./FeatureButton";
 import toolbarStyles from "./FeatureToolbar.module.scss";
 import { useFeatureManagerStore } from "./featureManagerStore";
+import { JsonPanel } from "./json";
 import { LinePanel } from "./line";
 import { PointPanel } from "./point";
 import { SpatialIdPanel } from "./spatial-id";
@@ -23,6 +29,12 @@ export default function FeatureManager() {
           onClick={() => toggleMode("spatial")}
         />
         <FeatureButton
+          name={"JSON"}
+          icon={IconFileDescription}
+          isActive={activeMode === "json"}
+          onClick={() => toggleMode("json")}
+        />
+        <FeatureButton
           name={"点"}
           icon={IconPoint}
           isActive={activeMode === "point"}
@@ -36,6 +48,7 @@ export default function FeatureManager() {
         />
       </div>
       {activeMode === "spatial" && <SpatialIdPanel />}
+      {activeMode === "json" && <JsonPanel />}
       {activeMode === "point" && <PointPanel />}
       {activeMode === "line" && <LinePanel />}
     </div>

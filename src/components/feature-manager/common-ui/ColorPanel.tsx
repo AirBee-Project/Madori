@@ -18,6 +18,7 @@ export interface ColorPanelProps {
   onClose: () => void;
   triggerRect: DOMRect | null;
   ignoreRef?: React.RefObject<HTMLElement | null>;
+  opacityOnly?: boolean;
 }
 
 type AlphaPointerProps = {
@@ -197,6 +198,7 @@ export default function ColorPanel({
   onClose,
   triggerRect,
   ignoreRef,
+  opacityOnly = false,
 }: ColorPanelProps) {
   const [internalColor, setInternalColor] = useState<RGBColor>({
     r: color.r,
@@ -269,16 +271,18 @@ export default function ColorPanel({
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
     >
-      <div className={styles.circlePickerWrapper}>
-        <CirclePicker
-          color={internalColor}
-          onChange={handleColorResultChange}
-          width="100%"
-          circleSize={22}
-          circleSpacing={11}
-          colors={preset_colors}
-        />
-      </div>
+      {!opacityOnly && (
+        <div className={styles.circlePickerWrapper}>
+          <CirclePicker
+            color={internalColor}
+            onChange={handleColorResultChange}
+            width="100%"
+            circleSize={22}
+            circleSpacing={11}
+            colors={preset_colors}
+          />
+        </div>
+      )}
       <AlphaSection color={internalColor} onChange={handleColorResultChange} />
       <InputsSection color={internalColor} onChange={handleRGBChange} />
     </div>,

@@ -8,4 +8,5 @@ export interface VoxelGeometry {
   color: RGBAColor;
   startTime: number | null;
   endTime: number | null;
+  value?: number;
 }

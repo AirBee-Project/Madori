@@ -1,7 +1,8 @@
-import { IconTarget, IconTrash } from "@tabler/icons-react";
+import { IconRefresh, IconTarget, IconTrash } from "@tabler/icons-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMapStore } from "../../../stores/mapStore";
+import { getGroupFile } from "../../../stores/spatialIdGroupFiles";
 import { useSpatialIdGroupStore } from "../../../stores/spatialIdGroupStores";
 import { useTimeStore } from "../../../stores/timeStore";
 import type { SpatialId } from "../../../types/geometry/spatioTemporalId";
@@ -48,10 +49,20 @@ export default function SpatialIdBox({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const isTypingRef = useRef(false);
 
+  // .txtファイル再読み込み用
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isReloading, setIsReloading] = useState(false);
+
+  // 元ファイルのハンドルを持つグループは.txt由来。
+  // ファイルで読み込んでいるのか、テキスト直打ちなのかのフラグ
+  const fileHandle = getGroupFile(group.id);
+  const isFileGroup = fileHandle != null;
+
   const flyTo = useMapStore((state) => state.flyTo);
   const setCurrentTime = useTimeStore((state) => state.setCurrentTime);
 
   useEffect(() => {
+    if (isFileGroup) return;
     if (isTypingRef.current) {
       isTypingRef.current = false;
       return;
@@ -59,7 +70,7 @@ export default function SpatialIdBox({
     const joined = group.spatialIds.map(spatialIdToString).join(", ");
     setText(joined);
     setErrorMsg(null);
-  }, [group.spatialIds]);
+  }, [group.spatialIds, isFileGroup]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     isTypingRef.current = true;
@@ -78,6 +89,38 @@ export default function SpatialIdBox({
     } else {
       setErrorMsg(null);
       onUpdate(group.id, { spatialIds: parsed.success });
+    }
+  };
+
+  const handleReloadClick = async () => {
+    const handle = getGroupFile(group.id);
+    if (!handle) {
+      setFileError(
+        "再読み込み元のファイルが見つかりません。再度追加してください。",
+      );
+      return;
+    }
+
+    setIsReloading(true);
+    setFileError(null);
+
+    try {
+      const file = await handle.getFile();
+      const content = await file.text();
+
+      const parsed = stringToSpatialIds(content);
+      if (parsed.errors.length > 0) {
+        setFileError(
+          `${parsed.errors[0].content}: ${parsed.errors[0].message}`,
+        );
+      } else {
+        onUpdate(group.id, { spatialIds: parsed.success });
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setFileError(errorMessage || "ファイルの再読み込みに失敗しました。");
+    } finally {
+      setIsReloading(false);
     }
   };
 
@@ -116,8 +159,23 @@ export default function SpatialIdBox({
 
   return (
     <FeatureItemBox
+      horizontal={isFileGroup}
       actions={
         <>
+          {isFileGroup && (
+            <IconButton
+              onClick={handleReloadClick}
+              ariaLabel="txtファイルを再読み込み"
+              disabled={isReloading}
+            >
+              <span
+                className={`${styles.iconWrapper} ${isReloading ? styles.spin : ""}`}
+              >
+                <IconRefresh size={20} />
+              </span>
+            </IconButton>
+          )}
+
           <IconButton
             onClick={() => onDelete(group.id)}
             ariaLabel="空間IDグループを削除"
@@ -139,20 +197,31 @@ export default function SpatialIdBox({
         </>
       }
     >
-      <div className={styles.textareaWrapper}>
-        <textarea
-          id={`spatial-id-input-${group.id}`}
-          className={`${styles.textarea} ${errorMsg ? styles.textareaError : ""}`}
-          value={text}
-          onChange={handleChange}
-          rows={3}
-        />
-        {errorMsg && (
-          <div className={styles.errorMessage} role="alert">
-            {errorMsg}
-          </div>
-        )}
-      </div>
+      {isFileGroup ? (
+        <div className={styles.fileWrapper}>
+          <span className={styles.fileName}>{fileHandle?.name}</span>
+          {fileError && (
+            <div className={styles.errorMessage} role="alert">
+              {fileError}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className={styles.textareaWrapper}>
+          <textarea
+            id={`spatial-id-input-${group.id}`}
+            className={`${styles.textarea} ${errorMsg ? styles.textareaError : ""}`}
+            value={text}
+            onChange={handleChange}
+            rows={3}
+          />
+          {errorMsg && (
+            <div className={styles.errorMessage} role="alert">
+              {errorMsg}
+            </div>
+          )}
+        </div>
+      )}
       {triggerRect && (
         <ColorPanel
           color={color}

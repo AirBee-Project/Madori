@@ -4,6 +4,7 @@ import styles from "./FeatureItemBox.module.scss";
 type FeatureItemBoxProps = {
   children: ReactNode;
   actions: ReactNode;
+  horizontal?: boolean;
 };
 
 /**
@@ -13,11 +14,18 @@ type FeatureItemBoxProps = {
 export default function FeatureItemBox({
   children,
   actions,
+  horizontal = false,
 }: FeatureItemBoxProps) {
   return (
-    <div className={styles.itemBox}>
+    <div className={horizontal ? styles.itemBoxHorizontal : styles.itemBox}>
       {children}
-      <div className={styles.actionGroup}>{actions}</div>
+      <div
+        className={
+          horizontal ? styles.actionGroupHorizontal : styles.actionGroup
+        }
+      >
+        {actions}
+      </div>
     </div>
   );
 }

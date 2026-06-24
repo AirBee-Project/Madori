@@ -5,6 +5,7 @@ type IconButtonProps = {
   ariaLabel: string;
   onClick?: () => void;
   variant?: "default" | "danger";
+  disabled?: boolean;
 };
 
 /**
@@ -16,15 +17,17 @@ export default function IconButton({
   ariaLabel,
   onClick,
   variant = "default",
+  disabled = false,
 }: IconButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={ariaLabel}
+      disabled={disabled}
       className={`${styles.iconButton} ${
         variant === "danger" ? styles.danger : ""
-      }`}
+      } ${disabled ? styles.disabled : ""}`}
     >
       {children}
     </button>

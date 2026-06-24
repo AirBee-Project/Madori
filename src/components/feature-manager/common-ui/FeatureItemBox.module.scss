@@ -7,10 +7,30 @@
   width: 100%;
 }
 
+.itemBoxHorizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  width: 100%;
+}
+
 .actionGroup {
   display: flex;
   flex-direction: column;
   height: 5rem;
   justify-content: space-between;
+  align-items: center;
+}
+
+.actionGroupHorizontal {
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  gap: 0.5rem;
+  justify-content: flex-end;
   align-items: center;
 }
