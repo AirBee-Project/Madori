@@ -76,6 +76,96 @@ function AlphaSection({ color, onChange }: AlphaSectionProps) {
   );
 }
 
+function rgbToHex({ r, g, b }: RGBColor): string {
+  const toHex = (n: number) => {
+    const hex = Math.round(n).toString(16);
+    return hex.length === 1 ? `0${hex}` : hex;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+}
+
+type InputsSectionProps = {
+  color: RGBColor;
+  onChange: (color: RGBColor) => void;
+};
+
+function InputsSection({ color, onChange }: InputsSectionProps) {
+  const [hexValue, setHexValue] = useState(() => rgbToHex(color));
+  const [opacityValue, setOpacityValue] = useState(() =>
+    Math.round((color.a ?? 1) * 100).toString(),
+  );
+
+  useEffect(() => {
+    setHexValue(rgbToHex(color));
+    setOpacityValue(Math.round((color.a ?? 1) * 100).toString());
+  }, [color]);
+
+  const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.toUpperCase();
+    setHexValue(val);
+    if (/^#[0-9A-F]{6}$/.test(val)) {
+      const r = parseInt(val.substring(1, 3), 16);
+      const g = parseInt(val.substring(3, 5), 16);
+      const b = parseInt(val.substring(5, 7), 16);
+      onChange({ ...color, r, g, b });
+    }
+  };
+
+  const handleHexBlur = () => {
+    if (!/^#[0-9A-F]{6}$/.test(hexValue)) {
+      setHexValue(rgbToHex(color));
+    }
+  };
+
+  const handleOpacityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (val === "") {
+      setOpacityValue("");
+      return;
+    }
+    let num = parseInt(val, 10);
+    if (Number.isNaN(num)) {
+      return;
+    }
+    if (num < 0) num = 0;
+    if (num > 100) num = 100;
+    setOpacityValue(num.toString());
+    onChange({ ...color, a: num / 100 });
+  };
+
+  return (
+    <div className={styles.inputsSection}>
+      <div className={styles.inputGroup}>
+        <label htmlFor="color-hex" className={styles.inputLabel}>
+          16進カラーコード
+        </label>
+        <input
+          id="color-hex"
+          className={styles.textInput}
+          type="text"
+          value={hexValue}
+          onChange={handleHexChange}
+          onBlur={handleHexBlur}
+        />
+      </div>
+      <div className={styles.inputGroup}>
+        <label htmlFor="color-opacity" className={styles.inputLabel}>
+          不透明度
+        </label>
+        <input
+          id="color-opacity"
+          className={styles.textInput}
+          type="number"
+          min={0}
+          max={100}
+          value={opacityValue}
+          onChange={handleOpacityChange}
+        />
+      </div>
+    </div>
+  );
+}
+
 function usePickerPosition(triggerRect: DOMRect | null) {
   const [position, setPosition] = useState<React.CSSProperties>({});
 
@@ -91,7 +181,7 @@ function usePickerPosition(triggerRect: DOMRect | null) {
     if (left < 10) {
       left = 10;
     }
-    const PICKER_HEIGHT = 150;
+    const PICKER_HEIGHT = 210;
     if (top + PICKER_HEIGHT > window.innerHeight) {
       top = triggerRect.top - (PICKER_HEIGHT + 10);
     }
@@ -158,9 +248,13 @@ export default function ColorPanel({
 
   useClickOutside(pickerRef, handleConfirmAndClose, ignoreRef);
 
-  const handleChange = (newColor: ColorResult) => {
-    setInternalColor(newColor.rgb);
-    emitColor(newColor.rgb);
+  const handleRGBChange = (rgb: RGBColor) => {
+    setInternalColor(rgb);
+    emitColor(rgb);
+  };
+
+  const handleColorResultChange = (newColor: ColorResult) => {
+    handleRGBChange(newColor.rgb);
   };
 
   if (!triggerRect) {
@@ -181,7 +275,7 @@ export default function ColorPanel({
         <div className={styles.circlePickerWrapper}>
           <CirclePicker
             color={internalColor}
-            onChange={handleChange}
+            onChange={handleColorResultChange}
             width="100%"
             circleSize={22}
             circleSpacing={11}
@@ -189,7 +283,8 @@ export default function ColorPanel({
           />
         </div>
       )}
-      <AlphaSection color={internalColor} onChange={handleChange} />
+      <AlphaSection color={internalColor} onChange={handleColorResultChange} />
+      <InputsSection color={internalColor} onChange={handleRGBChange} />
     </div>,
     document.body,
   );
