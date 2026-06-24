@@ -120,7 +120,8 @@ function InputsSection({ color, onChange }: InputsSectionProps) {
   const handleOpacityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (val === "") {
-      setOpacityValue("");
+      setOpacityValue("0");
+      onChange({ ...color, a: 0 });
       return;
     }
     let num = parseInt(val, 10);
