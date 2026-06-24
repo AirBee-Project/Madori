@@ -16,6 +16,7 @@ import {
 } from "../../utils/layerGenerator";
 import { jsonToGeometry } from "../../utils/parser/jsonToGeometry";
 import { spatialIdGroupToGeometries } from "../../utils/parser/voxelToGeometry";
+import { useKasaneTileLayer } from "./KasaneTileLayer";
 
 export default function MapContainer() {
   const viewState = useMapStore((state) => state.viewState);
@@ -148,13 +149,18 @@ export default function MapContainer() {
     pickable,
   ]);
 
+  const kasaneLayer = useKasaneTileLayer();
+
   const layers: LayersList = useMemo(() => {
     const list = [...baseLayers, ...voxelLayers];
     if (jsonLayer) {
       list.push(jsonLayer);
     }
+    if (kasaneLayer) {
+      list.push(kasaneLayer);
+    }
     return list;
-  }, [baseLayers, voxelLayers, jsonLayer]);
+  }, [baseLayers, voxelLayers, jsonLayer, kasaneLayer]);
 
   return (
     <DeckGL
@@ -166,9 +172,14 @@ export default function MapContainer() {
       style={{ width: "100vw", height: "100vh" }}
       layers={layers}
       onHover={({ object }) => {
+        if (!pickable) {
+          hoveredVoxelIdRef.current = null;
+          return;
+        }
         hoveredVoxelIdRef.current = object?.voxelId || null;
       }}
       getTooltip={({ object }) => {
+        if (!pickable) return null;
         if (!object?.voxelId) return null;
         if (object.value !== undefined) {
           return `${object.voxelId} | ${object.value}`;
