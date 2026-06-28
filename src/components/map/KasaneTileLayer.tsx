@@ -2,13 +2,14 @@ import { TileLayer } from "@deck.gl/geo-layers";
 import { ScatterplotLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { searchData } from "../../api/kasane/api";
-import type { RangeId } from "../../api/kasane/types";
+import type { RangeId, SpatialData } from "../../api/kasane/types";
 import { useKasaneStore } from "../../stores/kasaneStore";
 import {
   f_min,
   fxy_max,
 } from "../../types/geometry/spatioTemporalId/spatialId";
 import type { VoxelGeometry } from "../../types/geometry/spatioTemporalId/voxelGeometry";
+import { createHeatmapColorScale } from "../../utils/color/heatmap";
 import {
   type KasaneWorkerInput,
   type KasaneWorkerOutput,
@@ -21,6 +22,9 @@ const createWorker = () =>
   });
 
 const KASANE_COLOR = { r: 220, g: 120, b: 20, a: 160 };
+
+// Kasaneのheatmap用カラースケール (0〜100 の固定範囲)
+const heatmapColorScale = createHeatmapColorScale([0, 100]);
 
 /**
  * 1次元配列(Float64Array)から、VoxelGeometryの配列へ復元する。
@@ -143,6 +147,26 @@ function createPolygonLayer(id: string, data: VoxelGeometry[]) {
     wireframe: false,
     elevationScale: 1,
     pickable: true,
+  });
+}
+
+function mapCellsToWorkerInput(cells: SpatialData[], selectedDb: string) {
+  const isHeatmap = selectedDb === "riskmap" || selectedDb === "heatmap";
+  return cells.map((c) => {
+    let cellColor: { r: number; g: number; b: number; a: number } | undefined;
+    if (isHeatmap) {
+      const val = typeof c.data === "number" ? c.data : Number(c.data);
+      if (!Number.isNaN(val)) {
+        cellColor = heatmapColorScale(val);
+      }
+    }
+    return {
+      z: c.id.z,
+      f: c.id.f,
+      x: c.id.x,
+      y: c.id.y,
+      color: cellColor,
+    };
   });
 }
 
@@ -272,12 +296,7 @@ export function useKasaneTileLayer() {
                 type: "PARSE_VOXELS",
                 jobId,
                 payload: {
-                  cells: cells.map((c) => ({
-                    z: c.id.z,
-                    f: c.id.f,
-                    x: c.id.x,
-                    y: c.id.y,
-                  })),
+                  cells: mapCellsToWorkerInput(cells, selectedDb),
                   color: KASANE_COLOR,
                 },
               };

@@ -16,6 +16,7 @@ self.onmessage = (e: MessageEvent<KasaneWorkerInput>) => {
 
     for (let i = 0; i < count; i++) {
       const c = cells[i];
+      const cellColor = c.color ?? color;
       const geom = voxelToGeometry(
         {
           z: c.z,
@@ -26,7 +27,7 @@ self.onmessage = (e: MessageEvent<KasaneWorkerInput>) => {
           yMin: c.y,
           yMax: c.y,
         },
-        color,
+        cellColor,
       );
 
       const o = i * VOXEL_STRIDE;
@@ -39,10 +40,10 @@ self.onmessage = (e: MessageEvent<KasaneWorkerInput>) => {
       }
       buffer[o + 15] = geom.altitude;
       buffer[o + 16] = geom.elevation;
-      buffer[o + 17] = color.r;
-      buffer[o + 18] = color.g;
-      buffer[o + 19] = color.b;
-      buffer[o + 20] = color.a;
+      buffer[o + 17] = cellColor.r;
+      buffer[o + 18] = cellColor.g;
+      buffer[o + 19] = cellColor.b;
+      buffer[o + 20] = cellColor.a;
       buffer[o + 21] = geom.startTime ?? Number.NaN;
       buffer[o + 22] = geom.endTime ?? Number.NaN;
 

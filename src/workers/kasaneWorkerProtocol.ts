@@ -18,7 +18,7 @@ export type KasaneWorkerInput = {
   type: "PARSE_VOXELS";
   jobId: string;
   payload: {
-    cells: { z: number; f: number; x: number; y: number }[];
+    cells: { z: number; f: number; x: number; y: number; color?: RGBAColor }[];
     color: RGBAColor;
   };
 };
