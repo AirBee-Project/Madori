@@ -6,6 +6,7 @@ export type ActiveMode =
   | "point"
   | "line"
   | "kasane"
+  | "graph"
   | null;
 
 interface FeatureManagerState {

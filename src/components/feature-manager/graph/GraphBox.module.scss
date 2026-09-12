@@ -1,0 +1,75 @@
+.fileWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+  padding-left: calc(0.75rem + 1px);
+}
+
+.fileName {
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 12rem;
+}
+
+.dataSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.metaValue {
+  font-size: 0.75rem;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 12rem;
+}
+
+.errorMessage {
+  font-size: 0.75rem;
+  color: #ef4444;
+}
+
+.colorLabelGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.colorLabel {
+  font-size: 0.625rem;
+  line-height: 1;
+  color: #94a3b8;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg) translateZ(0);
+  }
+  to {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+.iconWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
