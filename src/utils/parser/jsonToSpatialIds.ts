@@ -1,5 +1,9 @@
 import type { JsonLayerData, JsonSpatialId } from "../../stores/jsonLayerStore";
-import { JsonFileSchema } from "../../types/json/jsonSchema";
+import {
+  JsonFileSchema,
+  type JsonValueType,
+} from "../../types/json/jsonSchema";
+import { createCategoricalColorScale } from "../color/categorical";
 import { createHeatmapColorScale } from "../color/heatmap";
 
 //アップロードされたJSONファイルをJsonLayerData型に変換
@@ -25,7 +29,16 @@ export function jsonToSpatialIds(jsonString: string): JsonLayerData {
 
   // 1つ目のデータのみ使用
   const firstData = validated.data[0];
-  const colorScale = createHeatmapColorScale(firstData.value);
+  const numericValues = firstData.value.filter(
+    (v): v is number => typeof v === "number",
+  );
+  const heatmapScale = createHeatmapColorScale(numericValues);
+  const categoricalScale = createCategoricalColorScale(firstData.value);
+  // 数値以外が 1 つでも混ざると大小関係で色を決められないため、値ごとの色分けにする
+  const colorScale = (value: JsonValueType) =>
+    numericValues.length === firstData.value.length && typeof value === "number"
+      ? heatmapScale(value)
+      : categoricalScale(value);
 
   const jsonSpatialIds: JsonSpatialId[] = firstData.ids.map((idObj) => {
     const f = toIndexValue(idObj.f);
