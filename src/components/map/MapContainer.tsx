@@ -1,7 +1,7 @@
 import type { LayersList, MapViewState } from "@deck.gl/core";
-import DeckGL from "@deck.gl/react";
+import DeckGL, { type DeckGLRef } from "@deck.gl/react";
 import { useEffect, useMemo, useRef } from "react";
-import { Map as MapGL } from "react-map-gl/maplibre";
+import { Map as MapGL, type MapRef } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useJsonLayerStore } from "../../stores/jsonLayerStore";
 import { useLineStore } from "../../stores/lineStores";
@@ -17,6 +17,7 @@ import {
 import { jsonToGeometry } from "../../utils/parser/jsonToGeometry";
 import { spatialIdGroupToGeometries } from "../../utils/parser/voxelToGeometry";
 import { useKasaneTileLayer } from "./KasaneTileLayer";
+import { saveMapScreenshot } from "./screenshot";
 
 export default function MapContainer() {
   const viewState = useMapStore((state) => state.viewState);
@@ -38,6 +39,21 @@ export default function MapContainer() {
     visible: jsonVisible,
     opacity: jsonOpacity,
   } = useJsonLayerStore();
+
+  const deckRef = useRef<DeckGLRef>(null);
+  const mapRef = useRef<MapRef>(null);
+
+  useEffect(() => {
+    useMapStore.setState({
+      takeScreenshot: async () => {
+        const deck = deckRef.current?.deck;
+        const map = mapRef.current?.getMap();
+        if (!deck || !map) return;
+        await saveMapScreenshot(deck, map);
+      },
+    });
+    return () => useMapStore.setState({ takeScreenshot: null });
+  }, []);
 
   // useRefを使用して再描画を防ぐ
   const hoveredVoxelIdRef = useRef<string | null>(null);
@@ -164,6 +180,7 @@ export default function MapContainer() {
 
   return (
     <DeckGL
+      ref={deckRef}
       viewState={viewState}
       onViewStateChange={(e) => setViewState(e.viewState as MapViewState)}
       controller={true}
@@ -187,7 +204,10 @@ export default function MapContainer() {
         return `${object.voxelId}`;
       }}
     >
-      <MapGL mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json" />
+      <MapGL
+        ref={mapRef}
+        mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+      />
     </DeckGL>
   );
 }
