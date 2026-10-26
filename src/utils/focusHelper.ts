@@ -89,6 +89,54 @@ export function calculateLineFocus(line: Line): FocusTarget {
 }
 
 /**
+ * 座標群（点・グラフの頂点など）全体の中心座標
+ */
+export function calculatePointsFocus(
+  points: { longitude: number; latitude: number; altitude: number }[],
+): FocusTarget {
+  if (points.length === 0) {
+    return {
+      longitude: 139.767,
+      latitude: 35.681,
+      zoom: 10,
+      minStartTime: null,
+    };
+  }
+
+  let minLon = Number.MAX_VALUE;
+  let maxLon = -Number.MAX_VALUE;
+  let minLat = Number.MAX_VALUE;
+  let maxLat = -Number.MAX_VALUE;
+
+  for (const pt of points) {
+    minLon = Math.min(minLon, pt.longitude);
+    maxLon = Math.max(maxLon, pt.longitude);
+    minLat = Math.min(minLat, pt.latitude);
+    maxLat = Math.max(maxLat, pt.latitude);
+  }
+
+  const longitude = (minLon + maxLon) / 2;
+  const latitude = (minLat + maxLat) / 2;
+
+  const deltaLon = Math.abs(maxLon - minLon);
+  const deltaLat = Math.abs(maxLat - minLat);
+  const maxDelta = Math.max(deltaLon, deltaLat);
+
+  let zoom = 15;
+  if (maxDelta > 0.0005) {
+    zoom = Math.floor(Math.log2(360 / maxDelta));
+    zoom = Math.max(0, Math.min(zoom, 18));
+  }
+
+  return {
+    longitude,
+    latitude,
+    zoom,
+    minStartTime: null,
+  };
+}
+
+/**
  * ボクセル群全体の中心座標
  */
 export function calculateVoxelFocus(geometries: VoxelGeometry[]): FocusTarget {

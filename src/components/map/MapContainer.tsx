@@ -3,6 +3,7 @@ import DeckGL, { type DeckGLRef } from "@deck.gl/react";
 import { useEffect, useMemo, useRef } from "react";
 import { Map as MapGL, type MapRef } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useGraphGroupStore } from "../../stores/graphGroupStores";
 import { useJsonLayerStore } from "../../stores/jsonLayerStore";
 import { useLineStore } from "../../stores/lineStores";
 import { useMapStore } from "../../stores/mapStore";
@@ -10,10 +11,12 @@ import { usePointStore } from "../../stores/pointStores";
 import { useSpatialIdGroupStore } from "../../stores/spatialIdGroupStores";
 import { useTimeStore } from "../../stores/timeStore";
 import {
+  generateGraphLayers,
   generateJsonVoxelLayer,
   generateMapLayers,
   generateVoxelLayer,
 } from "../../utils/layerGenerator";
+import { graphGroupToGeometries } from "../../utils/parser/graphToGeometry";
 import { jsonToGeometry } from "../../utils/parser/jsonToGeometry";
 import { spatialIdGroupToGeometries } from "../../utils/parser/voxelToGeometry";
 import { useKasaneTileLayer } from "./KasaneTileLayer";
@@ -33,6 +36,7 @@ export default function MapContainer() {
   const showBorder = useSpatialIdGroupStore((state) => state.showBorder);
   const pickable = useSpatialIdGroupStore((state) => state.pickable);
   const currentTime = useTimeStore((state) => state.currentTime);
+  const graphGroupsMap = useGraphGroupStore((state) => state.graphGroups);
 
   const {
     data: jsonData,
@@ -167,8 +171,22 @@ export default function MapContainer() {
 
   const kasaneLayers = useKasaneTileLayer();
 
+  const graphLayers = useMemo(() => {
+    const groupsList = Array.from(graphGroupsMap.values());
+    return groupsList.flatMap((group) => {
+      const { points, edges } = graphGroupToGeometries(group);
+      return generateGraphLayers(
+        group.id,
+        points,
+        edges,
+        group.nodeColor,
+        group.edgeColor,
+      );
+    });
+  }, [graphGroupsMap]);
+
   const layers: LayersList = useMemo(() => {
-    const list = [...baseLayers, ...voxelLayers];
+    const list = [...baseLayers, ...voxelLayers, ...graphLayers];
     if (jsonLayer) {
       list.push(jsonLayer);
     }
@@ -176,7 +194,7 @@ export default function MapContainer() {
       list.push(...kasaneLayers);
     }
     return list;
-  }, [baseLayers, voxelLayers, jsonLayer, kasaneLayers]);
+  }, [baseLayers, voxelLayers, graphLayers, jsonLayer, kasaneLayers]);
 
   return (
     <DeckGL

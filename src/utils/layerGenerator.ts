@@ -8,6 +8,10 @@ import type { RGBAColor } from "../types/geometry/color";
 import type { Line } from "../types/geometry/line";
 import type { Point } from "../types/geometry/point";
 import type { VoxelGeometry } from "../types/geometry/spatioTemporalId/voxelGeometry";
+import type {
+  GraphEdgeGeometry,
+  GraphPointGeometry,
+} from "./parser/graphToGeometry";
 
 function generatePointLayer(points: Point[]): ScatterplotLayer<Point> {
   return new ScatterplotLayer<Point>({
@@ -117,4 +121,53 @@ export function generateJsonVoxelLayer(
 
 export function generateMapLayers(points: Point[], lines: Line[]): LayersList {
   return [generatePointLayer(points), generateLineLayer(lines)];
+}
+
+/**
+ * グラフ（頂点・エッジ）を、ノードとエッジそれぞれ独立した色+不透明度で描画するレイヤー群を生成する
+ */
+export function generateGraphLayers(
+  id: string,
+  points: GraphPointGeometry[],
+  edges: GraphEdgeGeometry[],
+  nodeColor: RGBAColor,
+  edgeColor: RGBAColor,
+): LayersList {
+  const nodeLayer = new ScatterplotLayer<GraphPointGeometry>({
+    id: `graph-node-layer-${id}`,
+    data: points,
+    pickable: true,
+    stroked: false,
+    filled: true,
+    radiusScale: 1,
+    radiusMinPixels: 5,
+    radiusMaxPixels: 100,
+    getPosition: (d) => [d.longitude, d.latitude, d.altitude],
+    getRadius: 8,
+    getFillColor: [nodeColor.r, nodeColor.g, nodeColor.b, nodeColor.a],
+    billboard: true,
+    updateTriggers: {
+      getFillColor: [nodeColor],
+    },
+  });
+
+  const edgeLayer = new LineLayer<GraphEdgeGeometry>({
+    id: `graph-edge-layer-${id}`,
+    data: edges,
+    pickable: true,
+    getSourcePosition: (d) => [
+      d.start.longitude,
+      d.start.latitude,
+      d.start.altitude,
+    ],
+    getTargetPosition: (d) => [d.end.longitude, d.end.latitude, d.end.altitude],
+    getColor: [edgeColor.r, edgeColor.g, edgeColor.b, edgeColor.a],
+    getWidth: 2,
+    widthMinPixels: 1,
+    updateTriggers: {
+      getColor: [edgeColor],
+    },
+  });
+
+  return [nodeLayer, edgeLayer];
 }
