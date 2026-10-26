@@ -1,5 +1,6 @@
 import {
   IconBorderOuter,
+  IconCamera,
   IconEraser,
   IconMap,
   IconPointer,
@@ -36,6 +37,7 @@ export default function DrawModeToolbar({
 
   const isAutoRotating = useMapStore((state) => state.isAutoRotating);
   const toggleAutoRotation = useMapStore((state) => state.toggleAutoRotation);
+  const takeScreenshot = useMapStore((state) => state.takeScreenshot);
 
   const [expanded, setExpanded] = useState(!collapsible);
 
@@ -63,6 +65,11 @@ export default function DrawModeToolbar({
             icon={IconView360Number}
             isActive={isAutoRotating}
             onClick={toggleAutoRotation}
+          />
+          <DrawModeButton
+            icon={IconCamera}
+            isActive={false}
+            onClick={() => takeScreenshot?.()}
           />
           <DrawModeButton
             icon={IconEraser}
