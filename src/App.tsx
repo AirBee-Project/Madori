@@ -4,28 +4,6 @@ import { FeatureManager } from "./components/feature-manager";
 import MapContainer from "./components/map/MapContainer";
 import { TimePanel } from "./components/time-manager";
 
-import { useMapStore } from "./stores/mapStore";
-
-function ZoomIndicator() {
-  const zoom = useMapStore((state) => state.viewState.zoom);
-  if (zoom === undefined) return null;
-  return (
-    <div
-      style={{
-        backgroundColor: "rgba(0, 0, 0, 0.6)",
-        color: "white",
-        padding: "2px 6px",
-        borderRadius: "4px",
-        fontSize: "12px",
-        fontFamily: "monospace",
-        pointerEvents: "auto",
-      }}
-    >
-      Zoom: {zoom.toFixed(1)}
-    </div>
-  );
-}
-
 export default function App() {
   return (
     <div>
@@ -33,29 +11,19 @@ export default function App() {
         <FeatureManager />
       </div>
 
-      {/* logo & zoom info */}
-      <div
+      {/* logo */}
+      <img
+        src={madoriLogo}
+        alt="Madori Logo"
         style={{
           position: "absolute",
           top: "1rem",
           right: "1rem",
           zIndex: 50,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
+          height: "37px", // 左上のボタン群と同じ高さ
           pointerEvents: "none",
         }}
-      >
-        <img
-          src={madoriLogo}
-          alt="Madori Logo"
-          style={{
-            height: "37px", // 左上のボタン群と同じ高さ
-            marginBottom: "4px",
-          }}
-        />
-        <ZoomIndicator />
-      </div>
+      />
 
       {/* timebar */}
       <TimePanel />
