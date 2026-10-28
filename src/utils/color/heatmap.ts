@@ -65,11 +65,14 @@ export function createHeatmapColorScale(values: number[]): ColorConverter {
       b1 = c;
     }
 
+    // 不透明度はリスクに応じて 50 〜 255まで変化させる
+    const alpha = Math.round(50 + 205 * ratio);
+
     return {
       r: Math.round((r1 + m) * 255),
       g: Math.round((g1 + m) * 255),
       b: Math.round((b1 + m) * 255),
-      a: 255,
+      a: alpha,
     };
   }
 

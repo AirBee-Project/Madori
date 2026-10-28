@@ -35,7 +35,7 @@
 }
 
 .alphaSection {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   padding: 0 0.5rem;
   display: flex;
   align-items: center;
@@ -61,9 +61,8 @@
 
 .inputsSection {
   display: flex;
-  align-items: flex-end;
   gap: 0.75rem;
-  padding: 0 0.5rem;
+  padding: 0.5rem 0.5rem 0.25rem;
 }
 
 .inputGroup {
@@ -71,28 +70,27 @@
   flex-direction: column;
   gap: 0.125rem;
   flex: 1;
-  min-width: 0;
 }
 
 .inputLabel {
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 0.625rem;
   color: #6b7280;
-  line-height: 1;
+  font-weight: 600;
+  text-align: left;
 }
 
 .textInput {
   width: 100%;
-  height: 1.75rem;
-  padding: 0 0.375rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  font-family: monospace;
-  outline: none;
   box-sizing: border-box;
-}
+  padding: 0.25rem 0.375rem;
+  border-radius: 0.25rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  font-size: 0.8125rem;
+  color: #0f172a;
+  outline: none;
 
-.textInput:focus {
-  border-color: #0f766e;
+  &:focus {
+    border-color: #0f766e;
+  }
 }

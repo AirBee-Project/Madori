@@ -1,4 +1,4 @@
-import { IconRefresh, IconTarget, IconTrash } from "@tabler/icons-react";
+import { IconFocusCentered, IconRefresh, IconTrash } from "@tabler/icons-react";
 import type React from "react";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -123,7 +123,7 @@ export default function JsonBox({
               <IconTrash />
             </IconButton>
             <IconButton onClick={handleFocusClick} ariaLabel="JSONデータに移動">
-              <IconTarget />
+              <IconFocusCentered />
             </IconButton>
             <ColorButton
               ref={colorButtonRef}

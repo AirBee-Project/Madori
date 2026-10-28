@@ -1,183 +1,79 @@
+import { RangeId } from "@airbee-project/kasane-client";
 import { describe, expect, it } from "vitest";
 import type { RGBAColor } from "../../types/geometry/color";
-import type { SpatialIdGroup } from "../../types/geometry/spatioTemporalId/spatialIdGroup";
-import type { SpatialVoxel } from "./spatialIdToVoxels";
 import {
   spatialIdGroupToGeometries,
+  spatialIdToRangeIds,
   voxelToGeometry,
-  voxelToIdString,
 } from "./voxelToGeometry";
 
+const color: RGBAColor = { r: 0, g: 128, b: 255, a: 255 };
+
+describe("spatialIdToRangeIds", () => {
+  it("範囲のまま 1 つにする", () => {
+    const ids = spatialIdToRangeIds({
+      z: 10,
+      f: [1, 2],
+      x: [100, 101],
+      y: 200,
+    });
+    expect(ids.map(String)).toEqual(["10/1:2/100:101/200"]);
+  });
+
+  it("経度 180 度をまたぐ x は 2 つに分ける", () => {
+    const ids = spatialIdToRangeIds({ z: 3, f: 0, x: [6, 1], y: 2 });
+    expect(ids.map(String)).toEqual(["3/0/6:7/2", "3/0/0:1/2"]);
+  });
+
+  it("rangeMode でなければ 1 ボクセルずつにする", () => {
+    const ids = spatialIdToRangeIds(
+      { z: 3, f: 0, x: [7, 0], y: [1, 2], temporalId: { i: 60, t: [5, 6] } },
+      false,
+    );
+    expect(ids).toHaveLength(8);
+    expect(ids[0]?.toString()).toBe("3/0/7/1_60/5");
+  });
+});
+
 describe("voxelToGeometry", () => {
-  const dummyColor: RGBAColor = { r: 15, g: 118, b: 110, a: 255 };
-
-  describe("voxelToIdString", () => {
-    it("範囲・時間表現を持たない標準的なボクセルの文字列化", () => {
-      const voxel: SpatialVoxel = {
-        z: 10,
-        fMin: 5,
-        fMax: 5,
-        xMin: 100,
-        xMax: 100,
-        yMin: 200,
-        yMax: 200,
-      };
-      expect(voxelToIdString(voxel)).toBe("10/5/100/200");
-    });
-
-    it("範囲表現を持つボクセルの文字列化", () => {
-      const voxel: SpatialVoxel = {
-        z: 10,
-        fMin: 1,
-        fMax: 3,
-        xMin: 100,
-        xMax: 105,
-        yMin: 200,
-        yMax: 202,
-      };
-      expect(voxelToIdString(voxel)).toBe("10/1:3/100:105/200:202");
-    });
-
-    it("時間表現と範囲表現を併せ持つボクセルの文字列化", () => {
-      const voxel: SpatialVoxel = {
-        z: 10,
-        fMin: 5,
-        fMax: 5,
-        xMin: 100,
-        xMax: 100,
-        yMin: 200,
-        yMax: 200,
-        temporalId: {
-          i: 60,
-          tMin: 100,
-          tMax: 101,
-        },
-      };
-      expect(voxelToIdString(voxel)).toBe("10/5/100/200_60/100:101");
-    });
+  it("1 ボクセルの座標と時間", () => {
+    const geom = voxelToGeometry(
+      RangeId.create(10, 5, 100, 200).withTime(60, 100),
+      color,
+    );
+    expect(geom.points[1][0]).toBeCloseTo(-144.84375, 5);
+    expect(geom.points[0][0]).toBeCloseTo(-144.4921875, 5);
+    expect(geom.altitude).toBe(163840);
+    expect(geom.elevation).toBe(32768);
+    expect([geom.startTime, geom.endTime]).toEqual([6000, 6060]);
+    expect(geom.voxelId).toBe("10/5/100/200_60/100");
   });
 
-  describe("voxelToGeometry", () => {
-    it("ズームレベル10の単一ボクセルの地理変換が正しいこと", () => {
-      const voxel: SpatialVoxel = {
-        z: 10,
-        fMin: 5,
-        fMax: 5,
-        xMin: 100,
-        xMax: 100,
-        yMin: 200,
-        yMax: 200,
-        temporalId: {
-          i: 60,
-          tMin: 100,
-          tMax: 100,
-        },
-      };
-
-      const geometry = voxelToGeometry(voxel, dummyColor);
-
-      expect(geometry.points[1][0]).toBeCloseTo(-144.84375, 5);
-      expect(geometry.points[0][0]).toBeCloseTo(-144.4921875, 5);
-
-      expect(geometry.altitude).toBe(163840);
-      expect(geometry.elevation).toBe(32768);
-
-      expect(geometry.startTime).toBe(6000);
-      expect(geometry.endTime).toBe(6060);
-
-      expect(geometry.voxelId).toBe("10/5/100/200_60/100");
-      expect(geometry.color).toEqual(dummyColor);
-    });
-
-    it("範囲結合されたボクセルでも正しく全体の幾何境界が得られること", () => {
-      const voxel: SpatialVoxel = {
-        z: 10,
-        fMin: 1,
-        fMax: 2,
-        xMin: 100,
-        xMax: 101,
-        yMin: 200,
-        yMax: 201,
-      };
-
-      const geometry = voxelToGeometry(voxel, dummyColor);
-
-      expect(geometry.points[1][0]).toBeCloseTo(-144.84375, 5);
-      expect(geometry.points[0][0]).toBeCloseTo(-144.140625, 5);
-
-      expect(geometry.altitude).toBe(32768);
-      expect(geometry.elevation).toBe(65536);
-    });
+  it("範囲は全体の外側を囲む", () => {
+    const geom = voxelToGeometry(
+      RangeId.create(10, [1, 2], [100, 101], [200, 201]),
+      color,
+    );
+    expect(geom.points[1][0]).toBeCloseTo(-144.84375, 5);
+    expect(geom.points[0][0]).toBeCloseTo(-144.140625, 5);
+    expect(geom.altitude).toBe(32768);
+    expect(geom.elevation).toBe(65536);
+    expect([geom.startTime, geom.endTime]).toEqual([null, null]);
   });
+});
 
-  describe("spatialIdGroupToGeometries", () => {
-    it("グループ内の複数の空間IDを正しくボクセル幾何に変換できること", () => {
-      const group: SpatialIdGroup = {
-        id: "group-1",
-        color: dummyColor,
-        spatialIds: [
-          {
-            z: 10,
-            f: 5,
-            x: 100,
-            y: 200,
-          },
-          {
-            z: 10,
-            f: 6,
-            x: 101,
-            y: 201,
-          },
-        ],
-      };
-
-      const geometries = spatialIdGroupToGeometries(group, true);
-      expect(geometries).toHaveLength(2);
-      expect(geometries[0].voxelId).toBe("10/5/100/200");
-      expect(geometries[1].voxelId).toBe("10/6/101/201");
-      expect(geometries[0].color).toEqual(dummyColor);
-      expect(geometries[1].color).toEqual(dummyColor);
+describe("spatialIdGroupToGeometries", () => {
+  it("キャッシュを使っても色はグループの色になる", () => {
+    const spatialIds = [{ z: 10, f: 5, x: 100, y: 200 }];
+    const first = spatialIdGroupToGeometries({ id: "a", color, spatialIds });
+    const red = { r: 255, g: 0, b: 0, a: 128 };
+    const second = spatialIdGroupToGeometries({
+      id: "b",
+      color: red,
+      spatialIds,
     });
-
-    it("同じ空間IDに対してキャッシュが働き、色変更が動的に適用されること", () => {
-      const group1: SpatialIdGroup = {
-        id: "group-1",
-        color: dummyColor,
-        spatialIds: [
-          {
-            z: 10,
-            f: 5,
-            x: 100,
-            y: 200,
-          },
-        ],
-      };
-
-      const geometries1 = spatialIdGroupToGeometries(group1, true);
-      expect(geometries1).toHaveLength(1);
-      expect(geometries1[0].color).toEqual(dummyColor);
-
-      // 色を変更した新しいグループを作成（空間IDは同じ）
-      const newColor: RGBAColor = { r: 255, g: 0, b: 0, a: 128 };
-      const group2: SpatialIdGroup = {
-        id: "group-2",
-        color: newColor,
-        spatialIds: [
-          {
-            z: 10,
-            f: 5,
-            x: 100,
-            y: 200,
-          },
-        ],
-      };
-
-      const geometries2 = spatialIdGroupToGeometries(group2, true);
-      expect(geometries2).toHaveLength(1);
-      // キャッシュが使われているが、色は新しく指定した色になっていることを検証
-      expect(geometries2[0].color).toEqual(newColor);
-      // 重い頂点座標の配列参照は同じ（またはクローンされているが同一のデータ）であることを検証
-      expect(geometries2[0].points).toEqual(geometries1[0].points);
-    });
+    expect(first[0]?.voxelId).toBe("10/5/100/200");
+    expect(second[0]?.color).toEqual(red);
+    expect(second[0]?.points).toEqual(first[0]?.points);
   });
 });

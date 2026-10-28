@@ -1,5 +1,6 @@
 import {
   IconBorderOuter,
+  IconCamera,
   IconMap,
   IconPointer,
   IconRefresh,
@@ -24,6 +25,7 @@ export default function DrawModeToolbar() {
 
   const isAutoRotating = useMapStore((state) => state.isAutoRotating);
   const toggleAutoRotation = useMapStore((state) => state.toggleAutoRotation);
+  const takeScreenshot = useMapStore((state) => state.takeScreenshot);
 
   return (
     <div className={styles.rightControls}>
@@ -47,6 +49,11 @@ export default function DrawModeToolbar() {
         icon={IconView360Number}
         isActive={isAutoRotating}
         onClick={toggleAutoRotation}
+      />
+      <DrawModeButton
+        icon={IconCamera}
+        isActive={false}
+        onClick={() => takeScreenshot?.()}
       />
     </div>
   );

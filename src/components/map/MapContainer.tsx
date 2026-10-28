@@ -1,8 +1,9 @@
 import type { LayersList, MapViewState } from "@deck.gl/core";
-import DeckGL from "@deck.gl/react";
+import DeckGL, { type DeckGLRef } from "@deck.gl/react";
 import { useEffect, useMemo, useRef } from "react";
-import { Map as MapGL } from "react-map-gl/maplibre";
+import { Map as MapGL, type MapRef } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useGraphGroupStore } from "../../stores/graphGroupStores";
 import { useJsonLayerStore } from "../../stores/jsonLayerStore";
 import { useLineStore } from "../../stores/lineStores";
 import { useMapStore } from "../../stores/mapStore";
@@ -10,12 +11,15 @@ import { usePointStore } from "../../stores/pointStores";
 import { useSpatialIdGroupStore } from "../../stores/spatialIdGroupStores";
 import { useTimeStore } from "../../stores/timeStore";
 import {
+  generateGraphLayers,
   generateJsonVoxelLayer,
   generateMapLayers,
   generateVoxelLayer,
 } from "../../utils/layerGenerator";
+import { graphGroupToGeometries } from "../../utils/parser/graphToGeometry";
 import { jsonToGeometry } from "../../utils/parser/jsonToGeometry";
 import { spatialIdGroupToGeometries } from "../../utils/parser/voxelToGeometry";
+import { saveMapScreenshot } from "./screenshot";
 
 export default function MapContainer() {
   const viewState = useMapStore((state) => state.viewState);
@@ -31,12 +35,28 @@ export default function MapContainer() {
   const showBorder = useSpatialIdGroupStore((state) => state.showBorder);
   const pickable = useSpatialIdGroupStore((state) => state.pickable);
   const currentTime = useTimeStore((state) => state.currentTime);
+  const graphGroupsMap = useGraphGroupStore((state) => state.graphGroups);
 
   const {
     data: jsonData,
     visible: jsonVisible,
     opacity: jsonOpacity,
   } = useJsonLayerStore();
+
+  const deckRef = useRef<DeckGLRef>(null);
+  const mapRef = useRef<MapRef>(null);
+
+  useEffect(() => {
+    useMapStore.setState({
+      takeScreenshot: async () => {
+        const deck = deckRef.current?.deck;
+        const map = mapRef.current?.getMap();
+        if (!deck || !map) return;
+        await saveMapScreenshot(deck, map);
+      },
+    });
+    return () => useMapStore.setState({ takeScreenshot: null });
+  }, []);
 
   // useRefを使用して再描画を防ぐ
   const hoveredVoxelIdRef = useRef<string | null>(null);
@@ -148,16 +168,31 @@ export default function MapContainer() {
     pickable,
   ]);
 
+  const graphLayers = useMemo(() => {
+    const groupsList = Array.from(graphGroupsMap.values());
+    return groupsList.flatMap((group) => {
+      const { points, edges } = graphGroupToGeometries(group);
+      return generateGraphLayers(
+        group.id,
+        points,
+        edges,
+        group.nodeColor,
+        group.edgeColor,
+      );
+    });
+  }, [graphGroupsMap]);
+
   const layers: LayersList = useMemo(() => {
-    const list = [...baseLayers, ...voxelLayers];
+    const list = [...baseLayers, ...voxelLayers, ...graphLayers];
     if (jsonLayer) {
       list.push(jsonLayer);
     }
     return list;
-  }, [baseLayers, voxelLayers, jsonLayer]);
+  }, [baseLayers, voxelLayers, graphLayers, jsonLayer]);
 
   return (
     <DeckGL
+      ref={deckRef}
       viewState={viewState}
       onViewStateChange={(e) => setViewState(e.viewState as MapViewState)}
       controller={true}
@@ -166,9 +201,14 @@ export default function MapContainer() {
       style={{ width: "100vw", height: "100vh" }}
       layers={layers}
       onHover={({ object }) => {
+        if (!pickable) {
+          hoveredVoxelIdRef.current = null;
+          return;
+        }
         hoveredVoxelIdRef.current = object?.voxelId || null;
       }}
       getTooltip={({ object }) => {
+        if (!pickable) return null;
         if (!object?.voxelId) return null;
         if (object.value !== undefined) {
           return `${object.voxelId} | ${object.value}`;
@@ -176,7 +216,10 @@ export default function MapContainer() {
         return `${object.voxelId}`;
       }}
     >
-      <MapGL mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json" />
+      <MapGL
+        ref={mapRef}
+        mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+      />
     </DeckGL>
   );
 }
