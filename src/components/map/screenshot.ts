@@ -33,7 +33,7 @@ export function saveMapScreenshot(deck: Deck, map: MaplibreMap): Promise<void> {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `senri-${new Date().toISOString().replace(/[:.]/g, "-")}.png`;
+        link.download = `madori-${new Date().toISOString().replace(/[:.]/g, "-")}.png`;
         link.click();
         URL.revokeObjectURL(url);
         resolve();

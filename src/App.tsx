@@ -1,4 +1,4 @@
-import madoriLogo from "/Senri_logo.png";
+import madoriLogo from "/Madori_logo.png";
 import { DrawModeToolbar } from "./components/draw-mode-manager";
 import { FeatureManager } from "./components/feature-manager";
 import MapContainer from "./components/map/MapContainer";
@@ -48,7 +48,7 @@ export default function App() {
       >
         <img
           src={madoriLogo}
-          alt="Senri Logo"
+          alt="Madori Logo"
           style={{
             height: "40px", // adjust height as needed
             marginBottom: "4px",
