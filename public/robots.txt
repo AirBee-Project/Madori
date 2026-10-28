@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://map.airbee.jp/sitemap.xml
+Sitemap: https://madori.airbee.jp/sitemap.xml
