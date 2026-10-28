@@ -1,13 +1,6 @@
 import { create } from "zustand";
 
-export type ActiveMode =
-  | "spatial"
-  | "json"
-  | "point"
-  | "line"
-  | "kasane"
-  | "graph"
-  | null;
+export type ActiveMode = "spatial" | "json" | "point" | "line" | "graph" | null;
 
 interface FeatureManagerState {
   activeMode: ActiveMode;

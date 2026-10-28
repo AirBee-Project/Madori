@@ -19,7 +19,6 @@ import {
 import { graphGroupToGeometries } from "../../utils/parser/graphToGeometry";
 import { jsonToGeometry } from "../../utils/parser/jsonToGeometry";
 import { spatialIdGroupToGeometries } from "../../utils/parser/voxelToGeometry";
-import { useKasaneTileLayer } from "./KasaneTileLayer";
 import { saveMapScreenshot } from "./screenshot";
 
 export default function MapContainer() {
@@ -169,8 +168,6 @@ export default function MapContainer() {
     pickable,
   ]);
 
-  const kasaneLayers = useKasaneTileLayer();
-
   const graphLayers = useMemo(() => {
     const groupsList = Array.from(graphGroupsMap.values());
     return groupsList.flatMap((group) => {
@@ -190,11 +187,8 @@ export default function MapContainer() {
     if (jsonLayer) {
       list.push(jsonLayer);
     }
-    if (kasaneLayers.length > 0) {
-      list.push(...kasaneLayers);
-    }
     return list;
-  }, [baseLayers, voxelLayers, graphLayers, jsonLayer, kasaneLayers]);
+  }, [baseLayers, voxelLayers, graphLayers, jsonLayer]);
 
   return (
     <DeckGL

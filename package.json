@@ -1,5 +1,5 @@
 {
-  "name": "senri",
+  "name": "madori",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -15,13 +15,13 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@airbee-project/kasane-client": "https://github.com/AirBee-Project/Kasane-Client-ts/releases/download/v0.10.0/airbee-project-kasane-client-0.10.0.tgz",
     "@deck.gl/core": "^9.1.11",
     "@deck.gl/geo-layers": "^9.1.11",
     "@deck.gl/layers": "^9.1.11",
     "@deck.gl/react": "^9.1.11",
     "@tabler/icons-react": "^3.31.0",
     "deck.gl": "^9.1.11",
-    "dexie": "^4.4.4",
     "immer": "^11.1.4",
     "maplibre-gl": "^5.18.0",
     "react": "^18.3.1",
