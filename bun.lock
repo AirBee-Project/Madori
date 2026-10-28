@@ -5,14 +5,13 @@
     "": {
       "name": "voxel-preview",
       "dependencies": {
+        "@airbee-project/kasane-client": "https://github.com/AirBee-Project/Kasane-Client-ts/releases/download/v0.10.0/airbee-project-kasane-client-0.10.0.tgz",
         "@deck.gl/core": "^9.1.11",
         "@deck.gl/geo-layers": "^9.1.11",
         "@deck.gl/layers": "^9.1.11",
         "@deck.gl/react": "^9.1.11",
         "@tabler/icons-react": "^3.31.0",
         "deck.gl": "^9.1.11",
-        "dexie": "^4.4.4",
-        "@airbee-project/kasane-client": "https://github.com/AirBee-Project/Kasane-Client-ts/releases/download/v0.10.0/airbee-project-kasane-client-0.10.0.tgz",
         "immer": "^11.1.4",
         "maplibre-gl": "^5.18.0",
         "react": "^18.3.1",
@@ -739,8 +738,6 @@
     "delaunator": ["delaunator@5.0.1", "", { "dependencies": { "robust-predicates": "^3.0.2" } }, "sha512-8nvh+XBe96aCESrGOqMp/84b13H9cdKbG5P2ejQCh4d4sK9RL4371qou9drQjMhvnPmhWl5hnmqbEE0fXr9Xnw=="],
 
     "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
-
-    "dexie": ["dexie@4.4.4", "", {}, "sha512-jIwsYI8Os2hgnqc6O49YwFDKGc5v5QjGx0wPVp543ip1F53VFAKMLthV2pQosQcVTv3eAskTWYspOx195PM0FQ=="],
 
     "dfa": ["dfa@1.2.0", "", {}, "sha512-ED3jP8saaweFTjeGX8HQPjeC1YYyZs98jGNZx6IiBvxW7JG5v492kamAQB3m2wop07CvU/RQmzcKr6bgcC5D/Q=="],
 
