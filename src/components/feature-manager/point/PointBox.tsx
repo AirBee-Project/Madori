@@ -1,4 +1,4 @@
-import { IconTarget, IconTrash } from "@tabler/icons-react";
+import { IconFocusCentered, IconTrash } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { useMapStore } from "../../../stores/mapStore";
 import { usePointStore } from "../../../stores/pointStores";
@@ -51,7 +51,7 @@ export default function PointBox({ point, onUpdate, onDelete }: PointBoxProps) {
           </IconButton>
 
           <IconButton onClick={handleFocusClick} ariaLabel="点に移動">
-            <IconTarget />
+            <IconFocusCentered />
           </IconButton>
 
           <ColorButton
