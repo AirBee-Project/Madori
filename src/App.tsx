@@ -50,7 +50,7 @@ export default function App() {
           src={madoriLogo}
           alt="Madori Logo"
           style={{
-            height: "40px", // adjust height as needed
+            height: "37px", // 左上のボタン群と同じ高さ
             marginBottom: "4px",
           }}
         />
