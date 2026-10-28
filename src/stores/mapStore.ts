@@ -12,6 +12,8 @@ interface MapStore {
   ) => void;
   isAutoRotating: boolean;
   toggleAutoRotation: () => void;
+  /** MapContainerのマウント中だけ登録される */
+  takeScreenshot: (() => Promise<void>) | null;
 }
 
 export const useMapStore = create<MapStore>((set) => ({
@@ -39,4 +41,5 @@ export const useMapStore = create<MapStore>((set) => ({
   isAutoRotating: false,
   toggleAutoRotation: () =>
     set((state) => ({ isAutoRotating: !state.isAutoRotating })),
+  takeScreenshot: null,
 }));

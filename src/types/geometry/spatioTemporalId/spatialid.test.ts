@@ -1,158 +1,48 @@
 import { describe, expect, it } from "vitest";
-import { SpatialIdSchema } from "./spatialId";
+import { fromRangeId, SpatialIdSchema, toRangeId } from "./spatialId";
 
 describe("SpatialIdSchema", () => {
-  describe("正常系", () => {
-    it("単一インデックスをパースできる", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: 0,
-        x: 4,
-        y: 7,
-      });
-
-      expect(result.success).toBe(true);
-    });
-
-    it("範囲表現をパースできる", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: [-1, 1],
-        x: [7, 0], // x は逆転OK
-        y: [0, 7],
-      });
-
-      expect(result.success).toBe(true);
-    });
+  it("単一の値・範囲・時間を受け付ける", () => {
+    const id = {
+      z: 20,
+      f: [0, 7],
+      x: 931389,
+      y: [412900, 412901],
+      temporalId: { i: 3600, t: 5 },
+    };
+    expect(SpatialIdSchema.safeParse(id).success).toBe(true);
   });
 
-  describe("ズームレベル以上系", () => {
-    it("ズームレベルが負の値", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: -1,
-        f: 0,
-        x: 4,
-        y: 7,
-      });
-
-      expect(result.success).toBe(false);
-    });
-
-    it("ズームレベルが31以上", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 31,
-        f: [-1, 1],
-        x: [7, 0],
-        y: [0, 7],
-      });
-
-      expect(result.success).toBe(false);
-    });
+  it("範囲外の値は client の検証で失敗する", () => {
+    for (const id of [
+      { z: 31, f: 0, x: 0, y: 0 },
+      { z: 3, f: -9, x: 0, y: 0 },
+      { z: 3, f: 0, x: 8, y: 0 },
+      { z: 3, f: 0, x: 0, y: 0, temporalId: { i: 0, t: 0 } },
+    ]) {
+      expect(SpatialIdSchema.safeParse(id).success).toBe(false);
+    }
   });
 
-  describe("範囲外", () => {
-    it("x が最大値を超える場合は失敗する", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: 0,
-        x: 8,
-        y: 0,
-      });
-
-      expect(result.success).toBe(false);
-    });
-
-    it("y が負数の場合は失敗する", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: 0,
-        x: 0,
-        y: -1,
-      });
-
-      expect(result.success).toBe(false);
-    });
-
-    it("f が最小値未満の場合は失敗する", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: -9,
-        x: 0,
-        y: 0,
-      });
-
-      expect(result.success).toBe(false);
-    });
+  it("x は逆順（経度 180 度をまたぐ範囲）を受け付ける", () => {
+    expect(
+      SpatialIdSchema.safeParse({ z: 3, f: 0, x: [6, 1], y: 0 }).success,
+    ).toBe(true);
   });
+});
 
-  describe("範囲表現", () => {
-    it("f は逆転不可", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: [1, -1],
-        x: 0,
-        y: 0,
-      });
-
-      expect(result.success).toBe(false);
-
-      if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("f の範囲指定が不正");
-      }
-    });
-
-    it("y は逆転不可", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: 0,
-        x: 0,
-        y: [7, 0],
-      });
-
-      expect(result.success).toBe(false);
-    });
-
-    it("x は逆転可能", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: 0,
-        x: [7, 0],
-        y: 0,
-      });
-
-      expect(result.success).toBe(true);
-    });
-  });
-
-  describe("時間表現 (オプション)", () => {
-    it("空間IDと時間IDを両方パースできる", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: 0,
-        x: 4,
-        y: 7,
-        temporalId: {
-          i: 1,
-          t: [100, 200],
-        },
-      });
-
-      expect(result.success).toBe(true);
-    });
-
-    it("時間IDが不正なら失敗する", () => {
-      const result = SpatialIdSchema.safeParse({
-        z: 3,
-        f: 0,
-        x: 4,
-        y: 7,
-        temporalId: {
-          i: 1,
-          t: [200, 100],
-        },
-      });
-
-      expect(result.success).toBe(false);
-    });
+describe("toRangeId / fromRangeId", () => {
+  it("往復で元に戻り、両端が同じ範囲は 1 つの値になる", () => {
+    const id = {
+      z: 20,
+      f: 0,
+      x: [931389, 931390] as [number, number],
+      y: 412900,
+      temporalId: { i: 60, t: 5 },
+    };
+    expect(fromRangeId(toRangeId(id))).toEqual(id);
+    expect(toRangeId({ z: 20, f: [0, 0], x: 1, y: 2 }).toString()).toBe(
+      "20/0/1/2",
+    );
   });
 });

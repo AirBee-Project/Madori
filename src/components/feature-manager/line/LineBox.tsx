@@ -1,4 +1,4 @@
-import { IconTarget, IconTrash } from "@tabler/icons-react";
+import { IconFocusCentered, IconTrash } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { useLineStore } from "../../../stores/lineStores";
 import { useMapStore } from "../../../stores/mapStore";
@@ -53,7 +53,7 @@ export default function LineBox({ line, onUpdate, onDelete }: LineBoxProps) {
           </IconButton>
 
           <IconButton onClick={handleFocusClick} ariaLabel="線に移動">
-            <IconTarget />
+            <IconFocusCentered />
           </IconButton>
 
           <ColorButton

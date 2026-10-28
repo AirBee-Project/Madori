@@ -3,10 +3,12 @@ import {
   IconFileDescription,
   IconLine,
   IconPoint,
+  IconTopologyStar3,
 } from "@tabler/icons-react";
 import FeatureButton from "./FeatureButton";
 import toolbarStyles from "./FeatureToolbar.module.scss";
 import { useFeatureManagerStore } from "./featureManagerStore";
+import { GraphPanel } from "./graph";
 import { JsonPanel } from "./json";
 import { LinePanel } from "./line";
 import { PointPanel } from "./point";
@@ -46,11 +48,18 @@ export default function FeatureManager() {
           isActive={activeMode === "line"}
           onClick={() => toggleMode("line")}
         />
+        <FeatureButton
+          name={"グラフ描画"}
+          icon={IconTopologyStar3}
+          isActive={activeMode === "graph"}
+          onClick={() => toggleMode("graph")}
+        />
       </div>
       {activeMode === "spatial" && <SpatialIdPanel />}
       {activeMode === "json" && <JsonPanel />}
       {activeMode === "point" && <PointPanel />}
       {activeMode === "line" && <LinePanel />}
+      {activeMode === "graph" && <GraphPanel />}
     </div>
   );
 }

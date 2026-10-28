@@ -1,4 +1,4 @@
-import { IconRefresh, IconTarget, IconTrash } from "@tabler/icons-react";
+import { IconFocusCentered, IconRefresh, IconTrash } from "@tabler/icons-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMapStore } from "../../../stores/mapStore";
@@ -185,7 +185,7 @@ export default function SpatialIdBox({
           </IconButton>
 
           <IconButton onClick={handleFocusClick} ariaLabel="空間IDに移動">
-            <IconTarget />
+            <IconFocusCentered />
           </IconButton>
 
           <ColorButton

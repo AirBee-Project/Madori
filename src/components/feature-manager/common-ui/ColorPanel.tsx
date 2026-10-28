@@ -19,6 +19,8 @@ export interface ColorPanelProps {
   triggerRect: DOMRect | null;
   ignoreRef?: React.RefObject<HTMLElement | null>;
   opacityOnly?: boolean;
+  /** トリガー要素のすぐ右横に表示する（既定は左上パネル基準の位置） */
+  anchorToTrigger?: boolean;
 }
 
 type AlphaPointerProps = {
@@ -166,28 +168,55 @@ function InputsSection({ color, onChange }: InputsSectionProps) {
   );
 }
 
-function usePickerPosition(triggerRect: DOMRect | null) {
+/** トリガー要素の右横（収まらなければ左横）に表示する位置 */
+function computeTriggerAnchoredPosition(triggerRect: DOMRect): {
+  top: number;
+  left: number;
+} {
+  const PICKER_HEIGHT = 260;
+  const PICKER_WIDTH = 360; // 22.5rem
+  let left = triggerRect.right + 12;
+  if (left + PICKER_WIDTH > window.innerWidth) {
+    left = triggerRect.left - PICKER_WIDTH - 12;
+  }
+  let top = triggerRect.top;
+  if (top + PICKER_HEIGHT > window.innerHeight) {
+    top = window.innerHeight - PICKER_HEIGHT - 10;
+  }
+  return { top, left: Math.max(left, 10) };
+}
+
+/** 左上パネル基準の位置（従来の表示位置） */
+function computePanelAnchoredPosition(triggerRect: DOMRect): {
+  top: number;
+  left: number;
+} {
+  const PICKER_HEIGHT = 210;
+  let top = triggerRect.bottom + 8;
+  const panel = document.querySelector('[class*="panelContainer"]');
+  const left = panel ? panel.getBoundingClientRect().left : 16;
+  if (top + PICKER_HEIGHT > window.innerHeight) {
+    top = triggerRect.top - (PICKER_HEIGHT + 10);
+  }
+  return { top, left: Math.max(left, 10) };
+}
+
+function usePickerPosition(
+  triggerRect: DOMRect | null,
+  anchorToTrigger: boolean,
+) {
   const [position, setPosition] = useState<React.CSSProperties>({});
 
   useEffect(() => {
     if (!triggerRect) {
       return;
     }
-
-    let top = triggerRect.bottom + 8;
-    const panel = document.querySelector('[class*="panelContainer"]');
-    let left = panel ? panel.getBoundingClientRect().left : 16;
-
-    if (left < 10) {
-      left = 10;
-    }
-    const PICKER_HEIGHT = 210;
-    if (top + PICKER_HEIGHT > window.innerHeight) {
-      top = triggerRect.top - (PICKER_HEIGHT + 10);
-    }
-
-    setPosition({ top, left });
-  }, [triggerRect]);
+    setPosition(
+      anchorToTrigger
+        ? computeTriggerAnchoredPosition(triggerRect)
+        : computePanelAnchoredPosition(triggerRect),
+    );
+  }, [triggerRect, anchorToTrigger]);
 
   return position;
 }
@@ -199,6 +228,7 @@ export default function ColorPanel({
   triggerRect,
   ignoreRef,
   opacityOnly = false,
+  anchorToTrigger = false,
 }: ColorPanelProps) {
   const [internalColor, setInternalColor] = useState<RGBColor>({
     r: color.r,
@@ -208,7 +238,7 @@ export default function ColorPanel({
   });
 
   const pickerRef = useRef<HTMLDivElement>(null);
-  const position = usePickerPosition(triggerRect);
+  const position = usePickerPosition(triggerRect, anchorToTrigger);
 
   useEffect(() => {
     setInternalColor({

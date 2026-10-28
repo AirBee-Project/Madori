@@ -19,7 +19,7 @@ export default function CommonPanel({
         <div className={styles.itemList}>{children}</div>
       </div>
 
-      <div className={styles.footer}>{footerButton}</div>
+      {footerButton && <div className={styles.footer}>{footerButton}</div>}
     </div>
   );
 }

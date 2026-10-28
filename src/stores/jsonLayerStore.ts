@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { RGBAColor } from "../types/geometry/color";
 import type { SpatialId } from "../types/geometry/spatioTemporalId";
+import type { JsonValueType } from "../types/json/jsonSchema";
 import type { FileHandleLike } from "./spatialIdGroupFiles";
 
 let jsonFileHandle: FileHandleLike | null = null;
@@ -16,7 +17,7 @@ export function getJsonFileHandle(): FileHandleLike | null {
 export interface JsonSpatialId extends SpatialId {
   ref: number;
   color: RGBAColor;
-  value: number;
+  value: JsonValueType;
 }
 
 export interface JsonMetaData {
@@ -27,7 +28,7 @@ export interface JsonMetaData {
 export interface JsonLayerData {
   meta?: JsonMetaData;
   name: string;
-  values: number[];
+  values: JsonValueType[];
   ids: JsonSpatialId[];
 }
 

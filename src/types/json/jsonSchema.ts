@@ -7,6 +7,11 @@ import { z } from "zod";
 const JsonIndexSchema = z.array(z.number()).min(1).max(2);
 
 /**
+ * data.value の要素スキーマ
+ */
+const JsonValueSchema = z.union([z.number(), z.string(), z.boolean()]);
+
+/**
  * JSON用のIDスキーマ
  */
 export const JsonIdSchema = z.object({
@@ -33,11 +38,12 @@ export const JsonFileSchema = z.object({
   data: z.array(
     z.object({
       name: z.string(),
-      value: z.array(z.number()),
+      value: z.array(JsonValueSchema),
       ids: z.array(JsonIdSchema),
     }),
   ),
 });
 
+export type JsonValueType = z.infer<typeof JsonValueSchema>;
 export type JsonIdType = z.infer<typeof JsonIdSchema>;
 export type JsonFileType = z.infer<typeof JsonFileSchema>;
