@@ -15,6 +15,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@airbee-project/kasane-client": "https://github.com/AirBee-Project/Kasane-Client-ts/releases/download/v0.10.0/airbee-project-kasane-client-0.10.0.tgz",
     "@deck.gl/core": "^9.1.11",
     "@deck.gl/geo-layers": "^9.1.11",
     "@deck.gl/layers": "^9.1.11",

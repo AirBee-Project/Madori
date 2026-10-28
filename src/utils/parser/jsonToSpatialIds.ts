@@ -1,4 +1,5 @@
 import type { JsonLayerData, JsonSpatialId } from "../../stores/jsonLayerStore";
+import { toRangeId } from "../../types/geometry/spatioTemporalId";
 import {
   JsonFileSchema,
   type JsonValueType,
@@ -64,6 +65,7 @@ export function jsonToSpatialIds(jsonString: string): JsonLayerData {
       temporalId,
     };
 
+    toRangeId(spatialIdRaw);
     if (idObj.ref < 0 || idObj.ref >= firstData.value.length) {
       throw new Error(
         `参照ID (ref: ${idObj.ref}) が values 配列の範囲外です。`,

@@ -1,3 +1,4 @@
+import { RangeId } from "@airbee-project/kasane-client";
 import type { RGBAColor } from "../types/geometry/color";
 import { voxelToGeometry } from "../utils/parser/voxelToGeometry";
 import { type KasaneWorkerInput, VOXEL_STRIDE } from "./kasaneWorkerProtocol";
@@ -62,13 +63,13 @@ function processSpatialId(
   voxelIds: string[],
   i: number,
 ) {
-  const z = sid.z;
-  const [fMin, fMax] = parseRangeValue(sid.f, 0);
-  const [xMin, xMax] = parseRangeValue(sid.x, 0);
-  const [yMin, yMax] = parseRangeValue(sid.y, 0);
-
   const geom = voxelToGeometry(
-    { z, fMin, fMax, xMin, xMax, yMin, yMax },
+    RangeId.createUnchecked(
+      sid.z,
+      parseRangeValue(sid.f, 0),
+      parseRangeValue(sid.x, 0),
+      parseRangeValue(sid.y, 0),
+    ),
     cellColor,
   );
 

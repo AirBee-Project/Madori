@@ -11,10 +11,6 @@ import type {
   TableInfo,
 } from "../../api/kasane/types";
 import { useKasaneStore } from "../../stores/kasaneStore";
-import {
-  f_min,
-  fxy_max,
-} from "../../types/geometry/spatioTemporalId/spatialId";
 import type { VoxelGeometry } from "../../types/geometry/spatioTemporalId/voxelGeometry";
 import { createHeatmapColorScale } from "../../utils/color/heatmap";
 import {
@@ -153,14 +149,14 @@ async function processCellsWithWorker(
 }
 
 function calculateRangeId(x: number, y: number, z: number): RangeId | null {
-  const maxIdx = fxy_max[z];
+  const maxIdx = 2 ** z - 1;
   if (x < 0 || x > maxIdx || y < 0 || y > maxIdx) {
     return null;
   }
 
   const resolution = 33554432 / 2 ** z;
-  const fMinPractical = Math.max(f_min[z], Math.floor(-2000 / resolution));
-  const fMaxPractical = Math.min(fxy_max[z], Math.ceil(10000 / resolution));
+  const fMinPractical = Math.max(-(2 ** z), Math.floor(-2000 / resolution));
+  const fMaxPractical = Math.min(maxIdx, Math.ceil(10000 / resolution));
 
   return {
     z,
