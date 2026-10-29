@@ -219,6 +219,7 @@ export default function MapContainer() {
       <MapGL
         ref={mapRef}
         mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+        onLoad={() => deckRef.current?.deck?.redraw("map loaded")}
       />
     </DeckGL>
   );

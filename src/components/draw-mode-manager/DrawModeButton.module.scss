@@ -20,3 +20,10 @@
     color: #0f766e;
   }
 }
+
+@media (max-height: 640px) {
+  .circleButton {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}

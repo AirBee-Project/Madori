@@ -5,3 +5,9 @@
   flex-direction: column;
   gap: 0.75rem;
 }
+
+@media (max-height: 640px) {
+  .rightControls {
+    gap: 0.5rem;
+  }
+}

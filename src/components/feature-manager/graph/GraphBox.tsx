@@ -1,4 +1,4 @@
-import { IconRefresh, IconTarget, IconTrash } from "@tabler/icons-react";
+import { IconFocusCentered, IconRefresh, IconTrash } from "@tabler/icons-react";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useMapStore } from "../../../stores/mapStore";
@@ -125,7 +125,7 @@ export default function GraphBox({ group, onUpdate, onDelete }: GraphBoxProps) {
               <IconTrash />
             </IconButton>
             <IconButton onClick={handleFocusClick} ariaLabel="グラフに移動">
-              <IconTarget />
+              <IconFocusCentered />
             </IconButton>
             <div className={styles.colorLabelGroup}>
               <span className={styles.colorLabel}>点</span>

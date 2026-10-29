@@ -22,3 +22,11 @@
     color: #0f766e;
   }
 }
+
+@media (max-width: 760px) {
+  .toolbarButton {
+    gap: 0.3rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
+}
