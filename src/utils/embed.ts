@@ -40,9 +40,12 @@ export function show({ ids = [], json, border }: EmbedData): void {
     );
   });
 
-  const data = json ? jsonToSpatialIds(json) : null;
-  useJsonLayerStore.getState().setData(data);
-  if (data) geometries.push(...jsonToGeometry(data));
+  useJsonLayerStore.setState({ jsonLayers: new Map() });
+  if (json) {
+    const data = jsonToSpatialIds(json);
+    useJsonLayerStore.getState().addJsonLayer(data);
+    geometries.push(...jsonToGeometry(data));
+  }
 
   if (geometries.length === 0) {
     useEmbedStore.getState().setHasTime(false);

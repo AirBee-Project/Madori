@@ -1,0 +1,47 @@
+// 下端は時間バー（高さ約 5rem）に重ならないようにする
+.sidebar {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 7.5rem);
+}
+
+.tabs {
+  display: flex;
+  flex: 1;
+  gap: 0.25rem;
+}
+
+.tab {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: none;
+  border: none;
+  border-radius: 9999px;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #6b7280;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background-color 0.15s;
+
+  &:hover {
+    color: #0f766e;
+  }
+}
+
+.tabActive {
+  color: #0f766e;
+  background: #ccfbf1;
+}
+

@@ -1,0 +1,15 @@
+.dragging {
+  box-shadow: 0 0 0 2px #0f766e;
+}
+
+.addButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.error {
+  margin: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  color: #ef4444;
+}
+
