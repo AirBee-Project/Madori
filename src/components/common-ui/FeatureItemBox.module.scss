@@ -1,0 +1,31 @@
+.itemBox {
+  width: 100%;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.actionGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.detail {
+  padding: 0 0.75rem 0.5rem;
+}

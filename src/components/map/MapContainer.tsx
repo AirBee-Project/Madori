@@ -4,12 +4,16 @@ import { useEffect, useMemo, useRef } from "react";
 import { Map as MapGL, type MapRef } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useGraphGroupStore } from "../../stores/graphGroupStores";
-import { useJsonLayerStore } from "../../stores/jsonLayerStore";
+import {
+  type JsonLayerData,
+  useJsonLayerStore,
+} from "../../stores/jsonLayerStore";
 import { useLineStore } from "../../stores/lineStores";
 import { useMapStore } from "../../stores/mapStore";
 import { usePointStore } from "../../stores/pointStores";
 import { useSpatialIdGroupStore } from "../../stores/spatialIdGroupStores";
 import { useTimeStore } from "../../stores/timeStore";
+import type { VoxelGeometry } from "../../types/geometry/spatioTemporalId/voxelGeometry";
 import {
   generateGraphLayers,
   generateJsonVoxelLayer,
@@ -20,6 +24,25 @@ import { graphGroupToGeometries } from "../../utils/parser/graphToGeometry";
 import { jsonToGeometry } from "../../utils/parser/jsonToGeometry";
 import { spatialIdGroupToGeometries } from "../../utils/parser/voxelToGeometry";
 import { saveMapScreenshot } from "./screenshot";
+
+// 不透明度だけ変えたときに、全 JSON の形状を作り直さないためのキャッシュ（添字は rangeMode）
+const jsonGeometryCaches = [
+  new WeakMap<JsonLayerData, VoxelGeometry[]>(),
+  new WeakMap<JsonLayerData, VoxelGeometry[]>(),
+];
+
+function cachedJsonGeometries(
+  data: JsonLayerData,
+  rangeMode: boolean,
+): VoxelGeometry[] {
+  const cache = jsonGeometryCaches[Number(rangeMode)];
+  let geometries = cache.get(data);
+  if (!geometries) {
+    geometries = jsonToGeometry(data, rangeMode);
+    cache.set(data, geometries);
+  }
+  return geometries;
+}
 
 export default function MapContainer() {
   const viewState = useMapStore((state) => state.viewState);
@@ -37,11 +60,7 @@ export default function MapContainer() {
   const currentTime = useTimeStore((state) => state.currentTime);
   const graphGroupsMap = useGraphGroupStore((state) => state.graphGroups);
 
-  const {
-    data: jsonData,
-    visible: jsonVisible,
-    opacity: jsonOpacity,
-  } = useJsonLayerStore();
+  const jsonLayers = useJsonLayerStore((state) => state.jsonLayers);
 
   const deckRef = useRef<DeckGLRef>(null);
   const mapRef = useRef<MapRef>(null);
@@ -140,33 +159,25 @@ export default function MapContainer() {
     });
   }, [allGeometriesMap, currentTime, showBorder, pickable]);
 
-  const jsonGeometries = useMemo(() => {
-    if (!jsonData || !jsonVisible) return [];
-    return jsonToGeometry(jsonData, rangeMode);
-  }, [jsonData, jsonVisible, rangeMode]);
-
-  const jsonLayer = useMemo(() => {
-    if (!jsonData || !jsonVisible || jsonGeometries.length === 0) return null;
-    const filteredJsonGeometries = jsonGeometries.filter((geom) => {
-      if (geom.startTime === null || geom.endTime === null) return true;
-      return geom.startTime <= currentTime && currentTime <= geom.endTime;
-    });
-    return generateJsonVoxelLayer(
-      "json-layer",
-      filteredJsonGeometries,
-      jsonOpacity,
-      showBorder,
-      pickable,
-    );
-  }, [
-    jsonData,
-    jsonVisible,
-    jsonGeometries,
-    currentTime,
-    jsonOpacity,
-    showBorder,
-    pickable,
-  ]);
+  const jsonVoxelLayers = useMemo(
+    () =>
+      Array.from(jsonLayers.values(), (layer) => {
+        const geometries = cachedJsonGeometries(layer.data, rangeMode).filter(
+          (geom) =>
+            geom.startTime === null ||
+            geom.endTime === null ||
+            (geom.startTime <= currentTime && currentTime <= geom.endTime),
+        );
+        return generateJsonVoxelLayer(
+          layer.id,
+          geometries,
+          layer.opacity,
+          showBorder,
+          pickable,
+        );
+      }),
+    [jsonLayers, rangeMode, currentTime, showBorder, pickable],
+  );
 
   const graphLayers = useMemo(() => {
     const groupsList = Array.from(graphGroupsMap.values());
@@ -182,13 +193,10 @@ export default function MapContainer() {
     });
   }, [graphGroupsMap]);
 
-  const layers: LayersList = useMemo(() => {
-    const list = [...baseLayers, ...voxelLayers, ...graphLayers];
-    if (jsonLayer) {
-      list.push(jsonLayer);
-    }
-    return list;
-  }, [baseLayers, voxelLayers, graphLayers, jsonLayer]);
+  const layers: LayersList = useMemo(
+    () => [...baseLayers, ...voxelLayers, ...graphLayers, ...jsonVoxelLayers],
+    [baseLayers, voxelLayers, graphLayers, jsonVoxelLayers],
+  );
 
   return (
     <DeckGL

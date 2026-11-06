@@ -21,6 +21,15 @@ body {
   margin-right: 1rem;
 }
 
+.madori-logo {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  height: 37px;
+  pointer-events: none;
+}
+
 @media (max-width: 760px) {
   .madori-logo {
     display: none;
