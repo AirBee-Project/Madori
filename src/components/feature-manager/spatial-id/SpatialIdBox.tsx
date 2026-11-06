@@ -5,7 +5,6 @@ import { useMapStore } from "../../../stores/mapStore";
 import { getGroupFile } from "../../../stores/spatialIdGroupFiles";
 import { useSpatialIdGroupStore } from "../../../stores/spatialIdGroupStores";
 import { useTimeStore } from "../../../stores/timeStore";
-import type { SpatialId } from "../../../types/geometry/spatioTemporalId";
 import type { SpatialIdGroup } from "../../../types/geometry/spatioTemporalId/spatialIdGroup";
 import { calculateVoxelFocus } from "../../../utils/focusHelper";
 import { stringToSpatialIds } from "../../../utils/parser/stringToSpatialIds";
@@ -21,22 +20,6 @@ type SpatialIdBoxProps = {
   onUpdate: (id: string, updates: Partial<SpatialIdGroup>) => void;
   onDelete: (id: string) => void;
 };
-
-function spatialIdToString(spatialId: SpatialId): string {
-  const serializeVal = (val: number | [number, number]): string => {
-    return typeof val === "number" ? String(val) : `${val[0]}:${val[1]}`;
-  };
-  const fStr = serializeVal(spatialId.f);
-  const xStr = serializeVal(spatialId.x);
-  const yStr = serializeVal(spatialId.y);
-  const spatialStr = `${spatialId.z}/${fStr}/${xStr}/${yStr}`;
-
-  if (!spatialId.temporalId) {
-    return spatialStr;
-  }
-  const tStr = serializeVal(spatialId.temporalId.t);
-  return `${spatialStr}_${spatialId.temporalId.i}/${tStr}`;
-}
 
 export default function SpatialIdBox({
   group,
@@ -67,7 +50,7 @@ export default function SpatialIdBox({
       isTypingRef.current = false;
       return;
     }
-    const joined = group.spatialIds.map(spatialIdToString).join(", ");
+    const joined = group.spatialIds.join(", ");
     setText(joined);
     setErrorMsg(null);
   }, [group.spatialIds, isFileGroup]);

@@ -6,57 +6,29 @@ describe("stringToSpatialIds", () => {
     const result = stringToSpatialIds("20/22/33/44");
     expect(result.errors).toHaveLength(0);
     expect(result.success).toHaveLength(1);
-    expect(result.success[0]).toEqual({
-      z: 20,
-      f: 22,
-      x: 33,
-      y: 44,
-    });
+    expect(String(result.success[0])).toBe("20/22/33/44");
   });
 
   it("有効な空間IDと時間IDを持つ文字列をパースできること", () => {
     const result = stringToSpatialIds("20/22/33/44_1/1000");
     expect(result.errors).toHaveLength(0);
     expect(result.success).toHaveLength(1);
-    expect(result.success[0]).toEqual({
-      z: 20,
-      f: 22,
-      x: 33,
-      y: 44,
-      temporalId: { i: 1, t: 1000 },
-    });
+    expect(String(result.success[0])).toBe("20/22/33/44_1/1000");
   });
 
   it("範囲記法を含む有効なIDをパースできること", () => {
     const result = stringToSpatialIds("20/22:25/33/44:48_1/100:200");
     expect(result.errors).toHaveLength(0);
     expect(result.success).toHaveLength(1);
-    expect(result.success[0]).toEqual({
-      z: 20,
-      f: [22, 25],
-      x: 33,
-      y: [44, 48],
-      temporalId: { i: 1, t: [100, 200] },
-    });
+    expect(String(result.success[0])).toBe("20/22:25/33/44:48_1/100:200");
   });
 
   it("カンマ区切りで複数の有効なIDをパースできること", () => {
     const result = stringToSpatialIds("20/22/33/44_1/1000 , 21/5/6/7");
     expect(result.errors).toHaveLength(0);
     expect(result.success).toHaveLength(2);
-    expect(result.success[0]).toEqual({
-      z: 20,
-      f: 22,
-      x: 33,
-      y: 44,
-      temporalId: { i: 1, t: 1000 },
-    });
-    expect(result.success[1]).toEqual({
-      z: 21,
-      f: 5,
-      x: 6,
-      y: 7,
-    });
+    expect(String(result.success[0])).toBe("20/22/33/44_1/1000");
+    expect(String(result.success[1])).toBe("21/5/6/7");
   });
 
   it("空のトークンを無視すること", () => {
@@ -122,26 +94,9 @@ describe("stringToSpatialIds", () => {
 
     expect(result.errors).toHaveLength(0);
     expect(result.success).toHaveLength(3);
-    expect(result.success[0]).toEqual({
-      z: 20,
-      f: 22,
-      x: 33,
-      y: 44,
-    });
-    expect(result.success[1]).toEqual({
-      z: 21,
-      f: 1,
-      x: 2,
-      y: 3,
-      temporalId: { i: 4, t: 5 },
-    });
-    expect(result.success[2]).toEqual({
-      z: 22,
-      f: [6, 7],
-      x: 8,
-      y: [9, 10],
-      temporalId: { i: 11, t: [12, 13] },
-    });
+    expect(String(result.success[0])).toBe("20/22/33/44");
+    expect(String(result.success[1])).toBe("21/1/2/3_4/5");
+    expect(String(result.success[2])).toBe("22/6:7/8/9:10_11/12:13");
   });
 
   it("複数個の入力で成功と失敗が混在してもそれぞれ分離して扱えること", () => {
@@ -151,19 +106,8 @@ describe("stringToSpatialIds", () => {
 
     expect(result.success).toHaveLength(2);
     expect(result.errors).toHaveLength(2);
-    expect(result.success[0]).toEqual({
-      z: 20,
-      f: 22,
-      x: 33,
-      y: 44,
-    });
-    expect(result.success[1]).toEqual({
-      z: 21,
-      f: 1,
-      x: 2,
-      y: 3,
-      temporalId: { i: 4, t: 5 },
-    });
+    expect(String(result.success[0])).toBe("20/22/33/44");
+    expect(String(result.success[1])).toBe("21/1/2/3_4/5");
     expect(result.errors[0].content).toBe("20/a/33/44");
     expect(result.errors[1].content).toBe("22/6/7/8_9/x");
   });
@@ -173,18 +117,7 @@ describe("stringToSpatialIds", () => {
 
     expect(result.errors).toHaveLength(0);
     expect(result.success).toHaveLength(2);
-    expect(result.success[0]).toEqual({
-      z: 20,
-      f: 22,
-      x: 33,
-      y: 44,
-    });
-    expect(result.success[1]).toEqual({
-      z: 21,
-      f: 1,
-      x: 2,
-      y: 3,
-      temporalId: { i: 4, t: 5 },
-    });
+    expect(String(result.success[0])).toBe("20/22/33/44");
+    expect(String(result.success[1])).toBe("21/1/2/3_4/5");
   });
 });

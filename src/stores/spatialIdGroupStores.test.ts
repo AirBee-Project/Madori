@@ -1,3 +1,4 @@
+import { RangeId } from "@airbee-project/kasane-client/spatial-id";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { SpatialIdGroup } from "../types/geometry/spatioTemporalId/spatialIdGroup";
 import { useSpatialIdGroupStore } from "./spatialIdGroupStores";
@@ -18,7 +19,7 @@ describe("useSpatialIdGroupStore", () => {
       const state = useSpatialIdGroupStore.getState();
       const validGroup: Omit<SpatialIdGroup, "id"> = {
         color: { r: 255, g: 0, b: 0, a: 255 },
-        spatialIds: [{ z: 20, f: 22, x: 33, y: 44 }],
+        spatialIds: [RangeId.create(20, 22, 33, 44)],
       };
 
       const result = state.addSpatialIdGroup(validGroup);
@@ -59,7 +60,7 @@ describe("useSpatialIdGroupStore", () => {
       const invalidGroup = {
         color: { r: 255, g: 255, b: 255, a: 255 },
         spatialIds: [
-          { z: 0, f: 0, x: 0, y: 2 }, // z=0の場合、yの最大値は0なので不正
+          { z: 0, f: 0, x: 0, y: 2 }, // RangeId のインスタンスではない
         ],
       } as unknown as Omit<SpatialIdGroup, "id">;
 
@@ -102,7 +103,7 @@ describe("useSpatialIdGroupStore", () => {
       // テストデータの追加
       state.addSpatialIdGroup({
         color: { r: 0, g: 0, b: 255, a: 255 },
-        spatialIds: [{ z: 10, f: 0, x: 0, y: 0 }],
+        spatialIds: [RangeId.create(10, 0, 0, 0)],
       });
 
       const updatedState1 = useSpatialIdGroupStore.getState();
@@ -123,7 +124,7 @@ describe("useSpatialIdGroupStore", () => {
         // 引数に渡したカラーが更新されていること
         expect(editedGroup.color).toEqual({ r: 255, g: 255, b: 0, a: 128 });
         // 渡していない spatialIds が元のままであること
-        expect(editedGroup.spatialIds).toEqual([{ z: 10, f: 0, x: 0, y: 0 }]);
+        expect(editedGroup.spatialIds).toEqual([RangeId.create(10, 0, 0, 0)]);
       }
     });
 
@@ -138,9 +139,9 @@ describe("useSpatialIdGroupStore", () => {
       const updatedState1 = useSpatialIdGroupStore.getState();
       const addedId = Array.from(updatedState1.spatialIdGroups.keys())[0];
 
-      // yインデックスが範囲外の不正なデータを渡す
+      // RangeId のインスタンスではないデータを渡す
       const editResult = updatedState1.editSpatialIdGroup(addedId, {
-        spatialIds: [{ z: 0, f: 0, x: 0, y: 1 }],
+        spatialIds: [{ z: 0, f: 0, x: 0, y: 1 } as unknown as RangeId],
       });
 
       expect(editResult.success).toBe(false);

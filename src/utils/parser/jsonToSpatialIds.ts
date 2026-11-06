@@ -1,5 +1,5 @@
+import { RangeId } from "@airbee-project/kasane-client/spatial-id";
 import type { JsonLayerData, JsonSpatialId } from "../../stores/jsonLayerStore";
-import { toRangeId } from "../../types/geometry/spatioTemporalId";
 import {
   JsonFileSchema,
   type JsonValueType,
@@ -10,7 +10,7 @@ import { createHeatmapColorScale } from "../color/heatmap";
 //アップロードされたJSONファイルをJsonLayerData型に変換
 
 /**
- * JSONの 1〜2 要素配列を SpatialId が扱う number | [number, number] に変換する
+ * JSONの 1〜2 要素配列を RangeId が扱う number | [number, number] に変換する
  * [n]      → n
  * [s, e]   → [s, e]
  */
@@ -46,26 +46,12 @@ export function jsonToSpatialIds(jsonString: string): JsonLayerData {
     const x = toIndexValue(idObj.x);
     const y = toIndexValue(idObj.y);
 
-    let temporalId:
-      | {
-          i: number;
-          t: number | [number, number];
-        }
-      | undefined;
-    if (idObj.i !== undefined && idObj.t !== undefined) {
-      temporalId = { i: idObj.i, t: toIndexValue(idObj.t) };
-    }
+    const rangeId = RangeId.create(idObj.z, f, x, y);
+    const id =
+      idObj.i !== undefined && idObj.t !== undefined
+        ? rangeId.timeWith(idObj.i, toIndexValue(idObj.t))
+        : rangeId;
 
-    // SpatialIdの形式に変換
-    const spatialIdRaw = {
-      z: idObj.z,
-      f,
-      x,
-      y,
-      temporalId,
-    };
-
-    toRangeId(spatialIdRaw);
     if (idObj.ref < 0 || idObj.ref >= firstData.value.length) {
       throw new Error(
         `参照ID (ref: ${idObj.ref}) が values 配列の範囲外です。`,
@@ -75,7 +61,7 @@ export function jsonToSpatialIds(jsonString: string): JsonLayerData {
     const color = colorScale(refValue);
 
     return {
-      ...spatialIdRaw,
+      id,
       ref: idObj.ref,
       value: refValue,
       color,

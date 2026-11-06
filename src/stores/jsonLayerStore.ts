@@ -1,6 +1,6 @@
+import type { RangeId } from "@airbee-project/kasane-client/spatial-id";
 import { create } from "zustand";
 import type { RGBAColor } from "../types/geometry/color";
-import type { SpatialId } from "../types/geometry/spatioTemporalId";
 import type { JsonValueType } from "../types/json/jsonSchema";
 import type { FileHandleLike } from "./spatialIdGroupFiles";
 
@@ -14,7 +14,8 @@ export function getJsonFileHandle(): FileHandleLike | null {
   return jsonFileHandle;
 }
 
-export interface JsonSpatialId extends SpatialId {
+export interface JsonSpatialId {
+  id: RangeId;
   ref: number;
   color: RGBAColor;
   value: JsonValueType;

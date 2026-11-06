@@ -5,13 +5,13 @@
     "": {
       "name": "voxel-preview",
       "dependencies": {
-        "@airbee-project/kasane-client": "https://github.com/AirBee-Project/Kasane-Client-ts/releases/download/v0.10.0/airbee-project-kasane-client-0.10.0.tgz",
         "@deck.gl/core": "^9.1.11",
         "@deck.gl/geo-layers": "^9.1.11",
         "@deck.gl/layers": "^9.1.11",
         "@deck.gl/react": "^9.1.11",
         "@tabler/icons-react": "^3.31.0",
         "deck.gl": "^9.1.11",
+        "@airbee-project/kasane-client": "https://github.com/AirBee-Project/Kasane-Client-ts/releases/download/v0.10.1/airbee-project-kasane-client-0.10.1.tgz",
         "immer": "^11.1.4",
         "maplibre-gl": "^5.18.0",
         "react": "^18.3.1",
@@ -37,7 +37,7 @@
     },
   },
   "packages": {
-    "@airbee-project/kasane-client": ["@airbee-project/kasane-client@https://github.com/AirBee-Project/Kasane-Client-ts/releases/download/v0.10.0/airbee-project-kasane-client-0.10.0.tgz", { "dependencies": { "@bufbuild/protobuf": "^2.14.1", "@connectrpc/connect": "^2.1.2", "@connectrpc/connect-web": "^2.1.2" } }],
+    "@airbee-project/kasane-client": ["@airbee-project/kasane-client@https://github.com/AirBee-Project/Kasane-Client-ts/releases/download/v0.10.1/airbee-project-kasane-client-0.10.1.tgz", { "dependencies": { "@bufbuild/protobuf": "^2.14.1", "@connectrpc/connect": "^2.1.2", "@connectrpc/connect-web": "^2.1.2" } }, "sha512-UjwSfroBczBhB98Fy76zKPv4i9+eTIxv1xaEqO+LikIjVLSOcgRwLxLFDVMhbt64J2+wO04niCzVJKD50sWS3g=="],
 
     "@amcharts/amcharts5": ["@amcharts/amcharts5@5.14.3", "", { "dependencies": { "@types/d3": "^7.0.0", "@types/d3-chord": "^3.0.0", "@types/d3-hierarchy": "3.1.1", "@types/d3-sankey": "^0.11.1", "@types/d3-shape": "^3.0.0", "@types/geojson": "^7946.0.8", "@types/polylabel": "^1.0.5", "@types/svg-arc-to-cubic-bezier": "^3.2.0", "d3": "^7.0.0", "d3-chord": "^3.0.0", "d3-force": "^3.0.0", "d3-geo": "^3.0.0", "d3-hierarchy": "^3.0.0", "d3-sankey": "^0.12.3", "d3-selection": "^3.0.0", "d3-shape": "^3.0.0", "d3-transition": "^3.0.0", "d3-voronoi-treemap": "^1.1.2", "flatpickr": "^4.6.13", "markerjs2": "^2.29.4", "pdfmake": "^0.2.2", "polylabel": "^1.1.0", "seedrandom": "^3.0.5", "svg-arc-to-cubic-bezier": "^3.2.0", "tslib": "^2.2.0" } }, "sha512-RtczG2DHz8z2x1dgHjGX+xPc2W4HL46f4CCjR4KEFkDlg0W+QK058pYTipF0DD2BNnAJRNAFA4DVuOaEpUuu7g=="],
 

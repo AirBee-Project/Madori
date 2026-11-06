@@ -1,4 +1,4 @@
-import { enableMapSet } from "immer";
+import { castDraft, enableMapSet } from "immer";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -57,7 +57,11 @@ export const useSpatialIdGroupStore = create<
           set(
             (state) => {
               const newId = crypto.randomUUID();
-              state.spatialIdGroups.set(newId, { ...result.data, id: newId });
+              // RangeId は不変のクラスなので、immer に Draft として扱わせない
+              state.spatialIdGroups.set(
+                newId,
+                castDraft({ ...result.data, id: newId }),
+              );
             },
             false,
             "addSpatialIdGroup",
@@ -91,10 +95,10 @@ export const useSpatialIdGroupStore = create<
             (state) => {
               const targetGroup = state.spatialIdGroups.get(id);
               if (targetGroup) {
-                state.spatialIdGroups.set(id, {
-                  ...targetGroup,
-                  ...result.data,
-                });
+                state.spatialIdGroups.set(
+                  id,
+                  castDraft({ ...targetGroup, ...result.data }),
+                );
               }
             },
             false,

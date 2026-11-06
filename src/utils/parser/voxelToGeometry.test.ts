@@ -1,33 +1,28 @@
-import { RangeId } from "@airbee-project/kasane-client";
+import { RangeId } from "@airbee-project/kasane-client/spatial-id";
 import { describe, expect, it } from "vitest";
 import type { RGBAColor } from "../../types/geometry/color";
 import {
   spatialIdGroupToGeometries,
-  spatialIdToRangeIds,
+  splitForDrawing,
   voxelToGeometry,
 } from "./voxelToGeometry";
 
 const color: RGBAColor = { r: 0, g: 128, b: 255, a: 255 };
 
-describe("spatialIdToRangeIds", () => {
+describe("splitForDrawing", () => {
   it("範囲のまま 1 つにする", () => {
-    const ids = spatialIdToRangeIds({
-      z: 10,
-      f: [1, 2],
-      x: [100, 101],
-      y: 200,
-    });
+    const ids = splitForDrawing(RangeId.create(10, [1, 2], [100, 101], 200));
     expect(ids.map(String)).toEqual(["10/1:2/100:101/200"]);
   });
 
   it("経度 180 度をまたぐ x は 2 つに分ける", () => {
-    const ids = spatialIdToRangeIds({ z: 3, f: 0, x: [6, 1], y: 2 });
+    const ids = splitForDrawing(RangeId.create(3, 0, [6, 1], 2));
     expect(ids.map(String)).toEqual(["3/0/6:7/2", "3/0/0:1/2"]);
   });
 
   it("rangeMode でなければ 1 ボクセルずつにする", () => {
-    const ids = spatialIdToRangeIds(
-      { z: 3, f: 0, x: [7, 0], y: [1, 2], temporalId: { i: 60, t: [5, 6] } },
+    const ids = splitForDrawing(
+      RangeId.create(3, 0, [7, 0], [1, 2]).timeWith(60, [5, 6]),
       false,
     );
     expect(ids).toHaveLength(8);
@@ -38,7 +33,7 @@ describe("spatialIdToRangeIds", () => {
 describe("voxelToGeometry", () => {
   it("1 ボクセルの座標と時間", () => {
     const geom = voxelToGeometry(
-      RangeId.create(10, 5, 100, 200).withTime(60, 100),
+      RangeId.create(10, 5, 100, 200).timeWith(60, 100),
       color,
     );
     expect(geom.points[1][0]).toBeCloseTo(-144.84375, 5);
@@ -64,7 +59,7 @@ describe("voxelToGeometry", () => {
 
 describe("spatialIdGroupToGeometries", () => {
   it("キャッシュを使っても色はグループの色になる", () => {
-    const spatialIds = [{ z: 10, f: 5, x: 100, y: 200 }];
+    const spatialIds = [RangeId.create(10, 5, 100, 200)];
     const first = spatialIdGroupToGeometries({ id: "a", color, spatialIds });
     const red = { r: 255, g: 0, b: 0, a: 128 };
     const second = spatialIdGroupToGeometries({

@@ -1,13 +1,9 @@
-import { RangeId } from "@airbee-project/kasane-client";
-import {
-  fromRangeId,
-  type SpatialId,
-} from "../../types/geometry/spatioTemporalId";
+import { RangeId } from "@airbee-project/kasane-client/spatial-id";
 
 export type StringToSpatialIdsError = { content: string; message: string };
 
 export type StringToSpatialIdsResult = {
-  success: SpatialId[];
+  success: RangeId[];
   errors: StringToSpatialIdsError[];
 };
 
@@ -17,7 +13,7 @@ export function stringToSpatialIds(target: string): StringToSpatialIdsResult {
   for (const content of target.split(",").map((s) => s.trim())) {
     if (!content) continue;
     try {
-      result.success.push(fromRangeId(RangeId.parse(content)));
+      result.success.push(RangeId.parse(content));
     } catch (e) {
       result.errors.push({ content, message: (e as Error).message });
     }
