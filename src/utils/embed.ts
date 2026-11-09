@@ -33,11 +33,18 @@ export type EmbedData = {
   ids?: string[];
   json?: string;
   border?: boolean;
+  opacity?: number;
   camera?: Camera;
 };
 
 /** 表示中の ID と JSON を置き換え、その場所へカメラを動かす */
-export function show({ ids = [], json, border, camera = {} }: EmbedData): void {
+export function show({
+  ids = [],
+  json,
+  border,
+  opacity,
+  camera = {},
+}: EmbedData): void {
   const groups = useSpatialIdGroupStore.getState();
   for (const id of groups.spatialIdGroups.keys())
     groups.removeSpatialIdGroup(id);
@@ -56,6 +63,8 @@ export function show({ ids = [], json, border, camera = {} }: EmbedData): void {
 
   const data = json ? jsonToSpatialIds(json) : null;
   useJsonLayerStore.getState().setData(data);
+  if (opacity !== undefined)
+    useJsonLayerStore.getState().setOpacity(Math.round(opacity * 255));
   if (data) geometries.push(...jsonToGeometry(data));
 
   if (geometries.length === 0) {
@@ -101,7 +110,7 @@ function numberParam(params: URLSearchParams, name: string) {
 /**
  * URL（?ids=…&ids=…&border）で受け取った ID を表示する。
  * ?longitude・?latitude（中心）・?bearing（方位、度）・?pitch（傾き、度）・?zoom（ズームレベル）でカメラを指定できる。
- * ?view を付けるとボタン類を隠し、?hover を付けるとカーソルを乗せたボクセルの ID と値を最初から表示する。
+ * ?opacity で JSON の不透明度（0〜1）を指定できる。?view を付けるとボタン類を隠し、?hover を付けるとカーソルを乗せたボクセルの ID と値を最初から表示する。
  * 埋め込み元のページからは postMessage（{ type: "madori:show", ...EmbedData }）でも渡せる
  */
 export function startEmbed(): void {
@@ -115,6 +124,7 @@ export function startEmbed(): void {
     show({
       ids: params.getAll("ids"),
       border: params.has("border") || undefined,
+      opacity: numberParam(params, "opacity"),
       camera: {
         longitude: numberParam(params, "longitude"),
         latitude: numberParam(params, "latitude"),
