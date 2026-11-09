@@ -110,13 +110,15 @@ function numberParam(params: URLSearchParams, name: string) {
 /**
  * URL（?ids=…&ids=…&border）で受け取った ID を表示する。
  * ?longitude・?latitude（中心）・?bearing（方位、度）・?pitch（傾き、度）・?zoom（ズームレベル）でカメラを指定できる。
- * ?opacity で JSON の不透明度（0〜1）を指定できる。?view を付けるとボタン類を隠し、?hover を付けるとカーソルを乗せたボクセルの ID と値を最初から表示する。
+ * ?opacity で JSON の不透明度（0〜1）、?speed で再生の速さ（1 秒に進む秒数。1hr/s なら 3600）を指定できる。?view を付けるとボタン類を隠し、?hover を付けるとカーソルを乗せたボクセルの ID と値を最初から表示する。
  * 埋め込み元のページからは postMessage（{ type: "madori:show", ...EmbedData }）でも渡せる
  */
 export function startEmbed(): void {
   const params = new URLSearchParams(window.location.search);
   const groups = useSpatialIdGroupStore.getState();
   if (params.has("hover") && !groups.pickable) groups.togglePicking();
+  const speed = numberParam(params, "speed");
+  if (speed !== undefined) useTimeStore.getState().setPlaybackSpeed(speed);
   if (useEmbedStore.getState().viewOnly && !groups.showBorder)
     groups.toggleBorder();
   if (params.has("ids")) {
