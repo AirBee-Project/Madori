@@ -86,8 +86,14 @@ export function startEmbed(): void {
   const params = new URLSearchParams(window.location.search);
   const groups = useSpatialIdGroupStore.getState();
   if (params.has("hover") && !groups.pickable) groups.togglePicking();
+  if (useEmbedStore.getState().viewOnly && !groups.showBorder)
+    groups.toggleBorder();
   if (params.has("ids")) {
-    show({ ids: params.getAll("ids"), border: params.has("border") });
+    // border を付けないときは、今の枠線の表示（view なら表示）のままにする
+    show({
+      ids: params.getAll("ids"),
+      border: params.has("border") || undefined,
+    });
   }
   window.addEventListener("message", (e: MessageEvent) => {
     if (e.data?.type === "madori:show") show(e.data);
