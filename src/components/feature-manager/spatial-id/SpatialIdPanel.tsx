@@ -1,19 +1,26 @@
 import type React from "react";
 import { useRef, useState } from "react";
 import {
+  setJsonFileHandle,
+  useJsonLayerStore,
+} from "../../../stores/jsonLayerStore";
+import {
   deleteGroupFile,
   type FileHandleLike,
   fileToHandle,
   isFileSystemAccessSupported,
+  pickJsonFile,
   pickTextFile,
   setGroupFile,
 } from "../../../stores/spatialIdGroupFiles";
 import { useSpatialIdGroupStore } from "../../../stores/spatialIdGroupStores";
 import type { SpatialIdGroup } from "../../../types/geometry/spatioTemporalId/spatialIdGroup";
+import { jsonToSpatialIds } from "../../../utils/parser/jsonToSpatialIds";
 import { stringToSpatialIds } from "../../../utils/parser/stringToSpatialIds";
 import FeatureItemBox from "../common-ui/FeatureItemBox";
 import FooterAddButton from "../common-ui/FooterAddButton";
 import CommonPanel from "../common-ui/Panel";
+import { JsonBox } from "../json";
 import SpatialIdBox from "./SpatialIdBox";
 import styles from "./SpatialIdBox.module.scss";
 
@@ -35,6 +42,17 @@ export default function SpatialIdPanel() {
   const [loadingFiles, setLoadingFiles] = useState<
     { id: string; name: string }[]
   >([]);
+
+  const jsonFileInputRef = useRef<HTMLInputElement>(null);
+  const [jsonError, setJsonError] = useState<string | null>(null);
+  const [isJsonLoading, setIsJsonLoading] = useState(false);
+  const {
+    data: jsonData,
+    opacity: jsonOpacity,
+    setData: setJsonData,
+    setOpacity: setJsonOpacity,
+    clearData: clearJsonData,
+  } = useJsonLayerStore();
 
   const groupsList = Array.from(spatialIdGroupsMap.values());
 
@@ -108,6 +126,55 @@ export default function SpatialIdPanel() {
     await addGroupFromHandle(fileToHandle(file));
   };
 
+  const addJsonFromHandle = async (handle: FileHandleLike) => {
+    setIsJsonLoading(true);
+    setJsonError(null);
+
+    try {
+      const file = await handle.getFile();
+      const content = await file.text();
+      setJsonData(jsonToSpatialIds(content));
+      setJsonFileHandle(handle);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setJsonError(errorMessage || "JSONのパースに失敗しました。");
+    } finally {
+      setIsJsonLoading(false);
+    }
+  };
+
+  const handleAddJsonClick = async () => {
+    if (!isFileSystemAccessSupported()) {
+      jsonFileInputRef.current?.click();
+      return;
+    }
+
+    let handle: FileHandleLike | null;
+    try {
+      handle = await pickJsonFile();
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return;
+      }
+      console.error("ファイル選択エラー:", err);
+      setJsonError("ファイルの選択中にエラーが発生しました。");
+      return;
+    }
+    if (!handle) return;
+
+    await addJsonFromHandle(handle);
+  };
+
+  const handleAddJsonFromInput = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (jsonFileInputRef.current) jsonFileInputRef.current.value = "";
+    if (!file) return;
+
+    await addJsonFromHandle(fileToHandle(file));
+  };
+
   const handleUpdate = (id: string, updates: Partial<SpatialIdGroup>) => {
     editSpatialIdGroup(id, updates);
   };
@@ -130,6 +197,17 @@ export default function SpatialIdPanel() {
             onChange={handleAddFromInput}
             style={{ display: "none" }}
           />
+          <FooterAddButton
+            onClick={handleAddJsonClick}
+            ariaLabel=".jsonを追加"
+          />
+          <input
+            type="file"
+            accept=".json"
+            ref={jsonFileInputRef}
+            onChange={handleAddJsonFromInput}
+            style={{ display: "none" }}
+          />
         </div>
       }
     >
@@ -149,6 +227,29 @@ export default function SpatialIdPanel() {
           onDelete={handleDelete}
         />
       ))}
+
+      {isJsonLoading && (
+        <FeatureItemBox horizontal={true} actions={null}>
+          <div className={styles.fileWrapper}>
+            <span className={styles.fileName}>読み込み中...</span>
+          </div>
+        </FeatureItemBox>
+      )}
+
+      {jsonData && !isJsonLoading && (
+        <JsonBox
+          data={jsonData}
+          opacity={jsonOpacity}
+          onOpacityChange={setJsonOpacity}
+          onDelete={clearJsonData}
+        />
+      )}
+
+      {jsonError && (
+        <div className={styles.errorMessage} role="alert">
+          {jsonError}
+        </div>
+      )}
     </CommonPanel>
   );
 }
