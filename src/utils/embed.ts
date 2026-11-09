@@ -19,8 +19,14 @@ const COLORS: RGBAColor[] = [
   { r: 139, g: 92, b: 246, a: 128 },
 ];
 
-/** 指定しなかった項目は、方位・傾きは 0（北が上、真上から）、ズームは表示する ID から自動で決める */
-export type Camera = { bearing?: number; pitch?: number; zoom?: number };
+/** 指定しなかった項目は、中心とズームは表示する ID から、方位・傾きは 0（北が上、真上から） */
+export type Camera = {
+  longitude?: number;
+  latitude?: number;
+  bearing?: number;
+  pitch?: number;
+  zoom?: number;
+};
 
 /** ids は 1 要素が 1 グループ（カンマ区切りの空間ID） */
 export type EmbedData = {
@@ -72,8 +78,8 @@ export function show({ ids = [], json, border, camera = {} }: EmbedData): void {
   const map = useMapStore.getState();
   map.setViewState({
     ...map.viewState,
-    longitude: target.longitude,
-    latitude: target.latitude,
+    longitude: camera.longitude ?? target.longitude,
+    latitude: camera.latitude ?? target.latitude,
     zoom:
       camera.zoom ??
       Math.max(Math.min(target.zoom, zoomForHeight) - (coarse ? 2 : 1.25), 0),
@@ -94,7 +100,7 @@ function numberParam(params: URLSearchParams, name: string) {
 
 /**
  * URL（?ids=…&ids=…&border）で受け取った ID を表示する。
- * ?bearing（方位、度）・?pitch（傾き、度）・?zoom（ズームレベル）でカメラを指定できる。
+ * ?longitude・?latitude（中心）・?bearing（方位、度）・?pitch（傾き、度）・?zoom（ズームレベル）でカメラを指定できる。
  * ?view を付けるとボタン類を隠し、?hover を付けるとカーソルを乗せたボクセルの ID と値を最初から表示する。
  * 埋め込み元のページからは postMessage（{ type: "madori:show", ...EmbedData }）でも渡せる
  */
@@ -110,6 +116,8 @@ export function startEmbed(): void {
       ids: params.getAll("ids"),
       border: params.has("border") || undefined,
       camera: {
+        longitude: numberParam(params, "longitude"),
+        latitude: numberParam(params, "latitude"),
         bearing: numberParam(params, "bearing"),
         pitch: numberParam(params, "pitch"),
         zoom: numberParam(params, "zoom"),
