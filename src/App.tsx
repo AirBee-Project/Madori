@@ -10,7 +10,11 @@ export default function App() {
   const hasTime = useEmbedStore((state) => state.hasTime);
 
   return (
-    <div>
+    <div
+      className={
+        viewOnly ? `view-mode${hasTime ? " has-time" : ""}` : undefined
+      }
+    >
       {!viewOnly && (
         <div style={{ position: "absolute", zIndex: 50 }}>
           <FeatureManager />

@@ -21,6 +21,36 @@ body {
   margin-right: 1rem;
 }
 
+/* view モードでは、ライセンス表示を小さくして右下に置く */
+.view-mode .maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  margin-right: 0;
+}
+.view-mode:not(.has-time) .maplibregl-ctrl-bottom-right {
+  bottom: 0;
+}
+/* タイムバーがあるときは、再生ボタンの段に重ならないよう、その上に置く */
+.view-mode.has-time .maplibregl-ctrl-bottom-right {
+  bottom: 6.75rem;
+}
+.view-mode .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+  min-height: 16px;
+  padding: 0 4px;
+  border-radius: 8px 0 0;
+  font-size: 10px;
+  line-height: 16px;
+}
+.view-mode .maplibregl-ctrl-bottom-right .maplibregl-compact {
+  padding-right: 16px;
+}
+.view-mode .maplibregl-ctrl-bottom-right .maplibregl-compact-show {
+  padding-right: 20px;
+}
+.view-mode .maplibregl-ctrl-attrib-button {
+  width: 16px;
+  height: 16px;
+  background-size: 16px;
+}
+
 @media (max-width: 760px) {
   .madori-logo {
     display: none;
